@@ -1,8 +1,8 @@
 'use client';
 import React, { useState } from 'react';
+import WorkflowPage from './workflow/page';
 
 export default function DashboardPage() {
-  const [activeTab, setActiveTab] = useState('overview');
   const [aiPrompt, setAiPrompt] = useState('');
   const [aiResponse, setAiResponse] = useState<string | null>(null);
   const [loadingAgent, setLoadingAgent] = useState(false);
@@ -16,7 +16,7 @@ export default function DashboardPage() {
   };
 
   return (
-    <div className="space-y-8 max-w-7xl mx-auto">
+    <div className="space-y-10 max-w-7xl mx-auto">
       {/* Top Header */}
       <div className="flex items-center justify-between">
         <div>
@@ -27,9 +27,9 @@ export default function DashboardPage() {
           <button className="px-4 py-2 bg-[#EFECE6] text-[#1E2022] hover:bg-[#E2DFD8] text-xs font-semibold rounded-xl transition">
             Export BI Report
           </button>
-          <button className="px-4 py-2 bg-[#5E6AD2] text-white hover:bg-[#4E5AC2] text-xs font-semibold rounded-xl shadow-sm transition">
+          <a href="/workflow" className="px-4 py-2 bg-[#5E6AD2] text-white hover:bg-[#4E5AC2] text-xs font-semibold rounded-xl shadow-sm transition inline-block">
             + Trigger Workflow
-          </button>
+          </a>
         </div>
       </div>
 
@@ -177,6 +177,11 @@ export default function DashboardPage() {
           </div>
         </div>
       </div>
+
+      {/* Embedded Full Interactive Workflow DAG Execution Engine */}
+      <section id="workflow" className="pt-6 border-t border-[#E2DFD8]">
+        <WorkflowPage />
+      </section>
     </div>
   );
 }

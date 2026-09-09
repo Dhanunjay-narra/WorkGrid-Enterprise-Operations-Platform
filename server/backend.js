@@ -103,6 +103,81 @@ const server = http.createServer((req, res) => {
     });
   }
 
+  // Auth: Login
+  if (pathname === '/api/v1/auth/login' && req.method === 'POST') {
+    let body = '';
+    req.on('data', chunk => body += chunk);
+    req.on('end', () => {
+      let payload = { username: '', password: '', role: 'Executive', name: '' };
+      try { payload = JSON.parse(body); } catch (e) {}
+      const token = 'jwt_nexora_' + Math.random().toString(36).substring(2, 12);
+      const user = {
+        name: payload.name || (payload.username ? payload.username.split('@')[0] : 'Dhanunjay Narra'),
+        email: payload.username || 'architecture@nexora.io',
+        role: payload.role || 'Executive',
+        tenant: 'NEXORA Enterprise Global'
+      };
+      return sendJson(200, {
+        success: true,
+        message: 'Authentication successful',
+        token,
+        user
+      });
+    });
+    return;
+  }
+
+  // Auth: SSO
+  if (pathname === '/api/v1/auth/sso' && req.method === 'POST') {
+    let body = '';
+    req.on('data', chunk => body += chunk);
+    req.on('end', () => {
+      let payload = { provider: 'Google', role: 'Executive' };
+      try { payload = JSON.parse(body); } catch (e) {}
+      const token = 'sso_' + (payload.provider || 'sso').toLowerCase() + '_' + Math.random().toString(36).substring(2, 10);
+      const user = {
+        name: `Dhanunjay Narra (${payload.provider} Verified)`,
+        email: `sso-${(payload.provider || 'sso').toLowerCase()}@nexora.io`,
+        role: payload.role || 'Executive',
+        tenant: 'NEXORA Enterprise Global (SSO)'
+      };
+      return sendJson(200, {
+        success: true,
+        token,
+        user
+      });
+    });
+    return;
+  }
+
+  // Auth: Forgot Password
+  if (pathname === '/api/v1/auth/forgot-password' && req.method === 'POST') {
+    let body = '';
+    req.on('data', chunk => body += chunk);
+    req.on('end', () => {
+      let payload = { email: '' };
+      try { payload = JSON.parse(body); } catch (e) {}
+      return sendJson(200, {
+        success: true,
+        message: `Password reset instructions dispatched to ${payload.email || 'user@nexora.io'}`
+      });
+    });
+    return;
+  }
+
+  // Auth: Current Session
+  if (pathname === '/api/v1/auth/me' && req.method === 'GET') {
+    return sendJson(200, {
+      authenticated: true,
+      user: {
+        name: 'Dhanunjay Narra',
+        email: 'architecture@nexora.io',
+        role: 'Executive',
+        tenant: 'NEXORA Enterprise Global'
+      }
+    });
+  }
+
   // 3. CRM Deals
   if (pathname === '/api/v1/crm/deals') {
     if (req.method === 'GET') {

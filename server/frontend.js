@@ -52,15 +52,16 @@ const htmlContent = `<!DOCTYPE html>
       </div>
     </div>
 
-    <!-- Live Connection Status Pill -->
+    <!-- Actions & Auth -->
     <div class="flex items-center gap-3">
-      <div id="backend-status-pill" class="flex items-center gap-2 px-3 py-1.5 rounded-xl border border-[#E2DFD8] bg-[#F7F6F3] text-xs font-semibold text-[#1E2022]">
-        <span class="w-2.5 h-2.5 rounded-full bg-[#6B8E7B] pulse-live"></span>
-        <span id="backend-status-text">Connecting to Backend (Port 4000)...</span>
-      </div>
       <button onclick="triggerWorkflow('Global Autonomous Sweep')" class="px-3.5 py-1.5 bg-[#5E6AD2] hover:bg-[#4E5AC2] text-white text-xs font-bold rounded-xl shadow-sm transition flex items-center gap-1.5">
         <span>⚡</span> Run Autonomous Workflow
       </button>
+      <div id="header-auth-container" class="flex items-center gap-2">
+        <a href="/login" class="px-3.5 py-1.5 bg-[#EFECE6] hover:bg-[#E2DFD8] text-[#1E2022] text-xs font-bold rounded-xl border border-[#E2DFD8] transition flex items-center gap-1.5">
+          <span>🔒</span> Sign In
+        </a>
+      </div>
     </div>
   </header>
 
@@ -515,6 +516,22 @@ const htmlContent = `<!DOCTYPE html>
 
     </main>
   </div>
+
+  <!-- Bottom Status Footer Bar -->
+  <footer class="bg-[#FBFBF9] border-t border-[#E2DFD8] px-6 py-2 flex items-center justify-between text-xs text-[#1E2022]/70 shrink-0 sticky bottom-0 z-40">
+    <div class="flex items-center gap-3">
+      <div id="backend-status-pill" class="flex items-center gap-2 px-3 py-1 rounded-full border border-[#E2DFD8] bg-[#F7F6F3] text-xs font-semibold text-[#1E2022]">
+        <span class="w-2.5 h-2.5 rounded-full bg-[#6B8E7B] pulse-live"></span>
+        <span id="backend-status-text">Connecting to Backend (Port 4000)...</span>
+      </div>
+      <span class="text-[11px] font-mono text-[#1E2022]/50 hidden sm:inline">HTTP/1.1 • WebSocket Mesh Connected</span>
+    </div>
+    <div class="flex items-center gap-3 text-[11px] font-semibold text-[#1E2022]/60">
+      <span>NEXORA v2.4.0 PROD</span>
+      <span>•</span>
+      <span class="text-[#5E6AD2]">Port 4000 (Backend API)</span>
+    </div>
+  </footer>
 
   <script>
     const API_BASE = '';
@@ -973,6 +990,415 @@ const htmlContent = `<!DOCTYPE html>
           if (e.target === modalBackdrop) closeDealModal();
         });
       }
+      function renderAuthHeader() {
+        const userStr = localStorage.getItem('nexora_auth_user') || sessionStorage.getItem('nexora_auth_user');
+        const container = document.getElementById('header-auth-container');
+        if (!container) return;
+        if (userStr) {
+          try {
+            const user = JSON.parse(userStr);
+            container.innerHTML = '<div class="flex items-center gap-2">' +
+              '<span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-[#6B8E7B]/15 text-[#6B8E7B] border border-[#6B8E7B]/30">' +
+              (user.role || 'Executive') +
+              '</span>' +
+              '<span class="text-xs font-semibold text-[#1E2022] hidden sm:inline">' + (user.name || 'User') + '</span>' +
+              '<button onclick="handleLogout()" class="px-3 py-1.5 bg-rose-50 hover:bg-rose-100 text-rose-700 text-xs font-bold rounded-xl border border-rose-200 transition flex items-center gap-1">' +
+              '<span>🚪</span> Logout' +
+              '</button>' +
+              '</div>';
+            return;
+          } catch (e) {}
+        }
+        container.innerHTML = '<a href="/login" class="px-3.5 py-1.5 bg-[#EFECE6] hover:bg-[#E2DFD8] text-[#1E2022] text-xs font-bold rounded-xl border border-[#E2DFD8] transition flex items-center gap-1.5">' +
+          '<span>🔒</span> Sign In' +
+          '</a>';
+      }
+
+      window.handleLogout = function() {
+        localStorage.removeItem('nexora_auth_token');
+        localStorage.removeItem('nexora_auth_user');
+        sessionStorage.removeItem('nexora_auth_token');
+        sessionStorage.removeItem('nexora_auth_user');
+        window.location.href = '/login';
+      };
+
+      renderAuthHeader();
+    });
+  </script>
+</body>
+</html>`;
+
+const loginHtmlContent = `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>NEXORA — Sign In</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+    }
+  </style>
+</head>
+<body class="bg-[#F7F8FA] min-h-screen flex items-center justify-center p-4 md:p-8 text-[#1E2022] antialiased">
+  <div class="w-full max-w-md bg-white rounded-3xl p-8 md:p-10 shadow-xl border border-[#E2DFD8]/60 space-y-6">
+    <!-- Header -->
+    <div class="space-y-1">
+      <h3 class="text-2xl font-bold text-[#1E2022] tracking-tight">Welcome Back</h3>
+      <p class="text-xs text-[#1E2022]/60">Sign in to your NEXORA account</p>
+    </div>
+
+    <div id="error-banner" class="hidden p-3.5 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 text-xs flex items-center gap-2">
+      <span>⚠️</span> <span id="error-message"></span>
+    </div>
+
+    <!-- Form -->
+    <form id="login-form" onsubmit="handleLoginSubmit(event)" class="space-y-4">
+      <!-- User Name / Display Name -->
+      <div class="space-y-1.5">
+        <div class="relative">
+          <span class="absolute left-3.5 top-3 text-[#1E2022]/40 text-sm">👤</span>
+          <input
+            id="login-name"
+            type="text"
+            required
+            placeholder="User Name (e.g. Dhanunjay Narra)"
+            value="Dhanunjay Narra"
+            class="w-full pl-10 pr-4 py-2.5 text-xs rounded-xl bg-[#FBFBF9] border border-[#E2DFD8] focus:outline-none focus:ring-2 focus:ring-[#5E6AD2]/30 text-[#1E2022] placeholder:text-[#1E2022]/40"
+          />
+        </div>
+      </div>
+
+      <!-- Email Address -->
+      <div class="space-y-1.5">
+        <div class="relative">
+          <span class="absolute left-3.5 top-3 text-[#1E2022]/40 text-sm">✉</span>
+          <input
+            id="login-email"
+            type="text"
+            required
+            placeholder="Email address (any email works)"
+            value="architecture@nexora.io"
+            class="w-full pl-10 pr-4 py-2.5 text-xs rounded-xl bg-[#FBFBF9] border border-[#E2DFD8] focus:outline-none focus:ring-2 focus:ring-[#5E6AD2]/30 text-[#1E2022] placeholder:text-[#1E2022]/40"
+          />
+        </div>
+      </div>
+
+      <!-- Password -->
+      <div class="space-y-1.5">
+        <div class="relative">
+          <span class="absolute left-3.5 top-3 text-[#1E2022]/40 text-sm">🔒</span>
+          <input
+            id="login-password"
+            type="password"
+            required
+            placeholder="Password"
+            value="admin123"
+            class="w-full pl-10 pr-10 py-2.5 text-xs rounded-xl bg-[#FBFBF9] border border-[#E2DFD8] focus:outline-none focus:ring-2 focus:ring-[#5E6AD2]/30 text-[#1E2022] placeholder:text-[#1E2022]/40"
+          />
+          <button
+            type="button"
+            onclick="togglePasswordVisibility()"
+            class="absolute right-3.5 top-3 text-[#1E2022]/40 hover:text-[#1E2022] text-xs transition"
+          >
+            <span id="eye-icon">👁</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Checkbox & Forgot Password -->
+      <div class="flex items-center justify-between text-xs pt-1">
+        <label class="flex items-center gap-2 cursor-pointer text-[#1E2022]/80">
+          <input
+            id="remember-me"
+            type="checkbox"
+            checked
+            class="rounded border-[#E2DFD8] text-[#5E6AD2] focus:ring-[#5E6AD2]"
+          />
+          Remember me
+        </label>
+        <button
+          type="button"
+          onclick="openForgotModal()"
+          class="text-[#5E6AD2] hover:underline font-semibold text-xs"
+        >
+          Forgot password?
+        </button>
+      </div>
+
+      <!-- Role Selector -->
+      <div class="space-y-2 pt-1">
+        <label class="text-[11px] font-bold uppercase tracking-wider text-[#1E2022]/50">
+          Select Your Role
+        </label>
+        <div class="flex flex-wrap gap-1.5" id="roles-container">
+          <!-- Dynamically rendered -->
+        </div>
+      </div>
+
+      <!-- Submit Button -->
+      <button
+        type="submit"
+        id="login-submit-btn"
+        class="w-full py-3 bg-[#5E6AD2] hover:bg-[#4E5AC2] text-white text-xs font-bold rounded-xl shadow-md transition flex items-center justify-center gap-2"
+      >
+        <span>➔</span> <span id="login-btn-text">Sign In as Executive</span>
+      </button>
+    </form>
+
+    <!-- Divider -->
+    <div class="relative flex items-center justify-center">
+      <div class="border-t border-[#E2DFD8] w-full"></div>
+      <span class="bg-white px-3 text-[10px] font-bold uppercase tracking-wider text-[#1E2022]/40 relative">
+        OR
+      </span>
+    </div>
+
+    <!-- SSO Provider Buttons -->
+    <div class="grid grid-cols-3 gap-2.5">
+      <button
+        type="button"
+        onclick="triggerSSO('Google')"
+        class="flex items-center justify-center gap-2 py-2.5 px-3 rounded-xl border border-[#E2DFD8] bg-[#FBFBF9] hover:bg-[#EFECE6] text-xs font-semibold text-[#1E2022] transition"
+      >
+        <span class="font-bold text-blue-600">G</span> Google
+      </button>
+      <button
+        type="button"
+        onclick="triggerSSO('Microsoft')"
+        class="flex items-center justify-center gap-2 py-2.5 px-3 rounded-xl border border-[#E2DFD8] bg-[#FBFBF9] hover:bg-[#EFECE6] text-xs font-semibold text-[#1E2022] transition"
+      >
+        <span class="text-amber-500 font-bold">田</span> Microsoft
+      </button>
+      <button
+        type="button"
+        onclick="triggerSSO('SAML Enterprise')"
+        class="flex items-center justify-center gap-2 py-2.5 px-3 rounded-xl border border-[#E2DFD8] bg-[#FBFBF9] hover:bg-[#EFECE6] text-xs font-semibold text-[#1E2022] transition"
+      >
+        <span class="text-[#5E6AD2] text-xs">🛡️</span> SSO
+      </button>
+    </div>
+  </div>
+
+  <!-- FORGOT PASSWORD MODAL -->
+  <div id="forgot-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
+    <div class="w-full max-w-md bg-white rounded-3xl p-6 md:p-8 shadow-2xl border border-[#E2DFD8] space-y-4 relative animate-in fade-in zoom-in duration-200">
+      <button
+        type="button"
+        onclick="closeForgotModal()"
+        class="absolute top-4 right-4 text-[#1E2022]/40 hover:text-[#1E2022] text-sm font-bold"
+      >
+        ✕
+      </button>
+      <div class="space-y-1">
+        <h3 class="text-xl font-bold text-[#1E2022]">Reset Password</h3>
+        <p class="text-xs text-[#1E2022]/60">
+          Enter your account email to receive reset instructions via NEXORA Auth Gateway.
+        </p>
+      </div>
+
+      <div id="forgot-feedback" class="hidden p-4 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs space-y-3">
+        <p class="font-semibold">✓ Dispatch Successful</p>
+        <p id="forgot-feedback-msg"></p>
+        <button
+          type="button"
+          onclick="closeForgotModal()"
+          class="w-full py-2 bg-emerald-600 text-white rounded-xl font-bold text-xs"
+        >
+          Close
+        </button>
+      </div>
+
+      <form id="forgot-form" onsubmit="handleForgotSubmit(event)" class="space-y-4">
+        <div class="relative">
+          <span class="absolute left-3.5 top-3 text-[#1E2022]/40 text-sm">✉</span>
+          <input
+            id="forgot-email-input"
+            type="email"
+            required
+            placeholder="Enter your registered email"
+            value="architecture@nexora.io"
+            class="w-full pl-10 pr-4 py-2.5 text-xs rounded-xl bg-[#FBFBF9] border border-[#E2DFD8] focus:outline-none focus:ring-2 focus:ring-[#5E6AD2]/30 text-[#1E2022]"
+          />
+        </div>
+        <div class="flex gap-2">
+          <button
+            type="button"
+            onclick="closeForgotModal()"
+            class="flex-1 py-2.5 rounded-xl border border-[#E2DFD8] bg-[#FBFBF9] text-xs font-semibold"
+          >
+            Cancel
+          </button>
+          <button
+            type="submit"
+            id="forgot-submit-btn"
+            class="flex-1 py-2.5 bg-[#5E6AD2] hover:bg-[#4E5AC2] text-white text-xs font-bold rounded-xl shadow-md transition"
+          >
+            Send Reset Link
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    const roles = ['Executive', 'Finance', 'Sales', 'HR', 'Support', 'Security', 'Admin'];
+    let selectedRole = 'Executive';
+
+    function renderRoles() {
+      const container = document.getElementById('roles-container');
+      container.innerHTML = roles.map(r => \`
+        <button
+          type="button"
+          onclick="selectRole('\${r}')"
+          class="px-3 py-1 rounded-full text-[11px] font-semibold transition \${
+            selectedRole === r
+              ? 'bg-[#5E6AD2] text-white shadow-sm'
+              : 'bg-[#EFECE6] text-[#1E2022]/70 hover:bg-[#E2DFD8]'
+          }"
+        >
+          \${r}
+        </button>
+      \`).join('');
+      document.getElementById('login-btn-text').innerText = 'Sign In as ' + selectedRole;
+    }
+
+    function selectRole(role) {
+      selectedRole = role;
+      renderRoles();
+    }
+
+    function togglePasswordVisibility() {
+      const pass = document.getElementById('login-password');
+      const icon = document.getElementById('eye-icon');
+      if (pass.type === 'password') {
+        pass.type = 'text';
+        icon.innerText = '🙈';
+      } else {
+        pass.type = 'password';
+        icon.innerText = '👁';
+      }
+    }
+
+    function openForgotModal() {
+      document.getElementById('forgot-modal').classList.remove('hidden');
+      document.getElementById('forgot-feedback').classList.add('hidden');
+      document.getElementById('forgot-form').classList.remove('hidden');
+    }
+
+    function closeForgotModal() {
+      document.getElementById('forgot-modal').classList.add('hidden');
+    }
+
+    async function handleForgotSubmit(e) {
+      e.preventDefault();
+      const email = document.getElementById('forgot-email-input').value;
+      const btn = document.getElementById('forgot-submit-btn');
+      btn.innerText = 'Sending...';
+      btn.disabled = true;
+
+      try {
+        await fetch('/api/v1/auth/forgot-password', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email })
+        });
+      } catch (err) {}
+
+      btn.innerText = 'Send Reset Link';
+      btn.disabled = false;
+      document.getElementById('forgot-form').classList.add('hidden');
+      document.getElementById('forgot-feedback').classList.remove('hidden');
+      document.getElementById('forgot-feedback-msg').innerText = 'Password reset instructions dispatched to ' + email;
+    }
+
+    async function handleLoginSubmit(e) {
+      e.preventDefault();
+      const nameInput = document.getElementById('login-name');
+      const userName = (nameInput && nameInput.value.trim()) ? nameInput.value.trim() : (document.getElementById('login-email').value.split('@')[0] || 'User');
+      const email = document.getElementById('login-email').value;
+      const password = document.getElementById('login-password').value;
+      const remember = document.getElementById('remember-me').checked;
+      const btn = document.getElementById('login-submit-btn');
+
+      btn.innerHTML = '<span class="animate-spin">⚙</span> Authenticating...';
+      btn.disabled = true;
+
+      let authUser = {
+        name: userName,
+        email: email,
+        role: selectedRole,
+        tenant: 'NEXORA Enterprise Global'
+      };
+      let token = 'jwt_nexora_' + Math.random().toString(36).substring(2, 10);
+
+      try {
+        const res = await fetch('/api/v1/auth/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name: userName, username: email, password, role: selectedRole })
+        });
+        if (res.ok) {
+          const data = await res.json();
+          if (data.token) token = data.token;
+        }
+      } catch (err) {
+        console.warn('Gateway offline, using local session');
+      }
+
+      authUser.name = userName;
+
+      const storage = remember ? localStorage : sessionStorage;
+      storage.setItem('nexora_auth_token', token);
+      storage.setItem('nexora_auth_user', JSON.stringify(authUser));
+
+      btn.innerHTML = '<span>✓</span> Signed In! Redirecting...';
+      setTimeout(() => {
+        window.location.href = '/';
+      }, 500);
+    }
+
+    async function triggerSSO(provider) {
+      const btn = document.getElementById('login-submit-btn');
+      btn.innerHTML = '<span class="animate-spin">⚙</span> Connecting ' + provider + ' SSO...';
+      btn.disabled = true;
+
+      let authUser = {
+        name: 'Dhanunjay Narra (' + provider + ' SSO)',
+        email: 'sso-' + provider.toLowerCase() + '@nexora.io',
+        role: selectedRole,
+        tenant: 'NEXORA Enterprise Global (SSO)'
+      };
+      let token = 'sso_' + Math.random().toString(36).substring(2, 10);
+
+      try {
+        const res = await fetch('/api/v1/auth/sso', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ provider, role: selectedRole })
+        });
+        if (res.ok) {
+          const data = await res.json();
+          if (data.user) authUser = data.user;
+          if (data.token) token = data.token;
+        }
+      } catch (err) {}
+
+      localStorage.setItem('nexora_auth_token', token);
+      localStorage.setItem('nexora_auth_user', JSON.stringify(authUser));
+
+      btn.innerHTML = '<span>✓</span> ' + provider + ' Verified! Redirecting...';
+      setTimeout(() => {
+        window.location.href = '/';
+      }, 500);
+    }
+
+    window.addEventListener('DOMContentLoaded', () => {
+      renderRoles();
     });
   </script>
 </body>
@@ -998,6 +1424,15 @@ const server = http.createServer((req, res) => {
     return;
   }
 
+  if (req.url === '/login' || req.url.startsWith('/login?')) {
+    res.writeHead(200, {
+      'Content-Type': 'text/html; charset=utf-8',
+      'Cache-Control': 'no-cache'
+    });
+    res.end(loginHtmlContent);
+    return;
+  }
+
   res.writeHead(200, {
     'Content-Type': 'text/html; charset=utf-8',
     'Cache-Control': 'no-cache'
@@ -1010,6 +1445,7 @@ server.listen(FRONTEND_PORT, () => {
   console.log(`🌐 NEXORA ENTERPRISE FRONTEND APPLICATION IS LIVE!`);
   console.log(`========================================================`);
   console.log(`🖥️ Frontend URL:     http://localhost:${FRONTEND_PORT}`);
+  console.log(`🔑 Login Page:       http://localhost:${FRONTEND_PORT}/login`);
   console.log(`📡 Connected to API: http://localhost:${BACKEND_PORT}`);
   console.log(`🎨 Design System:    Pastel/Nude Enterprise Theme`);
   console.log(`========================================================\n`);
