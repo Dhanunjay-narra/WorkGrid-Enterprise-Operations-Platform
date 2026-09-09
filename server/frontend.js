@@ -12,6 +12,7 @@ const htmlContent = `<!DOCTYPE html>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>NEXORA — Enterprise Autonomous Operations Platform</title>
   <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -40,6 +41,11 @@ const htmlContent = `<!DOCTYPE html>
     }
     @keyframes pulseBlue {
       to { box-shadow: 0 0 0 10px rgba(94, 106, 210, 0); }
+    }
+    .chart-box {
+      position: relative;
+      height: 220px;
+      width: 100%;
     }
   </style>
 </head>
@@ -269,6 +275,35 @@ const htmlContent = `<!DOCTYPE html>
           </div>
         </div>
 
+        <!-- Visual Analytics Pie & Donut Row for Cockpit -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div class="card-nude rounded-2xl p-5 shadow-sm">
+            <div class="flex items-center justify-between mb-2">
+              <div>
+                <h4 class="font-bold text-xs uppercase tracking-wider text-[#1E2022]">Operational Resource Allocation</h4>
+                <p class="text-[11px] text-[#1E2022]/60">Budget & Compute Distribution Across Core Pillars</p>
+              </div>
+              <span class="text-[10px] font-bold badge-pastel-purple px-2 py-0.5 rounded-full">Donut Analysis</span>
+            </div>
+            <div class="chart-box">
+              <canvas id="chart-overview-budget"></canvas>
+            </div>
+          </div>
+
+          <div class="card-nude rounded-2xl p-5 shadow-sm">
+            <div class="flex items-center justify-between mb-2">
+              <div>
+                <h4 class="font-bold text-xs uppercase tracking-wider text-[#1E2022]">Enterprise Cluster Health & SLA</h4>
+                <p class="text-[11px] text-[#1E2022]/60">Node Integrity & Availability Across 64 Domains</p>
+              </div>
+              <span class="text-[10px] font-bold badge-pastel-green px-2 py-0.5 rounded-full">Pie Analysis</span>
+            </div>
+            <div class="chart-box">
+              <canvas id="chart-overview-health"></canvas>
+            </div>
+          </div>
+        </div>
+
         <!-- 2-Column Main Section -->
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <!-- Left 2 Cols: CRM Deals & Active Projects -->
@@ -363,6 +398,35 @@ const htmlContent = `<!DOCTYPE html>
           </div>
         </div>
 
+        <!-- CRM Pie & Donut Charts -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div class="card-nude rounded-2xl p-5 shadow-sm">
+            <div class="flex items-center justify-between mb-2">
+              <div>
+                <h4 class="font-bold text-xs uppercase tracking-wider text-[#1E2022]">Deal Value Distribution by Stage</h4>
+                <p class="text-[11px] text-[#1E2022]/60">Weighted Revenue Across Pipeline Funnel</p>
+              </div>
+              <span class="text-[10px] font-bold badge-pastel-blue px-2 py-0.5 rounded-full">Pipeline Share</span>
+            </div>
+            <div class="chart-box">
+              <canvas id="chart-crm-stages"></canvas>
+            </div>
+          </div>
+
+          <div class="card-nude rounded-2xl p-5 shadow-sm">
+            <div class="flex items-center justify-between mb-2">
+              <div>
+                <h4 class="font-bold text-xs uppercase tracking-wider text-[#1E2022]">Account Segmentation & Lead Intent</h4>
+                <p class="text-[11px] text-[#1E2022]/60">Conversion Probability Breakdown</p>
+              </div>
+              <span class="text-[10px] font-bold badge-pastel-green px-2 py-0.5 rounded-full">Intent Ratio</span>
+            </div>
+            <div class="chart-box">
+              <canvas id="chart-crm-intent"></canvas>
+            </div>
+          </div>
+        </div>
+
         <div class="card-nude rounded-2xl overflow-hidden shadow-sm">
           <table class="w-full text-left text-xs">
             <thead class="bg-[#EFECE6] border-b border-[#E2DFD8] text-[#1E2022]/70 font-bold uppercase text-[10px] tracking-wider">
@@ -392,6 +456,35 @@ const htmlContent = `<!DOCTYPE html>
           </div>
         </div>
 
+        <!-- Projects Pie & Donut Charts -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div class="card-nude rounded-2xl p-5 shadow-sm">
+            <div class="flex items-center justify-between mb-2">
+              <div>
+                <h4 class="font-bold text-xs uppercase tracking-wider text-[#1E2022]">Project Status & Velocity</h4>
+                <p class="text-[11px] text-[#1E2022]/60">Distribution of Milestone Completion</p>
+              </div>
+              <span class="text-[10px] font-bold badge-pastel-purple px-2 py-0.5 rounded-full">Milestone Status</span>
+            </div>
+            <div class="chart-box">
+              <canvas id="chart-projects-status"></canvas>
+            </div>
+          </div>
+
+          <div class="card-nude rounded-2xl p-5 shadow-sm">
+            <div class="flex items-center justify-between mb-2">
+              <div>
+                <h4 class="font-bold text-xs uppercase tracking-wider text-[#1E2022]">Architecture Domain Workload</h4>
+                <p class="text-[11px] text-[#1E2022]/60">Engineering Allocation Across 20 Tiers</p>
+              </div>
+              <span class="text-[10px] font-bold badge-pastel-blue px-2 py-0.5 rounded-full">Tier Allocation</span>
+            </div>
+            <div class="chart-box">
+              <canvas id="chart-projects-domain"></canvas>
+            </div>
+          </div>
+        </div>
+
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4" id="projects-grid">
           <!-- Dynamically populated -->
         </div>
@@ -403,6 +496,35 @@ const htmlContent = `<!DOCTYPE html>
           <div>
             <h2 class="text-xl font-bold text-[#1E2022]">Financial General Ledger & Tax Reconciliation</h2>
             <p class="text-xs text-[#1E2022]/60">Double-entry balanced journals, VAT compliance, and real-time treasury.</p>
+          </div>
+        </div>
+
+        <!-- Finance Pie & Donut Charts -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div class="card-nude rounded-2xl p-5 shadow-sm">
+            <div class="flex items-center justify-between mb-2">
+              <div>
+                <h4 class="font-bold text-xs uppercase tracking-wider text-[#1E2022]">Operating Expense & Cash Inflow Breakdown</h4>
+                <p class="text-[11px] text-[#1E2022]/60">Balanced General Ledger Line Ratios</p>
+              </div>
+              <span class="text-[10px] font-bold badge-pastel-green px-2 py-0.5 rounded-full">Cash Flow</span>
+            </div>
+            <div class="chart-box">
+              <canvas id="chart-finance-ledger"></canvas>
+            </div>
+          </div>
+
+          <div class="card-nude rounded-2xl p-5 shadow-sm">
+            <div class="flex items-center justify-between mb-2">
+              <div>
+                <h4 class="font-bold text-xs uppercase tracking-wider text-[#1E2022]">Tax & Statutory Withholding Distribution</h4>
+                <p class="text-[11px] text-[#1E2022]/60">Corporate, VAT, and Payroll Statutory Compliance</p>
+              </div>
+              <span class="text-[10px] font-bold badge-pastel-terracotta px-2 py-0.5 rounded-full">Tax Share</span>
+            </div>
+            <div class="chart-box">
+              <canvas id="chart-finance-tax"></canvas>
+            </div>
           </div>
         </div>
 
@@ -453,6 +575,35 @@ const htmlContent = `<!DOCTYPE html>
             <p class="text-xs text-[#1E2022]/60 mt-1">Automated direct ACH routing</p>
           </div>
         </div>
+
+        <!-- HR Pie & Donut Charts -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div class="card-nude rounded-2xl p-5 shadow-sm">
+            <div class="flex items-center justify-between mb-2">
+              <div>
+                <h4 class="font-bold text-xs uppercase tracking-wider text-[#1E2022]">Workforce Department Distribution</h4>
+                <p class="text-[11px] text-[#1E2022]/60">Headcount Share Across Core Divisions</p>
+              </div>
+              <span class="text-[10px] font-bold badge-pastel-blue px-2 py-0.5 rounded-full">Headcount</span>
+            </div>
+            <div class="chart-box">
+              <canvas id="chart-hr-dept"></canvas>
+            </div>
+          </div>
+
+          <div class="card-nude rounded-2xl p-5 shadow-sm">
+            <div class="flex items-center justify-between mb-2">
+              <div>
+                <h4 class="font-bold text-xs uppercase tracking-wider text-[#1E2022]">Attendance & Shift Modality</h4>
+                <p class="text-[11px] text-[#1E2022]/60">Geofenced On-Site vs Remote Telemetry</p>
+              </div>
+              <span class="text-[10px] font-bold badge-pastel-green px-2 py-0.5 rounded-full">Attendance</span>
+            </div>
+            <div class="chart-box">
+              <canvas id="chart-hr-modality"></canvas>
+            </div>
+          </div>
+        </div>
       </div>
 
       <!-- TAB 6: INVENTORY -->
@@ -461,6 +612,35 @@ const htmlContent = `<!DOCTYPE html>
           <div>
             <h2 class="text-xl font-bold text-[#1E2022]">Inventory & Supply Chain Automation</h2>
             <p class="text-xs text-[#1E2022]/60">Real-time SKU stock levels, warehouse routing, and automated PO reordering.</p>
+          </div>
+        </div>
+
+        <!-- Inventory Pie & Donut Charts -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div class="card-nude rounded-2xl p-5 shadow-sm">
+            <div class="flex items-center justify-between mb-2">
+              <div>
+                <h4 class="font-bold text-xs uppercase tracking-wider text-[#1E2022]">SKU Stock Status & Reorder Health</h4>
+                <p class="text-[11px] text-[#1E2022]/60">Inventory Safety Threshold Distribution</p>
+              </div>
+              <span class="text-[10px] font-bold badge-pastel-green px-2 py-0.5 rounded-full">Stock Health</span>
+            </div>
+            <div class="chart-box">
+              <canvas id="chart-inventory-health"></canvas>
+            </div>
+          </div>
+
+          <div class="card-nude rounded-2xl p-5 shadow-sm">
+            <div class="flex items-center justify-between mb-2">
+              <div>
+                <h4 class="font-bold text-xs uppercase tracking-wider text-[#1E2022]">Global Warehouse Allocation</h4>
+                <p class="text-[11px] text-[#1E2022]/60">Inventory Valuations across Distribution Centers</p>
+              </div>
+              <span class="text-[10px] font-bold badge-pastel-purple px-2 py-0.5 rounded-full">Hub Share</span>
+            </div>
+            <div class="chart-box">
+              <canvas id="chart-inventory-warehouses"></canvas>
+            </div>
           </div>
         </div>
 
@@ -492,6 +672,35 @@ const htmlContent = `<!DOCTYPE html>
           </div>
         </div>
 
+        <!-- IoT Pie & Donut Charts -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div class="card-nude rounded-2xl p-5 shadow-sm">
+            <div class="flex items-center justify-between mb-2">
+              <div>
+                <h4 class="font-bold text-xs uppercase tracking-wider text-[#1E2022]">Node Health & Thermal Load Profile</h4>
+                <p class="text-[11px] text-[#1E2022]/60">Operating Temperature Band across 3,840 Nodes</p>
+              </div>
+              <span class="text-[10px] font-bold badge-pastel-green px-2 py-0.5 rounded-full">Node Health</span>
+            </div>
+            <div class="chart-box">
+              <canvas id="chart-iot-health"></canvas>
+            </div>
+          </div>
+
+          <div class="card-nude rounded-2xl p-5 shadow-sm">
+            <div class="flex items-center justify-between mb-2">
+              <div>
+                <h4 class="font-bold text-xs uppercase tracking-wider text-[#1E2022]">Regional Telemetry Ingest Share</h4>
+                <p class="text-[11px] text-[#1E2022]/60">Traffic Volume (Frankfurt, Virginia, Singapore)</p>
+              </div>
+              <span class="text-[10px] font-bold badge-pastel-blue px-2 py-0.5 rounded-full">Ingest Traffic</span>
+            </div>
+            <div class="chart-box">
+              <canvas id="chart-iot-regions"></canvas>
+            </div>
+          </div>
+        </div>
+
         <div class="grid grid-cols-1 md:grid-cols-3 gap-5" id="iot-grid">
           <!-- Dynamically Populated -->
         </div>
@@ -503,6 +712,35 @@ const htmlContent = `<!DOCTYPE html>
           <div>
             <h2 class="text-xl font-bold text-[#1E2022]">Autonomous 9-Agent Operational Mesh</h2>
             <p class="text-xs text-[#1E2022]/60">Decentralized agent collaboration across executive, finance, sales, HR, and security domains.</p>
+          </div>
+        </div>
+
+        <!-- AI Swarm Pie & Donut Charts -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div class="card-nude rounded-2xl p-5 shadow-sm">
+            <div class="flex items-center justify-between mb-2">
+              <div>
+                <h4 class="font-bold text-xs uppercase tracking-wider text-[#1E2022]">Agent Mesh Tool Dispatch Share</h4>
+                <p class="text-[11px] text-[#1E2022]/60">Autonomous Policy Invocations by Agent Domain</p>
+              </div>
+              <span class="text-[10px] font-bold badge-pastel-purple px-2 py-0.5 rounded-full">Agent Workload</span>
+            </div>
+            <div class="chart-box">
+              <canvas id="chart-ai-agents"></canvas>
+            </div>
+          </div>
+
+          <div class="card-nude rounded-2xl p-5 shadow-sm">
+            <div class="flex items-center justify-between mb-2">
+              <div>
+                <h4 class="font-bold text-xs uppercase tracking-wider text-[#1E2022]">Cross-Domain Context Token Share</h4>
+                <p class="text-[11px] text-[#1E2022]/60">Embeddings and Reasoning Graph Ingestion</p>
+              </div>
+              <span class="text-[10px] font-bold badge-pastel-blue px-2 py-0.5 rounded-full">Neural Context</span>
+            </div>
+            <div class="chart-box">
+              <canvas id="chart-ai-domains"></canvas>
+            </div>
           </div>
         </div>
 
@@ -559,6 +797,35 @@ const htmlContent = `<!DOCTYPE html>
             <p class="text-[10px] font-bold uppercase tracking-wider text-[#1E2022]/50">Active Shards</p>
             <p id="wf-stat-shards" class="text-2xl font-extrabold text-[#1E2022] mt-1">16 Shards</p>
             <p class="text-[11px] text-[#1E2022]/60 mt-0.5">Frankfurt, Virginia, Singapore</p>
+          </div>
+        </div>
+
+        <!-- Workflows Pie & Donut Charts -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div class="card-nude rounded-2xl p-5 shadow-sm">
+            <div class="flex items-center justify-between mb-2">
+              <div>
+                <h4 class="font-bold text-xs uppercase tracking-wider text-[#1E2022]">Workflow Trigger Source Distribution</h4>
+                <p class="text-[11px] text-[#1E2022]/60">Inbound Events Initiating Distributed DAG Runs</p>
+              </div>
+              <span class="text-[10px] font-bold badge-pastel-purple px-2 py-0.5 rounded-full">Trigger Ingest</span>
+            </div>
+            <div class="chart-box">
+              <canvas id="chart-workflows-triggers"></canvas>
+            </div>
+          </div>
+
+          <div class="card-nude rounded-2xl p-5 shadow-sm">
+            <div class="flex items-center justify-between mb-2">
+              <div>
+                <h4 class="font-bold text-xs uppercase tracking-wider text-[#1E2022]">Cluster Shard Workload Allocation</h4>
+                <p class="text-[11px] text-[#1E2022]/60">State Machine Executions Across Geo-Shards</p>
+              </div>
+              <span class="text-[10px] font-bold badge-pastel-blue px-2 py-0.5 rounded-full">Shard Share</span>
+            </div>
+            <div class="chart-box">
+              <canvas id="chart-workflows-shards"></canvas>
+            </div>
           </div>
         </div>
 
@@ -661,6 +928,158 @@ const htmlContent = `<!DOCTYPE html>
     const API_BASE = 'http://localhost:${BACKEND_PORT}';
     let selectedAgentName = 'Executive';
     let currentWorkflowList = [];
+    const chartInstances = {};
+
+    // Pastel Theme Colors for Charts
+    const PASTEL_COLORS = [
+      '#5E6AD2', '#6B8E7B', '#C27D66', '#D08C49',
+      '#8E6BB8', '#38A169', '#4351B8', '#D97706', '#E53E3E'
+    ];
+
+    function createOrUpdateChart(canvasId, type, labels, data, bgColors) {
+      const ctx = document.getElementById(canvasId);
+      if (!ctx) return;
+
+      if (chartInstances[canvasId]) {
+        chartInstances[canvasId].destroy();
+      }
+
+      chartInstances[canvasId] = new Chart(ctx, {
+        type: type,
+        data: {
+          labels: labels,
+          datasets: [{
+            data: data,
+            backgroundColor: bgColors || PASTEL_COLORS.slice(0, labels.length),
+            borderWidth: 2,
+            borderColor: '#FBFBF9'
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              position: 'right',
+              labels: {
+                boxWidth: 12,
+                padding: 12,
+                font: {
+                  family: 'Plus Jakarta Sans',
+                  size: 11,
+                  weight: '600'
+                },
+                color: '#1E2022'
+              }
+            },
+            tooltip: {
+              backgroundColor: '#1E2022',
+              titleFont: { family: 'Plus Jakarta Sans', size: 12, weight: '700' },
+              bodyFont: { family: 'Plus Jakarta Sans', size: 11 },
+              padding: 10,
+              cornerRadius: 8
+            }
+          },
+          cutout: type === 'doughnut' ? '62%' : 0
+        }
+      });
+    }
+
+    function initAllPieCharts() {
+      // 1. Overview Charts
+      createOrUpdateChart('chart-overview-budget', 'doughnut',
+        ['R&D & Engineering (40%)', 'Sales & CRM (25%)', 'Cloud & Host Infra (18%)', 'Operations & Supply (12%)', 'Compliance & Security (5%)'],
+        [40, 25, 18, 12, 5]
+      );
+      createOrUpdateChart('chart-overview-health', 'pie',
+        ['Optimal SLA (94%)', 'In Active Review (4%)', 'Anomaly Quarantined (2%)'],
+        [94, 4, 2],
+        ['#6B8E7B', '#5E6AD2', '#C27D66']
+      );
+
+      // 2. CRM Charts
+      createOrUpdateChart('chart-crm-stages', 'doughnut',
+        ['Prospecting ($840K)', 'Proposal ($1.4M)', 'Negotiation ($2.1M)', 'Closing ($480K)'],
+        [840000, 1400000, 2100000, 480000]
+      );
+      createOrUpdateChart('chart-crm-intent', 'pie',
+        ['High Intent Enterprise (55%)', 'Mid-Market Qualified (30%)', 'Early Discovery (15%)'],
+        [55, 30, 15]
+      );
+
+      // 3. Projects Charts
+      createOrUpdateChart('chart-projects-status', 'pie',
+        ['In Progress (45%)', 'Completed (35%)', 'Testing (15%)', 'Blocked (5%)'],
+        [45, 35, 15, 5]
+      );
+      createOrUpdateChart('chart-projects-domain', 'doughnut',
+        ['Core Engine (30%)', 'Security Mesh (25%)', 'Integrations (25%)', 'Cloud Infra (20%)'],
+        [30, 25, 25, 20]
+      );
+
+      // 4. Finance Charts
+      createOrUpdateChart('chart-finance-ledger', 'doughnut',
+        ['Accounts Receivable ($480K)', 'Payroll Payable ($320K)', 'Hosting & Cloud ($42K)'],
+        [480000, 320000, 42000]
+      );
+      createOrUpdateChart('chart-finance-tax', 'pie',
+        ['Corporate Tax (45%)', 'VAT / GST (35%)', 'Payroll Statutory (20%)'],
+        [45, 35, 20]
+      );
+
+      // 5. HR Charts
+      createOrUpdateChart('chart-hr-dept', 'pie',
+        ['Engineering (42%)', 'Sales & Ops (24%)', 'Product & Design (18%)', 'Executive & Admin (16%)'],
+        [42, 24, 18, 16]
+      );
+      createOrUpdateChart('chart-hr-modality', 'doughnut',
+        ['On-Site Geofenced (65%)', 'Remote Mesh (30%)', 'On-Call Shift (5%)'],
+        [65, 30, 5],
+        ['#6B8E7B', '#5E6AD2', '#D08C49']
+      );
+
+      // 6. Inventory Charts
+      createOrUpdateChart('chart-inventory-health', 'pie',
+        ['Optimal Stock (74%)', 'Reorder Alert (18%)', 'Critical Threshold (8%)'],
+        [74, 18, 8],
+        ['#6B8E7B', '#D08C49', '#C27D66']
+      );
+      createOrUpdateChart('chart-inventory-warehouses', 'doughnut',
+        ['Frankfurt Hub (45%)', 'Virginia Hub (35%)', 'Singapore Hub (20%)'],
+        [45, 35, 20]
+      );
+
+      // 7. IoT Charts
+      createOrUpdateChart('chart-iot-health', 'pie',
+        ['Optimal Thermal <45°C (82%)', 'High Compute 45-50°C (15%)', 'Quarantine Spike >50°C (3%)'],
+        [82, 15, 3],
+        ['#6B8E7B', '#5E6AD2', '#C27D66']
+      );
+      createOrUpdateChart('chart-iot-regions', 'doughnut',
+        ['EU Central (40%)', 'US East (35%)', 'AP South (25%)'],
+        [40, 35, 25]
+      );
+
+      // 8. AI Swarm Charts
+      createOrUpdateChart('chart-ai-agents', 'doughnut',
+        ['Executive (30%)', 'Finance (22%)', 'Security (20%)', 'Sales (15%)', 'HR / Support (13%)'],
+        [30, 22, 20, 15, 13]
+      );
+      createOrUpdateChart('chart-ai-domains', 'pie',
+        ['Multi-Tenant Core (38%)', 'General Ledger (26%)', 'Zero-Trust RBAC (20%)', 'IoT Sensor Mesh (16%)'],
+        [38, 26, 20, 16]
+      );
+
+      // 9. Workflows Charts
+      createOrUpdateChart('chart-workflows-triggers', 'doughnut',
+        ['AI Swarm Mesh (45%)', 'Event Outbox (28%)', 'Cron Scheduler (18%)', 'Manual Admin (9%)'],
+        [45, 28, 18, 9]
+      );
+      createOrUpdateChart('chart-workflows-shards', 'pie',
+        ['Frankfurt Alpha (35%)', 'Virginia East (30%)', 'Singapore South (20%)', 'Ohio Central (15%)'],
+        [35, 30, 20, 15]
+      );
+    }
 
     function showToast(msg, icon = '✅') {
       const t = document.getElementById('toast');
@@ -688,6 +1107,13 @@ const htmlContent = `<!DOCTYPE html>
         activeNav.classList.add('sidebar-active');
         activeNav.classList.remove('text-[#1E2022]/70');
       }
+
+      // Trigger chart resize on tab switch
+      setTimeout(() => {
+        for (const k in chartInstances) {
+          if (chartInstances[k]) chartInstances[k].resize();
+        }
+      }, 50);
     }
 
     function selectAgent(agent) {
@@ -1089,6 +1515,7 @@ const htmlContent = `<!DOCTYPE html>
     // Initialize application
     window.addEventListener('DOMContentLoaded', async () => {
       selectAgent('Executive');
+      initAllPieCharts();
       await checkBackendConnection();
       await loadData();
       initRealtimeStream();
@@ -1113,6 +1540,7 @@ server.listen(FRONTEND_PORT, () => {
   console.log(`🖥️ Frontend URL:     http://localhost:${FRONTEND_PORT}`);
   console.log(`📡 Connected to API: http://localhost:${BACKEND_PORT}`);
   console.log(`🎨 Design System:    Pastel/Nude Enterprise Theme`);
+  console.log(`📊 Analytics:        Interactive Pie & Donut Charts Enabled`);
   console.log(`========================================================\n`);
 });
 
