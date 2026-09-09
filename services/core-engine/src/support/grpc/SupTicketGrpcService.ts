@@ -1,0 +1,13 @@
+export class SupTicketGrpcService {
+  public async getSupTicket(call: any, callback: any): Promise<void> {
+    const entityId = call.request.id;
+    callback(null, {
+      id: entityId,
+      tenant_id: "tenant-grpc-01",
+      code: "GRPC-SUP",
+      name: "SupTicket gRPC Entry",
+      status: "ACTIVE",
+      created_at_unix: Date.now()
+    });
+  }
+}
