@@ -1,4 +1,4 @@
-const { fork } = require('child_process');
+const { fork, execSync } = require('child_process');
 const http = require('http');
 const path = require('path');
 
@@ -10,36 +10,27 @@ console.log('🚀 NEXORA — Enterprise Autonomous Operations Platform  ');
 console.log('          STARTING BACKEND & FRONTEND SERVERS           ');
 console.log('========================================================\n');
 
-let backendProcess = null;
-let frontendProcess = null;
-let isShuttingDown = false;
-
-function startBackend() {
-  backendProcess = fork(path.join(__dirname, 'backend.js'), [], {
-    env: { ...process.env, BACKEND_PORT }
-  });
-  backendProcess.on('exit', (code) => {
-    if (!isShuttingDown) {
-      console.log(`[BACKEND] Process exited (${code}). Auto-restarting in 500ms...`);
-      setTimeout(startBackend, 500);
+// 1. Free any stale processes on Ports 3000 & 4000 (Windows & POSIX)
+function freePorts() {
+  try {
+    if (process.platform === 'win32') {
+      execSync(`powershell -Command "Get-NetTCPConnection -LocalPort ${FRONTEND_PORT}, ${BACKEND_PORT} -ErrorAction SilentlyContinue | ForEach-Object { Stop-Process -Id $_.OwningProcess -Force -ErrorAction SilentlyContinue }"`, { stdio: 'ignore' });
+    } else {
+      execSync(`npx kill-port ${FRONTEND_PORT} ${BACKEND_PORT}`, { stdio: 'ignore' });
     }
-  });
+  } catch (e) {}
 }
 
-function startFrontend() {
-  frontendProcess = fork(path.join(__dirname, 'frontend.js'), [], {
-    env: { ...process.env, FRONTEND_PORT, BACKEND_PORT }
-  });
-  frontendProcess.on('exit', (code) => {
-    if (!isShuttingDown) {
-      console.log(`[FRONTEND] Process exited (${code}). Auto-restarting in 500ms...`);
-      setTimeout(startFrontend, 500);
-    }
-  });
-}
+freePorts();
 
-startBackend();
-startFrontend();
+// 2. Start Servers
+const backendProcess = fork(path.join(__dirname, 'backend.js'), [], {
+  env: { ...process.env, BACKEND_PORT }
+});
+
+const frontendProcess = fork(path.join(__dirname, 'frontend.js'), [], {
+  env: { ...process.env, FRONTEND_PORT, BACKEND_PORT }
+});
 
 function checkHealth(url, name) {
   return new Promise((resolve) => {
@@ -71,15 +62,14 @@ setTimeout(async () => {
     console.log(`✅ Real-Time SSE/WS Mesh:  http://localhost:${BACKEND_PORT}/api/v1/realtime/stream`);
     console.log(`✅ Automated Agent Swarm:  http://localhost:${BACKEND_PORT}/api/v1/ai/agent-dispatch`);
     console.log('========================================================\n');
-    console.log('👉 You can now open http://localhost:3000 in your browser to interact with NEXORA!');
+    console.log('👉 Open http://localhost:3000 in your browser to interact with NEXORA!\n');
   } else {
-    console.log('[WARNING] Connectivity check retrying...', { backend: backendCheck, frontend: frontendCheck });
+    console.log('[WARNING] Connectivity check retrying...', { backend: backendCheck.ok, frontend: frontendCheck.ok });
   }
-}, 1500);
+}, 1200);
 
 // Graceful termination
 process.on('SIGINT', () => {
-  isShuttingDown = true;
   console.log('\nStopping NEXORA Platform...');
   if (backendProcess) backendProcess.kill();
   if (frontendProcess) frontendProcess.kill();

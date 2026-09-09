@@ -45,12 +45,96 @@ const db = {
     { nodeId: 'NODE-AP-09', location: 'Singapore DC 3', temperature: 44.2, loadPercent: 62.0, status: 'OPTIMAL', latencyMs: 3.4 }
   ],
   workflowLogs: [
-    { id: 'WF-8841', name: 'Procure-to-Pay Auto Approval', status: 'SUCCESS', stepsExecuted: 6, durationMs: 124, timestamp: new Date().toISOString() },
-    { id: 'WF-8842', name: 'Customer Churn Mitigation Trigger', status: 'SUCCESS', stepsExecuted: 4, durationMs: 88, timestamp: new Date().toISOString() }
+    {
+      id: 'WF-8841',
+      name: 'Procure-to-Pay Multi-Domain Settlement',
+      domain: 'Procurement & Finance',
+      trigger: 'AI Autonomous Swarm',
+      status: 'COMMITTED',
+      steps: [
+        '1. Ingest Purchase Order Data',
+        '2. Verify 3-Way Match with General Ledger',
+        '3. Zero-Trust RBAC Multi-Sig Approval',
+        '4. Balanced Double-Entry Journal Debit/Credit',
+        '5. Dispatch Automated ACH Disbursement'
+      ],
+      stepsExecuted: 5,
+      durationMs: 48,
+      shard: 'Shard-EU-Alpha (Frankfurt)',
+      timestamp: new Date(Date.now() - 1000 * 60 * 3).toISOString()
+    },
+    {
+      id: 'WF-8842',
+      name: 'Customer Churn Mitigation & Deal Rescue',
+      domain: 'CRM & Customer Support',
+      trigger: 'Telemetry Event Stream',
+      status: 'COMMITTED',
+      steps: [
+        '1. Ingest Telemetry Health Outlier',
+        '2. Compute Churn Propensity Vector',
+        '3. Auto-Assign Senior Solutions Engineer',
+        '4. Generate Proactive Deal Credit Voucher'
+      ],
+      stepsExecuted: 4,
+      durationMs: 36,
+      shard: 'Shard-US-East (Virginia)',
+      timestamp: new Date(Date.now() - 1000 * 60 * 8).toISOString()
+    },
+    {
+      id: 'WF-8843',
+      name: 'Real-Time IoT Outlier Anomaly Quarantine',
+      domain: 'IoT & Zero-Trust Security',
+      trigger: 'Sensor Telemetry Threshold',
+      status: 'COMMITTED',
+      steps: [
+        '1. Sensor Telemetry Spike Detected (46.8°C)',
+        '2. Isolate Edge Node MTLS Certificate',
+        '3. Reroute Ingest Traffic to Backup Mesh Node',
+        '4. Emit OpenTelemetry Security Alert Incident'
+      ],
+      stepsExecuted: 4,
+      durationMs: 22,
+      shard: 'Shard-AP-South (Singapore)',
+      timestamp: new Date(Date.now() - 1000 * 60 * 15).toISOString()
+    },
+    {
+      id: 'WF-8844',
+      name: 'Automated Bi-Weekly Payroll Tax Withholding',
+      domain: 'HR & Statutory Compliance',
+      trigger: 'Distributed Cron Scheduler',
+      status: 'COMMITTED',
+      steps: [
+        '1. Aggregate 1,420 Time Tracking Records',
+        '2. Execute Regional Statutory Tax Calculation',
+        '3. Balance Direct Deposit Journal Line Accounts',
+        '4. Emit SOX Compliance Cryptographic Audit Hash'
+      ],
+      stepsExecuted: 4,
+      durationMs: 54,
+      shard: 'Shard-US-Central (Ohio)',
+      timestamp: new Date(Date.now() - 1000 * 60 * 25).toISOString()
+    },
+    {
+      id: 'WF-8845',
+      name: 'Supply Chain Automated SKU Replenishment',
+      domain: 'Inventory & Procurement',
+      trigger: 'Inventory Threshold Breach',
+      status: 'COMMITTED',
+      steps: [
+        '1. Detect SKU-SEN-4420 Stock < Min Threshold (45 units)',
+        '2. Query Tier-1 Supplier Real-Time Quote API',
+        '3. Generate Digital Purchase Order PO-9021',
+        '4. Transmit Electronic EDI 850 Order Payload'
+      ],
+      stepsExecuted: 4,
+      durationMs: 41,
+      shard: 'Shard-EU-Beta (Dublin)',
+      timestamp: new Date(Date.now() - 1000 * 60 * 45).toISOString()
+    }
   ]
 };
 
-// WebSocket Connected Clients
+// WebSocket / SSE Connected Clients
 const clients = new Set();
 
 function handleCors(req, res) {
@@ -189,11 +273,9 @@ const server = http.createServer((req, res) => {
       req.on('end', () => {
         try {
           const newDeal = JSON.parse(body);
-          newDeal.amount = Number(newDeal.amount || 0);
-          newDeal.probability = Number(newDeal.probability || 0);
           newDeal.id = 'DEAL-' + String(db.deals.length + 1).padStart(3, '0');
           db.deals.unshift(newDeal);
-          db.metrics.totalPipelineValue += newDeal.amount;
+          db.metrics.totalPipelineValue += Number(newDeal.amount || 0);
           db.metrics.activeDealsCount += 1;
           broadcast({ type: 'DEAL_CREATED', deal: newDeal });
           return sendJson(201, { status: 'SUCCESS', deal: newDeal });
@@ -286,22 +368,58 @@ const server = http.createServer((req, res) => {
     return;
   }
 
-  // 10. Workflow DAG Execution Trigger
+  // 10. Workflows Listing & Trigger Endpoints
+  if (pathname === '/api/v1/workflows') {
+    if (req.method === 'GET') {
+      return sendJson(200, {
+        status: 'SUCCESS',
+        workflows: db.workflowLogs,
+        statistics: {
+          totalExecutions: db.metrics.workflowExecutions,
+          slaSuccessRate: db.metrics.workflowSlaPercent,
+          avgLatencyMs: 44.5,
+          activeShards: 16,
+          deadLetterBreaches: 0
+        }
+      });
+    }
+  }
+
   if (pathname === '/api/v1/workflows/trigger' && req.method === 'POST') {
     let body = '';
     req.on('data', chunk => body += chunk);
     req.on('end', () => {
       try {
-        const { workflowName } = JSON.parse(body || '{}');
+        const parsed = JSON.parse(body || '{}');
+        const wfName = parsed.workflowName || 'Enterprise Cross-Domain Auto-Rebalance';
+        const domain = parsed.domain || 'Multi-Tenant Cross-Domain Mesh';
+        const trigger = parsed.trigger || 'Manual Console Trigger';
         const wfId = 'WF-' + Math.floor(1000 + Math.random() * 9000);
+
+        const stepTemplates = [
+          '1. Ingest Event Stream & Lock Distributed Mutex',
+          '2. Validate Schema & RBAC Zero-Trust Token',
+          '3. Resolve DAG Dependencies Topologically',
+          '4. Execute Atomic Cross-Shard State Transitions',
+          '5. Commit Transaction & Dispatch Outbox Event'
+        ];
+
+        const shards = ['Shard-EU-Alpha (Frankfurt)', 'Shard-US-East (Virginia)', 'Shard-AP-South (Singapore)', 'Shard-US-Central (Ohio)'];
+        const chosenShard = shards[Math.floor(Math.random() * shards.length)];
+
         const wfEntry = {
           id: wfId,
-          name: workflowName || 'Enterprise Cross-Domain Auto-Rebalance',
-          status: 'SUCCESS',
-          stepsExecuted: 5,
-          durationMs: Math.floor(40 + Math.random() * 60),
+          name: wfName,
+          domain: domain,
+          trigger: trigger,
+          status: 'COMMITTED',
+          steps: stepTemplates,
+          stepsExecuted: stepTemplates.length,
+          durationMs: Math.floor(32 + Math.random() * 45),
+          shard: chosenShard,
           timestamp: new Date().toISOString()
         };
+
         db.workflowLogs.unshift(wfEntry);
         db.metrics.workflowExecutions += 1;
         broadcast({ type: 'WORKFLOW_TRIGGERED', workflow: wfEntry });
@@ -343,17 +461,14 @@ function broadcast(data) {
   }
 }
 
-process.on('uncaughtException', (err) => {
-  console.error('[BACKEND UNCAUGHT ERROR]', err);
-});
-
-server.listen(PORT, '0.0.0.0', () => {
+server.listen(PORT, () => {
   console.log(`\n========================================================`);
   console.log(`🚀 NEXORA ENTERPRISE BACKEND SERVER IS LIVE & RUNNING!`);
   console.log(`========================================================`);
   console.log(`📡 Backend URL:      http://localhost:${PORT}`);
   console.log(`🩺 Health Check:     http://localhost:${PORT}/api/v1/health`);
   console.log(`📊 Metrics Stream:   http://localhost:${PORT}/api/v1/metrics/overview`);
+  console.log(`⚙️ Workflows API:    http://localhost:${PORT}/api/v1/workflows`);
   console.log(`🤖 AI Agent API:     http://localhost:${PORT}/api/v1/ai/agent-dispatch`);
   console.log(`⚡ Real-Time Stream:  http://localhost:${PORT}/api/v1/realtime/stream`);
   console.log(`========================================================\n`);

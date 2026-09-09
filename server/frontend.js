@@ -12,6 +12,7 @@ const htmlContent = `<!DOCTYPE html>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>NEXORA — Enterprise Autonomous Operations Platform</title>
   <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -24,14 +25,27 @@ const htmlContent = `<!DOCTYPE html>
     .badge-pastel-green { background-color: #E8F0EC; color: #2E5A44; border: 1px solid #C8DDD2; }
     .badge-pastel-blue { background-color: #ECEFFE; color: #4351B8; border: 1px solid #D0D7FA; }
     .badge-pastel-terracotta { background-color: #FAEEEB; color: #9E4F39; border: 1px solid #F2D3CC; }
+    .badge-pastel-purple { background-color: #F3EDFC; color: #6933A6; border: 1px solid #DFD0F5; }
     .card-nude { background-color: #FBFBF9; border: 1px solid #E2DFD8; }
     .sidebar-active { background-color: #EFECE6; color: #1E2022; font-weight: 700; }
     .pulse-live {
       box-shadow: 0 0 0 0 rgba(107, 142, 123, 0.7);
       animation: pulse 1.6s infinite cubic-bezier(0.66, 0, 0, 1);
     }
+    .pulse-blue {
+      box-shadow: 0 0 0 0 rgba(94, 106, 210, 0.7);
+      animation: pulseBlue 1.6s infinite cubic-bezier(0.66, 0, 0, 1);
+    }
     @keyframes pulse {
       to { box-shadow: 0 0 0 10px rgba(107, 142, 123, 0); }
+    }
+    @keyframes pulseBlue {
+      to { box-shadow: 0 0 0 10px rgba(94, 106, 210, 0); }
+    }
+    .chart-box {
+      position: relative;
+      height: 220px;
+      width: 100%;
     }
   </style>
 </head>
@@ -39,13 +53,51 @@ const htmlContent = `<!DOCTYPE html>
 
   <!-- Top Global Bar -->
   <header class="bg-[#FBFBF9] border-b border-[#E2DFD8] px-6 py-3.5 flex items-center justify-between sticky top-0 z-50">
-    <div class="flex items-center gap-4">
-      <div class="w-9 h-9 rounded-xl bg-[#5E6AD2] flex items-center justify-center text-white font-black text-lg shadow-sm">
-        N
+    <!-- Stylish Humanized NEXORA Brand Logo -->
+    <div class="flex items-center gap-3.5 group cursor-pointer">
+      <div class="relative w-10 h-10 rounded-2xl bg-gradient-to-br from-[#1E2022] via-[#2D3033] to-[#1E2022] p-[1.5px] shadow-md transition-all duration-300 group-hover:scale-105 group-hover:shadow-indigo-500/20">
+        <div class="w-full h-full bg-[#1E2022] rounded-2xl flex items-center justify-center relative overflow-hidden">
+          <!-- Subtle ambient background glow -->
+          <div class="absolute -top-3 -right-3 w-8 h-8 rounded-full bg-[#5E6AD2]/30 blur-md pointer-events-none"></div>
+          <div class="absolute -bottom-3 -left-3 w-8 h-8 rounded-full bg-[#C27D66]/25 blur-md pointer-events-none"></div>
+          
+          <!-- Interconnected Humanized "N" Mesh SVG Icon -->
+          <svg class="w-6 h-6 transform transition duration-300 group-hover:rotate-3" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <linearGradient id="nexoraGrad1" x1="4" y1="4" x2="32" y2="32" gradientUnits="userSpaceOnUse">
+                <stop offset="0%" stop-color="#7F8DF5" />
+                <stop offset="50%" stop-color="#5E6AD2" />
+                <stop offset="100%" stop-color="#4E5AC2" />
+              </linearGradient>
+              <linearGradient id="nexoraGrad2" x1="32" y1="4" x2="4" y2="32" gradientUnits="userSpaceOnUse">
+                <stop offset="0%" stop-color="#E89C82" />
+                <stop offset="60%" stop-color="#C27D66" />
+                <stop offset="100%" stop-color="#6B8E7B" />
+              </linearGradient>
+              <linearGradient id="nexoraGradAccent" x1="0" y1="0" x2="1" y2="1">
+                <stop offset="0%" stop-color="#FCD34D" />
+                <stop offset="100%" stop-color="#F59E0B" />
+              </linearGradient>
+            </defs>
+            <!-- Left Vertical Pillar -->
+            <path d="M9 27V11C9 8.79086 10.7909 7 13 7C15.2091 7 17 8.79086 17 11V27" stroke="url(#nexoraGrad1)" stroke-width="3" stroke-linecap="round" />
+            <!-- Diagonal Flowing Bridge (Humanized Synergy Wave) -->
+            <path d="M13 10L23 26" stroke="url(#nexoraGrad2)" stroke-width="3" stroke-linecap="round" />
+            <!-- Right Vertical Pillar -->
+            <path d="M19 9V25C19 27.2091 20.7909 29 23 29C25.2091 29 27 27.2091 27 25V9" stroke="url(#nexoraGrad1)" stroke-width="3" stroke-linecap="round" />
+            <!-- Humanized Golden Synergy Node -->
+            <circle cx="18" cy="18" r="2.5" fill="url(#nexoraGradAccent)" />
+            <circle cx="18" cy="18" r="4.5" stroke="#FCD34D" stroke-opacity="0.4" stroke-width="1" />
+          </svg>
+        </div>
       </div>
+
       <div>
         <div class="flex items-center gap-2">
-          <h1 class="text-base font-extrabold tracking-tight text-[#1E2022]">NEXORA</h1>
+          <h1 class="text-base font-extrabold tracking-tight text-[#1E2022] flex items-center">
+            <span>NEX</span><span class="text-[#5E6AD2]">O</span><span>RA</span>
+            <span class="inline-block w-1.5 h-1.5 rounded-full bg-[#C27D66] ml-1"></span>
+          </h1>
           <span class="text-[10px] font-bold px-2 py-0.5 rounded-full badge-pastel-blue">v2.4.0 PROD</span>
         </div>
         <p class="text-[11px] text-[#1E2022]/60 font-medium">Enterprise Autonomous Operations Platform</p>
@@ -54,7 +106,7 @@ const htmlContent = `<!DOCTYPE html>
 
     <!-- Actions & Auth -->
     <div class="flex items-center gap-3">
-      <button onclick="triggerWorkflow('Global Autonomous Sweep')" class="px-3.5 py-1.5 bg-[#5E6AD2] hover:bg-[#4E5AC2] text-white text-xs font-bold rounded-xl shadow-sm transition flex items-center gap-1.5">
+      <button onclick="triggerWorkflow('Global Autonomous Sweep', 'Multi-Tenant Cross-Domain Mesh')" class="px-3.5 py-1.5 bg-[#5E6AD2] hover:bg-[#4E5AC2] text-white text-xs font-bold rounded-xl shadow-sm transition flex items-center gap-1.5">
         <span>⚡</span> Run Autonomous Workflow
       </button>
       <div id="header-auth-container" class="flex items-center gap-2">
@@ -123,79 +175,100 @@ const htmlContent = `<!DOCTYPE html>
     <main class="flex-1 p-6 md:p-8 overflow-y-auto max-w-7xl mx-auto w-full space-y-6">
 
       <!-- Toast Notification -->
-      <div id="toast" class="hidden fixed bottom-6 right-6 z-50 px-4 py-3 rounded-xl card-nude shadow-lg border border-[#E2DFD8] flex items-center gap-3 text-xs font-semibold transition">
+      <div id="toast" class="hidden fixed bottom-6 right-6 z-50 px-4 py-3 rounded-xl card-nude shadow-xl border border-[#E2DFD8] flex items-center gap-3 text-xs font-semibold transition">
         <span id="toast-icon">✅</span>
         <span id="toast-message">Action processed successfully</span>
       </div>
 
-      <!-- Create Deal Modal Dialog -->
-      <div id="deal-modal" class="hidden fixed inset-0 z-50 bg-black/40 backdrop-blur-sm flex items-center justify-center p-4">
-        <div class="card-nude rounded-2xl max-w-lg w-full p-6 shadow-2xl space-y-5 border border-[#E2DFD8] bg-[#FBFBF9] relative animate-in fade-in zoom-in-95">
-          <div class="flex items-center justify-between pb-3 border-b border-[#E2DFD8]">
-            <div class="flex items-center gap-2.5">
-              <div class="w-8 h-8 rounded-xl bg-[#ECEFFE] flex items-center justify-center text-[#5E6AD2] font-bold text-sm">
-                💼
-              </div>
-              <div>
-                <h3 class="text-base font-bold text-[#1E2022]">Create New Enterprise Deal</h3>
-                <p class="text-xs text-[#1E2022]/60">Register a new enterprise opportunity into pipeline velocity.</p>
-              </div>
+      <!-- Workflow Trace Modal -->
+      <div id="trace-modal" class="hidden fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+        <div class="card-nude rounded-2xl max-w-2xl w-full p-6 shadow-2xl border border-[#E2DFD8] space-y-4">
+          <div class="flex justify-between items-start">
+            <div>
+              <span id="modal-trace-id" class="text-xs font-extrabold text-[#5E6AD2]">WF-8841</span>
+              <h3 id="modal-trace-name" class="text-base font-extrabold text-[#1E2022] mt-0.5">Procure-to-Pay Multi-Domain Settlement</h3>
+              <p id="modal-trace-domain" class="text-xs text-[#1E2022]/60">Procurement & Finance</p>
             </div>
-            <button type="button" onclick="closeDealModal()" class="text-[#1E2022]/50 hover:text-[#1E2022] p-1.5 rounded-lg hover:bg-[#EFECE6] text-sm font-bold transition">
-              ✕
-            </button>
+            <button onclick="closeTraceModal()" class="w-8 h-8 rounded-xl bg-[#EFECE6] hover:bg-[#E2DFD8] text-[#1E2022] font-bold flex items-center justify-center">✕</button>
           </div>
 
-          <form id="deal-form" onsubmit="handleDealSubmit(event)" class="space-y-4">
+          <div class="grid grid-cols-3 gap-3 p-3 rounded-xl bg-[#F7F6F3] border border-[#E2DFD8] text-xs">
             <div>
-              <label class="block text-[11px] font-bold uppercase tracking-wider text-[#1E2022]/70 mb-1">Deal Name *</label>
-              <input id="deal-name" required type="text" placeholder="e.g. Next-Gen Cloud Migration" class="w-full px-3.5 py-2.5 text-xs rounded-xl bg-[#F7F6F3] border border-[#E2DFD8] focus:outline-none focus:ring-2 focus:ring-[#5E6AD2]/30 text-[#1E2022]" />
+              <span class="text-[10px] text-[#1E2022]/50 uppercase font-bold">Status</span>
+              <p class="font-extrabold text-[#2E5A44] flex items-center gap-1"><span>🟢</span> COMMITTED</p>
+            </div>
+            <div>
+              <span class="text-[10px] text-[#1E2022]/50 uppercase font-bold">Execution Latency</span>
+              <p id="modal-trace-duration" class="font-bold text-[#1E2022]">48 ms</p>
+            </div>
+            <div>
+              <span class="text-[10px] text-[#1E2022]/50 uppercase font-bold">Execution Shard</span>
+              <p id="modal-trace-shard" class="font-bold text-[#5E6AD2]">Shard-EU-Alpha</p>
+            </div>
+          </div>
+
+          <div>
+            <h4 class="text-xs font-bold uppercase text-[#1E2022]/70 mb-2">Topological Step Transition Log</h4>
+            <div id="modal-trace-steps" class="space-y-2 text-xs font-mono bg-[#EFECE6] p-4 rounded-xl border border-[#E2DFD8] max-h-48 overflow-y-auto">
+              <!-- Dynamically populated steps -->
+            </div>
+          </div>
+
+          <div class="flex justify-end pt-2">
+            <button onclick="closeTraceModal()" class="px-4 py-2 bg-[#EFECE6] hover:bg-[#E2DFD8] text-xs font-bold rounded-xl text-[#1E2022] transition">
+              Close Trace
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Trigger New DAG Modal -->
+      <div id="trigger-modal" class="hidden fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+        <div class="card-nude rounded-2xl max-w-lg w-full p-6 shadow-2xl border border-[#E2DFD8] space-y-4">
+          <div class="flex justify-between items-start">
+            <div>
+              <h3 class="text-base font-extrabold text-[#1E2022]">Trigger Distributed DAG Run</h3>
+              <p class="text-xs text-[#1E2022]/60">Select an enterprise workflow template or enter custom parameters</p>
+            </div>
+            <button onclick="closeTriggerModal()" class="w-8 h-8 rounded-xl bg-[#EFECE6] hover:bg-[#E2DFD8] text-[#1E2022] font-bold flex items-center justify-center">✕</button>
+          </div>
+
+          <div class="space-y-3">
+            <div>
+              <label class="text-[11px] font-bold uppercase text-[#1E2022]/60">Workflow Template</label>
+              <select id="modal-wf-select" class="w-full mt-1 px-3 py-2 text-xs rounded-xl bg-[#F7F6F3] border border-[#E2DFD8] focus:outline-none focus:ring-2 focus:ring-[#5E6AD2]/30 font-semibold" onchange="onTemplateChange()">
+                <option value="Enterprise Cross-Domain Auto-Rebalance|Multi-Tenant Cross-Domain Mesh">⚡ Enterprise Cross-Domain Auto-Rebalance</option>
+                <option value="Multi-Region Financial Ledger Settlement|Finance & General Ledger">💳 Multi-Region Financial Ledger Settlement</option>
+                <option value="Supply Chain Auto-Replenishment PO|Inventory & Procurement">📦 Supply Chain Auto-Replenishment PO</option>
+                <option value="Zero-Trust Security Incident Auto-Remediation|IoT & Security Mesh">🛡️ Zero-Trust Security Incident Auto-Remediation</option>
+                <option value="9-Agent Swarm Collaborative Consensus|AI Autonomous Swarm">🤖 9-Agent Swarm Collaborative Consensus</option>
+              </select>
             </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-3.5">
-              <div>
-                <label class="block text-[11px] font-bold uppercase tracking-wider text-[#1E2022]/70 mb-1">Company / Client *</label>
-                <input id="deal-company" required type="text" placeholder="e.g. Acme Logistics Corp" class="w-full px-3.5 py-2.5 text-xs rounded-xl bg-[#F7F6F3] border border-[#E2DFD8] focus:outline-none focus:ring-2 focus:ring-[#5E6AD2]/30 text-[#1E2022]" />
-              </div>
-
-              <div>
-                <label class="block text-[11px] font-bold uppercase tracking-wider text-[#1E2022]/70 mb-1">Contract Value ($) *</label>
-                <input id="deal-amount" required type="number" min="0" step="1000" placeholder="e.g. 650000" class="w-full px-3.5 py-2.5 text-xs rounded-xl bg-[#F7F6F3] border border-[#E2DFD8] focus:outline-none focus:ring-2 focus:ring-[#5E6AD2]/30 text-[#1E2022]" />
-              </div>
+            <div>
+              <label class="text-[11px] font-bold uppercase text-[#1E2022]/60">Custom Workflow Name (Optional)</label>
+              <input id="modal-wf-custom-name" type="text" placeholder="Or enter custom workflow name..." class="w-full mt-1 px-3 py-2 text-xs rounded-xl bg-[#F7F6F3] border border-[#E2DFD8] focus:outline-none focus:ring-2 focus:ring-[#5E6AD2]/30" />
             </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
-              <div>
-                <label class="block text-[11px] font-bold uppercase tracking-wider text-[#1E2022]/70 mb-1">Stage *</label>
-                <select id="deal-stage" required class="w-full px-3 py-2.5 text-xs rounded-xl bg-[#F7F6F3] border border-[#E2DFD8] focus:outline-none focus:ring-2 focus:ring-[#5E6AD2]/30 text-[#1E2022]">
-                  <option value="Prospecting">Prospecting</option>
-                  <option value="Proposal" selected>Proposal</option>
-                  <option value="Negotiation">Negotiation</option>
-                  <option value="Closing">Closing</option>
-                  <option value="Won">Won</option>
-                </select>
-              </div>
-
-              <div>
-                <label class="block text-[11px] font-bold uppercase tracking-wider text-[#1E2022]/70 mb-1">Win Probability (%) *</label>
-                <input id="deal-prob" required type="number" min="0" max="100" value="70" placeholder="e.g. 70" class="w-full px-3.5 py-2.5 text-xs rounded-xl bg-[#F7F6F3] border border-[#E2DFD8] focus:outline-none focus:ring-2 focus:ring-[#5E6AD2]/30 text-[#1E2022]" />
-              </div>
-
-              <div>
-                <label class="block text-[11px] font-bold uppercase tracking-wider text-[#1E2022]/70 mb-1">Deal Owner *</label>
-                <input id="deal-owner" required type="text" placeholder="e.g. Sarah Jenkins" value="Sarah Jenkins" class="w-full px-3.5 py-2.5 text-xs rounded-xl bg-[#F7F6F3] border border-[#E2DFD8] focus:outline-none focus:ring-2 focus:ring-[#5E6AD2]/30 text-[#1E2022]" />
-              </div>
+            <div>
+              <label class="text-[11px] font-bold uppercase text-[#1E2022]/60">Target Execution Cluster</label>
+              <select class="w-full mt-1 px-3 py-2 text-xs rounded-xl bg-[#F7F6F3] border border-[#E2DFD8] focus:outline-none font-semibold">
+                <option>Active-Active Geo-Mesh (Frankfurt, Virginia, Singapore)</option>
+                <option>EU-Central Cluster (Frankfurt)</option>
+                <option>US-East Cluster (Virginia)</option>
+                <option>AP-South Cluster (Singapore)</option>
+              </select>
             </div>
+          </div>
 
-            <div class="flex justify-end items-center gap-2.5 pt-3 border-t border-[#E2DFD8]">
-              <button type="button" onclick="closeDealModal()" class="px-4 py-2 text-xs font-semibold text-[#1E2022]/70 hover:bg-[#EFECE6] rounded-xl transition">
-                Cancel
-              </button>
-              <button type="submit" id="btn-submit-deal" class="px-4 py-2 bg-[#5E6AD2] hover:bg-[#4E5AC2] text-white text-xs font-bold rounded-xl transition shadow-sm flex items-center gap-1.5">
-                <span>+</span> Create Deal
-              </button>
-            </div>
-          </form>
+          <div class="flex justify-end gap-2 pt-2">
+            <button onclick="closeTriggerModal()" class="px-4 py-2 bg-[#EFECE6] hover:bg-[#E2DFD8] text-xs font-bold rounded-xl text-[#1E2022] transition">
+              Cancel
+            </button>
+            <button onclick="submitModalWorkflow()" class="px-4 py-2 bg-[#5E6AD2] hover:bg-[#4E5AC2] text-xs font-bold rounded-xl text-white shadow-sm transition flex items-center gap-1.5">
+              <span>⚡</span> Execute DAG Run
+            </button>
+          </div>
         </div>
       </div>
 
@@ -237,6 +310,35 @@ const htmlContent = `<!DOCTYPE html>
               <span class="text-xs font-bold badge-pastel-blue px-1.5 py-0.5 rounded-md">Live Nodes</span>
             </div>
             <p class="text-[11px] text-[#1E2022]/60 mt-1">Avg latency: 2.4ms across 3 regions</p>
+          </div>
+        </div>
+
+        <!-- Visual Analytics Pie & Donut Row for Cockpit -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div class="card-nude rounded-2xl p-5 shadow-sm">
+            <div class="flex items-center justify-between mb-2">
+              <div>
+                <h4 class="font-bold text-xs uppercase tracking-wider text-[#1E2022]">Operational Resource Allocation</h4>
+                <p class="text-[11px] text-[#1E2022]/60">Budget & Compute Distribution Across Core Pillars</p>
+              </div>
+              <span class="text-[10px] font-bold badge-pastel-purple px-2 py-0.5 rounded-full">Donut Analysis</span>
+            </div>
+            <div class="chart-box">
+              <canvas id="chart-overview-budget"></canvas>
+            </div>
+          </div>
+
+          <div class="card-nude rounded-2xl p-5 shadow-sm">
+            <div class="flex items-center justify-between mb-2">
+              <div>
+                <h4 class="font-bold text-xs uppercase tracking-wider text-[#1E2022]">Enterprise Cluster Health & SLA</h4>
+                <p class="text-[11px] text-[#1E2022]/60">Node Integrity & Availability Across 64 Domains</p>
+              </div>
+              <span class="text-[10px] font-bold badge-pastel-green px-2 py-0.5 rounded-full">Pie Analysis</span>
+            </div>
+            <div class="chart-box">
+              <canvas id="chart-overview-health"></canvas>
+            </div>
           </div>
         </div>
 
@@ -332,9 +434,35 @@ const htmlContent = `<!DOCTYPE html>
             <h2 class="text-xl font-bold text-[#1E2022]">Enterprise CRM & Pipeline Management</h2>
             <p class="text-xs text-[#1E2022]/60">Real-time enterprise deals, lead scoring, and sales stage progression.</p>
           </div>
-          <button onclick="openDealModal()" class="px-4 py-2 bg-[#5E6AD2] text-white text-xs font-bold rounded-xl hover:bg-[#4E5AC2] transition">
-            + Create New Deal
-          </button>
+        </div>
+
+        <!-- CRM Pie & Donut Charts -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div class="card-nude rounded-2xl p-5 shadow-sm">
+            <div class="flex items-center justify-between mb-2">
+              <div>
+                <h4 class="font-bold text-xs uppercase tracking-wider text-[#1E2022]">Deal Value Distribution by Stage</h4>
+                <p class="text-[11px] text-[#1E2022]/60">Weighted Revenue Across Pipeline Funnel</p>
+              </div>
+              <span class="text-[10px] font-bold badge-pastel-blue px-2 py-0.5 rounded-full">Pipeline Share</span>
+            </div>
+            <div class="chart-box">
+              <canvas id="chart-crm-stages"></canvas>
+            </div>
+          </div>
+
+          <div class="card-nude rounded-2xl p-5 shadow-sm">
+            <div class="flex items-center justify-between mb-2">
+              <div>
+                <h4 class="font-bold text-xs uppercase tracking-wider text-[#1E2022]">Account Segmentation & Lead Intent</h4>
+                <p class="text-[11px] text-[#1E2022]/60">Conversion Probability Breakdown</p>
+              </div>
+              <span class="text-[10px] font-bold badge-pastel-green px-2 py-0.5 rounded-full">Intent Ratio</span>
+            </div>
+            <div class="chart-box">
+              <canvas id="chart-crm-intent"></canvas>
+            </div>
+          </div>
         </div>
 
         <div class="card-nude rounded-2xl overflow-hidden shadow-sm">
@@ -366,6 +494,35 @@ const htmlContent = `<!DOCTYPE html>
           </div>
         </div>
 
+        <!-- Projects Pie & Donut Charts -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div class="card-nude rounded-2xl p-5 shadow-sm">
+            <div class="flex items-center justify-between mb-2">
+              <div>
+                <h4 class="font-bold text-xs uppercase tracking-wider text-[#1E2022]">Project Status & Velocity</h4>
+                <p class="text-[11px] text-[#1E2022]/60">Distribution of Milestone Completion</p>
+              </div>
+              <span class="text-[10px] font-bold badge-pastel-purple px-2 py-0.5 rounded-full">Milestone Status</span>
+            </div>
+            <div class="chart-box">
+              <canvas id="chart-projects-status"></canvas>
+            </div>
+          </div>
+
+          <div class="card-nude rounded-2xl p-5 shadow-sm">
+            <div class="flex items-center justify-between mb-2">
+              <div>
+                <h4 class="font-bold text-xs uppercase tracking-wider text-[#1E2022]">Architecture Domain Workload</h4>
+                <p class="text-[11px] text-[#1E2022]/60">Engineering Allocation Across 20 Tiers</p>
+              </div>
+              <span class="text-[10px] font-bold badge-pastel-blue px-2 py-0.5 rounded-full">Tier Allocation</span>
+            </div>
+            <div class="chart-box">
+              <canvas id="chart-projects-domain"></canvas>
+            </div>
+          </div>
+        </div>
+
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4" id="projects-grid">
           <!-- Dynamically populated -->
         </div>
@@ -377,6 +534,35 @@ const htmlContent = `<!DOCTYPE html>
           <div>
             <h2 class="text-xl font-bold text-[#1E2022]">Financial General Ledger & Tax Reconciliation</h2>
             <p class="text-xs text-[#1E2022]/60">Double-entry balanced journals, VAT compliance, and real-time treasury.</p>
+          </div>
+        </div>
+
+        <!-- Finance Pie & Donut Charts -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div class="card-nude rounded-2xl p-5 shadow-sm">
+            <div class="flex items-center justify-between mb-2">
+              <div>
+                <h4 class="font-bold text-xs uppercase tracking-wider text-[#1E2022]">Operating Expense & Cash Inflow Breakdown</h4>
+                <p class="text-[11px] text-[#1E2022]/60">Balanced General Ledger Line Ratios</p>
+              </div>
+              <span class="text-[10px] font-bold badge-pastel-green px-2 py-0.5 rounded-full">Cash Flow</span>
+            </div>
+            <div class="chart-box">
+              <canvas id="chart-finance-ledger"></canvas>
+            </div>
+          </div>
+
+          <div class="card-nude rounded-2xl p-5 shadow-sm">
+            <div class="flex items-center justify-between mb-2">
+              <div>
+                <h4 class="font-bold text-xs uppercase tracking-wider text-[#1E2022]">Tax & Statutory Withholding Distribution</h4>
+                <p class="text-[11px] text-[#1E2022]/60">Corporate, VAT, and Payroll Statutory Compliance</p>
+              </div>
+              <span class="text-[10px] font-bold badge-pastel-terracotta px-2 py-0.5 rounded-full">Tax Share</span>
+            </div>
+            <div class="chart-box">
+              <canvas id="chart-finance-tax"></canvas>
+            </div>
           </div>
         </div>
 
@@ -427,6 +613,35 @@ const htmlContent = `<!DOCTYPE html>
             <p class="text-xs text-[#1E2022]/60 mt-1">Automated direct ACH routing</p>
           </div>
         </div>
+
+        <!-- HR Pie & Donut Charts -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div class="card-nude rounded-2xl p-5 shadow-sm">
+            <div class="flex items-center justify-between mb-2">
+              <div>
+                <h4 class="font-bold text-xs uppercase tracking-wider text-[#1E2022]">Workforce Department Distribution</h4>
+                <p class="text-[11px] text-[#1E2022]/60">Headcount Share Across Core Divisions</p>
+              </div>
+              <span class="text-[10px] font-bold badge-pastel-blue px-2 py-0.5 rounded-full">Headcount</span>
+            </div>
+            <div class="chart-box">
+              <canvas id="chart-hr-dept"></canvas>
+            </div>
+          </div>
+
+          <div class="card-nude rounded-2xl p-5 shadow-sm">
+            <div class="flex items-center justify-between mb-2">
+              <div>
+                <h4 class="font-bold text-xs uppercase tracking-wider text-[#1E2022]">Attendance & Shift Modality</h4>
+                <p class="text-[11px] text-[#1E2022]/60">Geofenced On-Site vs Remote Telemetry</p>
+              </div>
+              <span class="text-[10px] font-bold badge-pastel-green px-2 py-0.5 rounded-full">Attendance</span>
+            </div>
+            <div class="chart-box">
+              <canvas id="chart-hr-modality"></canvas>
+            </div>
+          </div>
+        </div>
       </div>
 
       <!-- TAB 6: INVENTORY -->
@@ -435,6 +650,35 @@ const htmlContent = `<!DOCTYPE html>
           <div>
             <h2 class="text-xl font-bold text-[#1E2022]">Inventory & Supply Chain Automation</h2>
             <p class="text-xs text-[#1E2022]/60">Real-time SKU stock levels, warehouse routing, and automated PO reordering.</p>
+          </div>
+        </div>
+
+        <!-- Inventory Pie & Donut Charts -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div class="card-nude rounded-2xl p-5 shadow-sm">
+            <div class="flex items-center justify-between mb-2">
+              <div>
+                <h4 class="font-bold text-xs uppercase tracking-wider text-[#1E2022]">SKU Stock Status & Reorder Health</h4>
+                <p class="text-[11px] text-[#1E2022]/60">Inventory Safety Threshold Distribution</p>
+              </div>
+              <span class="text-[10px] font-bold badge-pastel-green px-2 py-0.5 rounded-full">Stock Health</span>
+            </div>
+            <div class="chart-box">
+              <canvas id="chart-inventory-health"></canvas>
+            </div>
+          </div>
+
+          <div class="card-nude rounded-2xl p-5 shadow-sm">
+            <div class="flex items-center justify-between mb-2">
+              <div>
+                <h4 class="font-bold text-xs uppercase tracking-wider text-[#1E2022]">Global Warehouse Allocation</h4>
+                <p class="text-[11px] text-[#1E2022]/60">Inventory Valuations across Distribution Centers</p>
+              </div>
+              <span class="text-[10px] font-bold badge-pastel-purple px-2 py-0.5 rounded-full">Hub Share</span>
+            </div>
+            <div class="chart-box">
+              <canvas id="chart-inventory-warehouses"></canvas>
+            </div>
           </div>
         </div>
 
@@ -466,6 +710,35 @@ const htmlContent = `<!DOCTYPE html>
           </div>
         </div>
 
+        <!-- IoT Pie & Donut Charts -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div class="card-nude rounded-2xl p-5 shadow-sm">
+            <div class="flex items-center justify-between mb-2">
+              <div>
+                <h4 class="font-bold text-xs uppercase tracking-wider text-[#1E2022]">Node Health & Thermal Load Profile</h4>
+                <p class="text-[11px] text-[#1E2022]/60">Operating Temperature Band across 3,840 Nodes</p>
+              </div>
+              <span class="text-[10px] font-bold badge-pastel-green px-2 py-0.5 rounded-full">Node Health</span>
+            </div>
+            <div class="chart-box">
+              <canvas id="chart-iot-health"></canvas>
+            </div>
+          </div>
+
+          <div class="card-nude rounded-2xl p-5 shadow-sm">
+            <div class="flex items-center justify-between mb-2">
+              <div>
+                <h4 class="font-bold text-xs uppercase tracking-wider text-[#1E2022]">Regional Telemetry Ingest Share</h4>
+                <p class="text-[11px] text-[#1E2022]/60">Traffic Volume (Frankfurt, Virginia, Singapore)</p>
+              </div>
+              <span class="text-[10px] font-bold badge-pastel-blue px-2 py-0.5 rounded-full">Ingest Traffic</span>
+            </div>
+            <div class="chart-box">
+              <canvas id="chart-iot-regions"></canvas>
+            </div>
+          </div>
+        </div>
+
         <div class="grid grid-cols-1 md:grid-cols-3 gap-5" id="iot-grid">
           <!-- Dynamically Populated -->
         </div>
@@ -477,6 +750,35 @@ const htmlContent = `<!DOCTYPE html>
           <div>
             <h2 class="text-xl font-bold text-[#1E2022]">Autonomous 9-Agent Operational Mesh</h2>
             <p class="text-xs text-[#1E2022]/60">Decentralized agent collaboration across executive, finance, sales, HR, and security domains.</p>
+          </div>
+        </div>
+
+        <!-- AI Swarm Pie & Donut Charts -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div class="card-nude rounded-2xl p-5 shadow-sm">
+            <div class="flex items-center justify-between mb-2">
+              <div>
+                <h4 class="font-bold text-xs uppercase tracking-wider text-[#1E2022]">Agent Mesh Tool Dispatch Share</h4>
+                <p class="text-[11px] text-[#1E2022]/60">Autonomous Policy Invocations by Agent Domain</p>
+              </div>
+              <span class="text-[10px] font-bold badge-pastel-purple px-2 py-0.5 rounded-full">Agent Workload</span>
+            </div>
+            <div class="chart-box">
+              <canvas id="chart-ai-agents"></canvas>
+            </div>
+          </div>
+
+          <div class="card-nude rounded-2xl p-5 shadow-sm">
+            <div class="flex items-center justify-between mb-2">
+              <div>
+                <h4 class="font-bold text-xs uppercase tracking-wider text-[#1E2022]">Cross-Domain Context Token Share</h4>
+                <p class="text-[11px] text-[#1E2022]/60">Embeddings and Reasoning Graph Ingestion</p>
+              </div>
+              <span class="text-[10px] font-bold badge-pastel-blue px-2 py-0.5 rounded-full">Neural Context</span>
+            </div>
+            <div class="chart-box">
+              <canvas id="chart-ai-domains"></canvas>
+            </div>
           </div>
         </div>
 
@@ -494,22 +796,165 @@ const htmlContent = `<!DOCTYPE html>
         </div>
       </div>
 
-      <!-- TAB 9: WORKFLOWS -->
+      <!-- TAB 9: WORKFLOWS (DISTRIBUTED DAG ENGINE) -->
       <div id="tab-workflows" class="hidden space-y-6">
-        <div class="flex items-center justify-between">
+        <!-- Header -->
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
-            <h2 class="text-xl font-bold text-[#1E2022]">Distributed DAG Workflow Execution Engine</h2>
-            <p class="text-xs text-[#1E2022]/60">State machine orchestration with zero dead-letter queue breaches.</p>
+            <div class="flex items-center gap-2">
+              <h2 class="text-xl font-extrabold text-[#1E2022]">Distributed DAG Workflow Execution Engine</h2>
+              <span class="text-[10px] font-bold px-2 py-0.5 rounded-full badge-pastel-green">ACTIVE-ACTIVE</span>
+            </div>
+            <p class="text-xs text-[#1E2022]/60 mt-0.5">Topological state machine orchestration with zero dead-letter queue breaches across 64 domains.</p>
           </div>
-          <button onclick="triggerWorkflow('Ad-Hoc Cross-Domain Rebalance')" class="px-4 py-2 bg-[#5E6AD2] text-white text-xs font-bold rounded-xl hover:bg-[#4E5AC2] transition">
-            + Trigger New DAG Run
-          </button>
+          <div class="flex gap-2">
+            <button onclick="openTriggerModal()" class="px-4 py-2.5 bg-[#5E6AD2] hover:bg-[#4E5AC2] text-white text-xs font-bold rounded-xl shadow-sm transition flex items-center gap-1.5">
+              <span>+</span> Trigger New DAG Run
+            </button>
+          </div>
         </div>
 
-        <div class="card-nude rounded-2xl p-6 shadow-sm">
-          <h3 class="font-bold text-sm text-[#1E2022] mb-4">Execution Log & State Transitions</h3>
-          <div class="space-y-3" id="workflow-logs-container">
-            <!-- Dynamically Populated -->
+        <!-- Metric Cards -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div class="card-nude rounded-2xl p-4 shadow-sm">
+            <p class="text-[10px] font-bold uppercase tracking-wider text-[#1E2022]/50">Total Executions</p>
+            <p id="wf-stat-total" class="text-2xl font-extrabold text-[#1E2022] mt-1">84,912</p>
+            <p class="text-[11px] text-[#2E5A44] font-semibold mt-0.5">↑ 100% Real-time sync</p>
+          </div>
+          <div class="card-nude rounded-2xl p-4 shadow-sm">
+            <p class="text-[10px] font-bold uppercase tracking-wider text-[#1E2022]/50">SLA Success Rate</p>
+            <p id="wf-stat-sla" class="text-2xl font-extrabold text-[#2E5A44] mt-1">99.98%</p>
+            <p class="text-[11px] text-[#1E2022]/60 mt-0.5">0 Dead-Letter Queue Breaches</p>
+          </div>
+          <div class="card-nude rounded-2xl p-4 shadow-sm">
+            <p class="text-[10px] font-bold uppercase tracking-wider text-[#1E2022]/50">Average Latency</p>
+            <p id="wf-stat-latency" class="text-2xl font-extrabold text-[#5E6AD2] mt-1">44.5 ms</p>
+            <p class="text-[11px] text-[#1E2022]/60 mt-0.5">Sub-50ms DAG resolution</p>
+          </div>
+          <div class="card-nude rounded-2xl p-4 shadow-sm">
+            <p class="text-[10px] font-bold uppercase tracking-wider text-[#1E2022]/50">Active Shards</p>
+            <p id="wf-stat-shards" class="text-2xl font-extrabold text-[#1E2022] mt-1">16 Shards</p>
+            <p class="text-[11px] text-[#1E2022]/60 mt-0.5">Frankfurt, Virginia, Singapore</p>
+          </div>
+        </div>
+
+        <!-- Workflows Pie & Donut Charts -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div class="card-nude rounded-2xl p-5 shadow-sm">
+            <div class="flex items-center justify-between mb-2">
+              <div>
+                <h4 class="font-bold text-xs uppercase tracking-wider text-[#1E2022]">Workflow Trigger Source Distribution</h4>
+                <p class="text-[11px] text-[#1E2022]/60">Inbound Events Initiating Distributed DAG Runs</p>
+              </div>
+              <span class="text-[10px] font-bold badge-pastel-purple px-2 py-0.5 rounded-full">Trigger Ingest</span>
+            </div>
+            <div class="chart-box">
+              <canvas id="chart-workflows-triggers"></canvas>
+            </div>
+          </div>
+
+          <div class="card-nude rounded-2xl p-5 shadow-sm">
+            <div class="flex items-center justify-between mb-2">
+              <div>
+                <h4 class="font-bold text-xs uppercase tracking-wider text-[#1E2022]">Cluster Shard Workload Allocation</h4>
+                <p class="text-[11px] text-[#1E2022]/60">State Machine Executions Across Geo-Shards</p>
+              </div>
+              <span class="text-[10px] font-bold badge-pastel-blue px-2 py-0.5 rounded-full">Shard Share</span>
+            </div>
+            <div class="chart-box">
+              <canvas id="chart-workflows-shards"></canvas>
+            </div>
+          </div>
+        </div>
+
+        <!-- Visual Live DAG Topology Pipeline -->
+        <div class="card-nude rounded-2xl p-6 shadow-sm space-y-3">
+          <div class="flex items-center justify-between">
+            <h3 class="font-extrabold text-sm text-[#1E2022] flex items-center gap-2">
+              <span>⚡</span> Live DAG Execution Topology (Active Cluster State)
+            </h3>
+            <span class="text-[10px] font-bold px-2 py-0.5 rounded-full badge-pastel-blue pulse-blue">REALTIME STREAMING</span>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-5 gap-3 pt-2">
+            <div class="p-3 rounded-xl bg-[#F7F6F3] border border-[#E2DFD8] relative">
+              <span class="text-[10px] font-bold text-[#5E6AD2]">STAGE 1</span>
+              <h5 class="text-xs font-bold text-[#1E2022] mt-0.5">Ingest Event</h5>
+              <p class="text-[10px] text-[#1E2022]/60">Kafka / Webhook Stream</p>
+              <div class="mt-2 text-[10px] font-bold text-[#2E5A44] flex items-center gap-1">
+                <span class="w-2 h-2 rounded-full bg-[#6B8E7B] pulse-live"></span> Ready
+              </div>
+            </div>
+
+            <div class="p-3 rounded-xl bg-[#F7F6F3] border border-[#E2DFD8]">
+              <span class="text-[10px] font-bold text-[#5E6AD2]">STAGE 2</span>
+              <h5 class="text-xs font-bold text-[#1E2022] mt-0.5">Schema & RBAC</h5>
+              <p class="text-[10px] text-[#1E2022]/60">Zero-Trust Token Check</p>
+              <div class="mt-2 text-[10px] font-bold text-[#2E5A44] flex items-center gap-1">
+                <span class="w-2 h-2 rounded-full bg-[#6B8E7B]"></span> Verified
+              </div>
+            </div>
+
+            <div class="p-3 rounded-xl bg-[#F7F6F3] border border-[#E2DFD8]">
+              <span class="text-[10px] font-bold text-[#5E6AD2]">STAGE 3</span>
+              <h5 class="text-xs font-bold text-[#1E2022] mt-0.5">Resolve Graph</h5>
+              <p class="text-[10px] text-[#1E2022]/60">Topological Sort</p>
+              <div class="mt-2 text-[10px] font-bold text-[#2E5A44] flex items-center gap-1">
+                <span class="w-2 h-2 rounded-full bg-[#6B8E7B]"></span> Optimal
+              </div>
+            </div>
+
+            <div class="p-3 rounded-xl bg-[#F7F6F3] border border-[#E2DFD8]">
+              <span class="text-[10px] font-bold text-[#5E6AD2]">STAGE 4</span>
+              <h5 class="text-xs font-bold text-[#1E2022] mt-0.5">Shard Mutex</h5>
+              <p class="text-[10px] text-[#1E2022]/60">Distributed Atomic Lock</p>
+              <div class="mt-2 text-[10px] font-bold text-[#2E5A44] flex items-center gap-1">
+                <span class="w-2 h-2 rounded-full bg-[#6B8E7B]"></span> Acquired
+              </div>
+            </div>
+
+            <div class="p-3 rounded-xl bg-[#F7F6F3] border border-[#E2DFD8]">
+              <span class="text-[10px] font-bold text-[#5E6AD2]">STAGE 5</span>
+              <h5 class="text-xs font-bold text-[#1E2022] mt-0.5">Commit & Outbox</h5>
+              <p class="text-[10px] text-[#1E2022]/60">Transactional Outbox</p>
+              <div class="mt-2 text-[10px] font-bold text-[#2E5A44] flex items-center gap-1">
+                <span class="w-2 h-2 rounded-full bg-[#6B8E7B]"></span> Completed
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Execution Log & Transaction History Table -->
+        <div class="card-nude rounded-2xl overflow-hidden shadow-sm">
+          <div class="p-5 bg-[#FBFBF9] border-b border-[#E2DFD8] flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div>
+              <h3 class="font-bold text-sm text-[#1E2022]">Live Workflow Execution Log & Transaction History</h3>
+              <p class="text-xs text-[#1E2022]/60">Historical audit trail of state transitions across all 64 enterprise domains.</p>
+            </div>
+            <div class="flex items-center gap-2">
+              <span class="text-xs text-[#1E2022]/60 font-semibold" id="wf-log-count-text">Showing 5 executions</span>
+            </div>
+          </div>
+
+          <div class="overflow-x-auto">
+            <table class="w-full text-left text-xs">
+              <thead class="bg-[#EFECE6] border-b border-[#E2DFD8] text-[#1E2022]/70 font-bold uppercase text-[10px] tracking-wider">
+                <tr>
+                  <th class="p-4">Execution ID</th>
+                  <th class="p-4">Workflow Name</th>
+                  <th class="p-4">Domain</th>
+                  <th class="p-4">Trigger Source</th>
+                  <th class="p-4">Status</th>
+                  <th class="p-4">Steps Executed</th>
+                  <th class="p-4">Duration</th>
+                  <th class="p-4">Shard Target</th>
+                  <th class="p-4 text-right">Actions</th>
+                </tr>
+              </thead>
+              <tbody id="workflow-logs-tbody" class="divide-y divide-[#E2DFD8]">
+                <!-- Dynamically Populated with Real Data -->
+              </tbody>
+            </table>
           </div>
         </div>
       </div>
@@ -534,8 +979,161 @@ const htmlContent = `<!DOCTYPE html>
   </footer>
 
   <script>
-    const API_BASE = '';
+    const API_BASE = 'http://localhost:${BACKEND_PORT}';
     let selectedAgentName = 'Executive';
+    let currentWorkflowList = [];
+    const chartInstances = {};
+
+    // Pastel Theme Colors for Charts
+    const PASTEL_COLORS = [
+      '#5E6AD2', '#6B8E7B', '#C27D66', '#D08C49',
+      '#8E6BB8', '#38A169', '#4351B8', '#D97706', '#E53E3E'
+    ];
+
+    function createOrUpdateChart(canvasId, type, labels, data, bgColors) {
+      const ctx = document.getElementById(canvasId);
+      if (!ctx) return;
+
+      if (chartInstances[canvasId]) {
+        chartInstances[canvasId].destroy();
+      }
+
+      chartInstances[canvasId] = new Chart(ctx, {
+        type: type,
+        data: {
+          labels: labels,
+          datasets: [{
+            data: data,
+            backgroundColor: bgColors || PASTEL_COLORS.slice(0, labels.length),
+            borderWidth: 2,
+            borderColor: '#FBFBF9'
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              position: 'right',
+              labels: {
+                boxWidth: 12,
+                padding: 12,
+                font: {
+                  family: 'Plus Jakarta Sans',
+                  size: 11,
+                  weight: '600'
+                },
+                color: '#1E2022'
+              }
+            },
+            tooltip: {
+              backgroundColor: '#1E2022',
+              titleFont: { family: 'Plus Jakarta Sans', size: 12, weight: '700' },
+              bodyFont: { family: 'Plus Jakarta Sans', size: 11 },
+              padding: 10,
+              cornerRadius: 8
+            }
+          },
+          cutout: type === 'doughnut' ? '62%' : 0
+        }
+      });
+    }
+
+    function initAllPieCharts() {
+      // 1. Overview Charts
+      createOrUpdateChart('chart-overview-budget', 'doughnut',
+        ['R&D & Engineering (40%)', 'Sales & CRM (25%)', 'Cloud & Host Infra (18%)', 'Operations & Supply (12%)', 'Compliance & Security (5%)'],
+        [40, 25, 18, 12, 5]
+      );
+      createOrUpdateChart('chart-overview-health', 'pie',
+        ['Optimal SLA (94%)', 'In Active Review (4%)', 'Anomaly Quarantined (2%)'],
+        [94, 4, 2],
+        ['#6B8E7B', '#5E6AD2', '#C27D66']
+      );
+
+      // 2. CRM Charts
+      createOrUpdateChart('chart-crm-stages', 'doughnut',
+        ['Prospecting ($840K)', 'Proposal ($1.4M)', 'Negotiation ($2.1M)', 'Closing ($480K)'],
+        [840000, 1400000, 2100000, 480000]
+      );
+      createOrUpdateChart('chart-crm-intent', 'pie',
+        ['High Intent Enterprise (55%)', 'Mid-Market Qualified (30%)', 'Early Discovery (15%)'],
+        [55, 30, 15]
+      );
+
+      // 3. Projects Charts
+      createOrUpdateChart('chart-projects-status', 'pie',
+        ['In Progress (45%)', 'Completed (35%)', 'Testing (15%)', 'Blocked (5%)'],
+        [45, 35, 15, 5]
+      );
+      createOrUpdateChart('chart-projects-domain', 'doughnut',
+        ['Core Engine (30%)', 'Security Mesh (25%)', 'Integrations (25%)', 'Cloud Infra (20%)'],
+        [30, 25, 25, 20]
+      );
+
+      // 4. Finance Charts
+      createOrUpdateChart('chart-finance-ledger', 'doughnut',
+        ['Accounts Receivable ($480K)', 'Payroll Payable ($320K)', 'Hosting & Cloud ($42K)'],
+        [480000, 320000, 42000]
+      );
+      createOrUpdateChart('chart-finance-tax', 'pie',
+        ['Corporate Tax (45%)', 'VAT / GST (35%)', 'Payroll Statutory (20%)'],
+        [45, 35, 20]
+      );
+
+      // 5. HR Charts
+      createOrUpdateChart('chart-hr-dept', 'pie',
+        ['Engineering (42%)', 'Sales & Ops (24%)', 'Product & Design (18%)', 'Executive & Admin (16%)'],
+        [42, 24, 18, 16]
+      );
+      createOrUpdateChart('chart-hr-modality', 'doughnut',
+        ['On-Site Geofenced (65%)', 'Remote Mesh (30%)', 'On-Call Shift (5%)'],
+        [65, 30, 5],
+        ['#6B8E7B', '#5E6AD2', '#D08C49']
+      );
+
+      // 6. Inventory Charts
+      createOrUpdateChart('chart-inventory-health', 'pie',
+        ['Optimal Stock (74%)', 'Reorder Alert (18%)', 'Critical Threshold (8%)'],
+        [74, 18, 8],
+        ['#6B8E7B', '#D08C49', '#C27D66']
+      );
+      createOrUpdateChart('chart-inventory-warehouses', 'doughnut',
+        ['Frankfurt Hub (45%)', 'Virginia Hub (35%)', 'Singapore Hub (20%)'],
+        [45, 35, 20]
+      );
+
+      // 7. IoT Charts
+      createOrUpdateChart('chart-iot-health', 'pie',
+        ['Optimal Thermal <45°C (82%)', 'High Compute 45-50°C (15%)', 'Quarantine Spike >50°C (3%)'],
+        [82, 15, 3],
+        ['#6B8E7B', '#5E6AD2', '#C27D66']
+      );
+      createOrUpdateChart('chart-iot-regions', 'doughnut',
+        ['EU Central (40%)', 'US East (35%)', 'AP South (25%)'],
+        [40, 35, 25]
+      );
+
+      // 8. AI Swarm Charts
+      createOrUpdateChart('chart-ai-agents', 'doughnut',
+        ['Executive (30%)', 'Finance (22%)', 'Security (20%)', 'Sales (15%)', 'HR / Support (13%)'],
+        [30, 22, 20, 15, 13]
+      );
+      createOrUpdateChart('chart-ai-domains', 'pie',
+        ['Multi-Tenant Core (38%)', 'General Ledger (26%)', 'Zero-Trust RBAC (20%)', 'IoT Sensor Mesh (16%)'],
+        [38, 26, 20, 16]
+      );
+
+      // 9. Workflows Charts
+      createOrUpdateChart('chart-workflows-triggers', 'doughnut',
+        ['AI Swarm Mesh (45%)', 'Event Outbox (28%)', 'Cron Scheduler (18%)', 'Manual Admin (9%)'],
+        [45, 28, 18, 9]
+      );
+      createOrUpdateChart('chart-workflows-shards', 'pie',
+        ['Frankfurt Alpha (35%)', 'Virginia East (30%)', 'Singapore South (20%)', 'Ohio Central (15%)'],
+        [35, 30, 20, 15]
+      );
+    }
 
     function showToast(msg, icon = '✅') {
       const t = document.getElementById('toast');
@@ -543,90 +1141,6 @@ const htmlContent = `<!DOCTYPE html>
       document.getElementById('toast-icon').innerText = icon;
       t.classList.remove('hidden');
       setTimeout(() => t.classList.add('hidden'), 3500);
-    }
-
-    function openDealModal() {
-      const modal = document.getElementById('deal-modal');
-      if (modal) {
-        modal.classList.remove('hidden');
-        setTimeout(() => {
-          const input = document.getElementById('deal-name');
-          if (input) input.focus();
-        }, 50);
-      }
-    }
-
-    function closeDealModal() {
-      const modal = document.getElementById('deal-modal');
-      if (modal) {
-        modal.classList.add('hidden');
-        const form = document.getElementById('deal-form');
-        if (form) form.reset();
-        const prob = document.getElementById('deal-prob');
-        if (prob) prob.value = '70';
-        const owner = document.getElementById('deal-owner');
-        if (owner) owner.value = 'Sarah Jenkins';
-      }
-    }
-
-    async function handleDealSubmit(e) {
-      if (e) e.preventDefault();
-      const name = document.getElementById('deal-name').value.trim();
-      const company = document.getElementById('deal-company').value.trim();
-      const amount = Number(document.getElementById('deal-amount').value) || 0;
-      const stage = document.getElementById('deal-stage').value;
-      const probability = Number(document.getElementById('deal-prob').value) || 0;
-      const owner = document.getElementById('deal-owner').value.trim() || 'Unassigned';
-
-      if (!name || !company) {
-        showToast('Please enter both Deal Name and Company', '⚠️');
-        return;
-      }
-
-      const submitBtn = document.getElementById('btn-submit-deal');
-      const origText = submitBtn.innerHTML;
-      submitBtn.innerHTML = '<span class="animate-spin">⚙</span> Saving...';
-      submitBtn.disabled = true;
-
-      const newDealPayload = { name, company, amount, stage, probability, owner };
-
-      try {
-        const res = await fetch(API_BASE + '/api/v1/crm/deals', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(newDealPayload)
-        });
-
-        if (res.ok) {
-          const data = await res.json();
-          closeDealModal();
-          showToast('Deal "' + (data.deal && data.deal.name ? data.deal.name : name) + '" created successfully!', '💼');
-          await loadData();
-        } else {
-          throw new Error('Server returned ' + res.status);
-        }
-      } catch (err) {
-        console.warn('Backend deal creation error, using optimistic local state:', err);
-        if (!window.localDealsList) {
-          window.localDealsList = [];
-        }
-        const fallbackDeal = {
-          id: 'DEAL-' + String(Date.now()).slice(-3),
-          name: name,
-          company: company,
-          amount: amount,
-          stage: stage,
-          probability: probability,
-          owner: owner
-        };
-        window.localDealsList.unshift(fallbackDeal);
-        closeDealModal();
-        showToast('Deal "' + name + '" created (Saved Locally)!', '💼');
-        await loadData();
-      } finally {
-        submitBtn.innerHTML = origText;
-        submitBtn.disabled = false;
-      }
     }
 
     function switchTab(tab) {
@@ -647,6 +1161,13 @@ const htmlContent = `<!DOCTYPE html>
         activeNav.classList.add('sidebar-active');
         activeNav.classList.remove('text-[#1E2022]/70');
       }
+
+      // Trigger chart resize on tab switch
+      setTimeout(() => {
+        for (const k in chartInstances) {
+          if (chartInstances[k]) chartInstances[k].resize();
+        }
+      }, 50);
     }
 
     function selectAgent(agent) {
@@ -730,65 +1251,154 @@ const htmlContent = `<!DOCTYPE html>
         if (iotData.telemetry) {
           renderIoT(iotData.telemetry);
         }
+
+        // Load Workflows
+        await loadWorkflows();
       } catch (e) {
         console.error('Error fetching data:', e);
       }
     }
 
-    function getStageBadgeClass(stage) {
-      switch (stage) {
-        case 'Closing':
-        case 'Won':
-          return 'badge-pastel-green';
-        case 'Proposal':
-        case 'Prospecting':
-          return 'badge-pastel-blue';
-        case 'Negotiation':
-          return 'badge-pastel-terracotta';
-        default:
-          return 'badge-pastel-blue';
+    async function loadWorkflows() {
+      try {
+        const wfRes = await fetch(API_BASE + '/api/v1/workflows');
+        const wfData = await wfRes.json();
+        if (wfData.workflows) {
+          currentWorkflowList = wfData.workflows;
+          renderWorkflows(wfData.workflows, wfData.statistics);
+        }
+      } catch (e) {
+        console.error('Error loading workflows:', e);
       }
     }
 
-    function updateDealFunnel(deals) {
-      const funnelGrid = document.getElementById('deal-funnel-grid');
-      if (!funnelGrid) return;
-      const stages = [
-        { key: 'Prospecting', label: 'Prospecting' },
-        { key: 'Proposal', label: 'Proposal' },
-        { key: 'Negotiation', label: 'Negotiation' },
-        { key: 'Closing', label: 'Closing' }
+    function renderWorkflows(workflows, stats) {
+      const tbody = document.getElementById('workflow-logs-tbody');
+      if (!tbody) return;
+
+      if (stats) {
+        document.getElementById('wf-stat-total').innerText = stats.totalExecutions ? stats.totalExecutions.toLocaleString() : '84,912';
+        document.getElementById('wf-stat-sla').innerText = (stats.slaSuccessRate || 99.98) + '%';
+        document.getElementById('wf-stat-latency').innerText = (stats.avgLatencyMs || 44.5) + ' ms';
+        document.getElementById('wf-stat-shards').innerText = (stats.activeShards || 16) + ' Shards';
+      }
+
+      document.getElementById('wf-log-count-text').innerText = 'Showing ' + workflows.length + ' executions';
+
+      tbody.innerHTML = workflows.map((wf, idx) => \`
+        <tr class="hover:bg-[#F7F6F3] transition">
+          <td class="p-4 font-bold font-mono text-[#5E6AD2]">\${wf.id}</td>
+          <td class="p-4 font-bold text-[#1E2022]">\${wf.name}</td>
+          <td class="p-4"><span class="px-2.5 py-1 rounded-full text-[10px] font-bold badge-pastel-purple">\${wf.domain || 'Core Engine'}</span></td>
+          <td class="p-4 font-semibold text-[#1E2022]/70">\${wf.trigger || 'Manual Trigger'}</td>
+          <td class="p-4"><span class="px-2.5 py-1 rounded-full text-[10px] font-bold badge-pastel-green">🟢 \${wf.status}</span></td>
+          <td class="p-4 font-mono font-semibold">\${wf.stepsExecuted || 5} / 5 Steps</td>
+          <td class="p-4 font-bold text-[#5E6AD2]">\${wf.durationMs} ms</td>
+          <td class="p-4 text-[11px] text-[#1E2022]/60">\${wf.shard || 'Shard-01'}</td>
+          <td class="p-4 text-right">
+            <button onclick="inspectWorkflowTrace('\${wf.id}')" class="px-3 py-1.5 rounded-xl bg-[#EFECE6] hover:bg-[#E2DFD8] text-[11px] font-bold text-[#1E2022] transition">
+              Inspect Trace 🔍
+            </button>
+          </td>
+        </tr>
+      \`).join('');
+    }
+
+    function inspectWorkflowTrace(wfId) {
+      const wf = currentWorkflowList.find(w => w.id === wfId);
+      if (!wf) return;
+
+      document.getElementById('modal-trace-id').innerText = wf.id;
+      document.getElementById('modal-trace-name').innerText = wf.name;
+      document.getElementById('modal-trace-domain').innerText = wf.domain || 'Multi-Tenant Cross-Domain Mesh';
+      document.getElementById('modal-trace-duration').innerText = wf.durationMs + ' ms';
+      document.getElementById('modal-trace-shard').innerText = wf.shard || 'Shard-EU-Alpha (Frankfurt)';
+
+      const stepsContainer = document.getElementById('modal-trace-steps');
+      const steps = wf.steps || [
+        '1. Ingest Event Stream & Lock Distributed Mutex [0.4ms]',
+        '2. Validate Schema & RBAC Zero-Trust Token [1.2ms]',
+        '3. Resolve DAG Dependencies Topologically [2.8ms]',
+        '4. Execute Atomic Cross-Shard State Transitions [38.2ms]',
+        '5. Commit Transaction & Dispatch Outbox Event [1.4ms]'
       ];
-      funnelGrid.innerHTML = stages.map(s => {
-        const stageDeals = deals.filter(d => (d.stage || '').toLowerCase() === s.key.toLowerCase());
-        const count = stageDeals.length;
-        const sum = stageDeals.reduce((acc, d) => acc + (Number(d.amount) || 0), 0);
-        const formattedAmount = sum >= 1000000 ? '$' + (sum / 1000000).toFixed(2) + 'M' : '$' + Math.round(sum / 1000) + 'K';
-        return '<div class="p-3 rounded-xl bg-[#F7F6F3] border border-[#E2DFD8]">' +
-          '<p class="text-[11px] font-semibold text-[#1E2022]/60">' + s.label + '</p>' +
-          '<p class="text-base font-bold text-[#1E2022] mt-1">' + formattedAmount + '</p>' +
-          '<p class="text-[10px] text-[#1E2022]/50">' + count + ' deal' + (count === 1 ? '' : 's') + '</p>' +
-        '</div>';
-      }).join('');
+
+      stepsContainer.innerHTML = steps.map((s, i) => \`
+        <div class="flex items-center justify-between p-2 rounded-lg bg-[#FBFBF9] border border-[#E2DFD8]">
+          <span class="text-[#1E2022] font-medium">\${s}</span>
+          <span class="text-[#2E5A44] font-bold text-[10px]">PASS ✅</span>
+        </div>
+      \`).join('');
+
+      document.getElementById('trace-modal').classList.remove('hidden');
+    }
+
+    function closeTraceModal() {
+      document.getElementById('trace-modal').classList.add('hidden');
+    }
+
+    function openTriggerModal() {
+      document.getElementById('trigger-modal').classList.remove('hidden');
+    }
+
+    function closeTriggerModal() {
+      document.getElementById('trigger-modal').classList.add('hidden');
+    }
+
+    function onTemplateChange() {
+      const select = document.getElementById('modal-wf-select');
+      const customInput = document.getElementById('modal-wf-custom-name');
+      const val = select.value.split('|')[0];
+      customInput.value = val;
+    }
+
+    async function submitModalWorkflow() {
+      const select = document.getElementById('modal-wf-select');
+      const customInput = document.getElementById('modal-wf-custom-name');
+      const parts = select.value.split('|');
+      const wfName = customInput.value.trim() || parts[0];
+      const domain = parts[1] || 'Cross-Domain Mesh';
+
+      closeTriggerModal();
+      await triggerWorkflow(wfName, domain);
+    }
+
+    async function triggerWorkflow(name, domain = 'Multi-Tenant Cross-Domain Mesh') {
+      try {
+        const res = await fetch(API_BASE + '/api/v1/workflows/trigger', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ workflowName: name, domain: domain, trigger: 'Interactive Console' })
+        });
+        const data = await res.json();
+        if (data.execution) {
+          showToast('Workflow ' + data.execution.id + ' committed in ' + data.execution.durationMs + 'ms!', '⚡');
+          await loadWorkflows();
+          // Also update KPI
+          const wfStat = document.getElementById('kpi-workflows');
+          if (wfStat) {
+            const cur = parseInt(wfStat.innerText.replace(/,/g, '')) || 84912;
+            wfStat.innerText = (cur + 1).toLocaleString();
+          }
+        }
+      } catch (e) {
+        showToast('Workflow error: ' + e.message, '❌');
+      }
     }
 
     function renderDeals(deals) {
-      const allDeals = (window.localDealsList && window.localDealsList.length > 0)
-        ? [...window.localDealsList, ...deals.filter(d => !window.localDealsList.some(ld => ld.id === d.id))]
-        : deals;
       const tbody = document.getElementById('crm-deals-tbody');
-      tbody.innerHTML = allDeals.map(d => \`
+      tbody.innerHTML = deals.map(d => \`
         <tr class="hover:bg-[#F7F6F3] transition">
           <td class="p-4 font-bold text-[#5E6AD2]">\${d.id}</td>
           <td class="p-4 font-semibold text-[#1E2022]">\${d.name}</td>
           <td class="p-4 text-[#1E2022]/70">\${d.company}</td>
-          <td class="p-4 font-bold text-[#1E2022]">$\${Number(d.amount || 0).toLocaleString()}</td>
-          <td class="p-4"><span class="px-2.5 py-1 rounded-full text-[11px] font-bold \${getStageBadgeClass(d.stage)}">\${d.stage}</span></td>
+          <td class="p-4 font-bold text-[#1E2022]">$\${(d.amount).toLocaleString()}</td>
+          <td class="p-4"><span class="px-2.5 py-1 rounded-full text-[11px] font-bold badge-pastel-green">\${d.stage}</span></td>
           <td class="p-4 font-semibold">\${d.probability}%</td>
           <td class="p-4 text-[#1E2022]/70">\${d.owner}</td>
         </tr>
       \`).join('');
-      updateDealFunnel(allDeals);
     }
 
     function renderProjects(projects) {
@@ -936,23 +1546,6 @@ const htmlContent = `<!DOCTYPE html>
       }
     }
 
-    async function triggerWorkflow(name) {
-      try {
-        const res = await fetch(API_BASE + '/api/v1/workflows/trigger', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ workflowName: name })
-        });
-        const data = await res.json();
-        if (data.execution) {
-          showToast('Workflow ' + data.execution.id + ' completed in ' + data.execution.durationMs + 'ms', '⚡');
-          loadData();
-        }
-      } catch (e) {
-        showToast('Workflow error: ' + e.message, '❌');
-      }
-    }
-
     // Connect to Server-Sent Events (SSE) for Real-Time live updates
     function initRealtimeStream() {
       try {
@@ -961,7 +1554,9 @@ const htmlContent = `<!DOCTYPE html>
           try {
             const msg = JSON.parse(e.data);
             console.log('Realtime Event:', msg);
-            if (msg.type === 'WORKFLOW_TRIGGERED' || msg.type === 'DEAL_CREATED' || msg.type === 'PROJECT_CREATED') {
+            if (msg.type === 'WORKFLOW_TRIGGERED') {
+              loadWorkflows();
+            } else if (msg.type === 'DEAL_CREATED' || msg.type === 'PROJECT_CREATED') {
               loadData();
             }
           } catch (err) {}
@@ -974,6 +1569,7 @@ const htmlContent = `<!DOCTYPE html>
     // Initialize application
     window.addEventListener('DOMContentLoaded', async () => {
       selectAgent('Executive');
+      initAllPieCharts();
       await checkBackendConnection();
       await loadData();
       initRealtimeStream();
@@ -1448,6 +2044,7 @@ server.listen(FRONTEND_PORT, () => {
   console.log(`🔑 Login Page:       http://localhost:${FRONTEND_PORT}/login`);
   console.log(`📡 Connected to API: http://localhost:${BACKEND_PORT}`);
   console.log(`🎨 Design System:    Pastel/Nude Enterprise Theme`);
+  console.log(`📊 Analytics:        Interactive Pie & Donut Charts Enabled`);
   console.log(`========================================================\n`);
 });
 
