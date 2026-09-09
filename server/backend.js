@@ -114,9 +114,11 @@ const server = http.createServer((req, res) => {
       req.on('end', () => {
         try {
           const newDeal = JSON.parse(body);
+          newDeal.amount = Number(newDeal.amount || 0);
+          newDeal.probability = Number(newDeal.probability || 0);
           newDeal.id = 'DEAL-' + String(db.deals.length + 1).padStart(3, '0');
           db.deals.unshift(newDeal);
-          db.metrics.totalPipelineValue += Number(newDeal.amount || 0);
+          db.metrics.totalPipelineValue += newDeal.amount;
           db.metrics.activeDealsCount += 1;
           broadcast({ type: 'DEAL_CREATED', deal: newDeal });
           return sendJson(201, { status: 'SUCCESS', deal: newDeal });
@@ -236,6 +238,20 @@ const server = http.createServer((req, res) => {
     return;
   }
 
+  // 11. Server-Sent Events (SSE) Real-Time stream for Web frontend
+  if (pathname === '/api/v1/realtime/stream') {
+    res.writeHead(200, {
+      'Content-Type': 'text/event-stream',
+      'Cache-Control': 'no-cache',
+      'Connection': 'keep-alive',
+      'Access-Control-Allow-Origin': '*'
+    });
+    res.write(`data: ${JSON.stringify({ type: 'CONNECTED', message: 'Connected to NEXORA Live Real-Time Stream' })}\n\n`);
+    clients.add(res);
+    req.on('close', () => clients.delete(res));
+    return;
+  }
+
   // Fallback
   sendJson(404, { error: 'Endpoint Not Found', path: pathname });
 });
@@ -252,22 +268,11 @@ function broadcast(data) {
   }
 }
 
-// Server-Sent Events (SSE) Real-Time stream for Web frontend
-server.on('request', (req, res) => {
-  if (req.url === '/api/v1/realtime/stream') {
-    res.writeHead(200, {
-      'Content-Type': 'text/event-stream',
-      'Cache-Control': 'no-cache',
-      'Connection': 'keep-alive',
-      'Access-Control-Allow-Origin': '*'
-    });
-    res.write(`data: ${JSON.stringify({ type: 'CONNECTED', message: 'Connected to NEXORA Live Real-Time Stream' })}\n\n`);
-    clients.add(res);
-    req.on('close', () => clients.delete(res));
-  }
+process.on('uncaughtException', (err) => {
+  console.error('[BACKEND UNCAUGHT ERROR]', err);
 });
 
-server.listen(PORT, () => {
+server.listen(PORT, '0.0.0.0', () => {
   console.log(`\n========================================================`);
   console.log(`🚀 NEXORA ENTERPRISE BACKEND SERVER IS LIVE & RUNNING!`);
   console.log(`========================================================`);

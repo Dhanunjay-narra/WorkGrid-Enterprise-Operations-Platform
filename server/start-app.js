@@ -10,15 +10,36 @@ console.log('🚀 NEXORA — Enterprise Autonomous Operations Platform  ');
 console.log('          STARTING BACKEND & FRONTEND SERVERS           ');
 console.log('========================================================\n');
 
-// 1. Start Backend Server
-const backendProcess = fork(path.join(__dirname, 'backend.js'), [], {
-  env: { ...process.env, BACKEND_PORT }
-});
+let backendProcess = null;
+let frontendProcess = null;
+let isShuttingDown = false;
 
-// 2. Start Frontend Server
-const frontendProcess = fork(path.join(__dirname, 'frontend.js'), [], {
-  env: { ...process.env, FRONTEND_PORT, BACKEND_PORT }
-});
+function startBackend() {
+  backendProcess = fork(path.join(__dirname, 'backend.js'), [], {
+    env: { ...process.env, BACKEND_PORT }
+  });
+  backendProcess.on('exit', (code) => {
+    if (!isShuttingDown) {
+      console.log(`[BACKEND] Process exited (${code}). Auto-restarting in 500ms...`);
+      setTimeout(startBackend, 500);
+    }
+  });
+}
+
+function startFrontend() {
+  frontendProcess = fork(path.join(__dirname, 'frontend.js'), [], {
+    env: { ...process.env, FRONTEND_PORT, BACKEND_PORT }
+  });
+  frontendProcess.on('exit', (code) => {
+    if (!isShuttingDown) {
+      console.log(`[FRONTEND] Process exited (${code}). Auto-restarting in 500ms...`);
+      setTimeout(startFrontend, 500);
+    }
+  });
+}
+
+startBackend();
+startFrontend();
 
 function checkHealth(url, name) {
   return new Promise((resolve) => {
@@ -58,8 +79,9 @@ setTimeout(async () => {
 
 // Graceful termination
 process.on('SIGINT', () => {
+  isShuttingDown = true;
   console.log('\nStopping NEXORA Platform...');
-  backendProcess.kill();
-  frontendProcess.kill();
+  if (backendProcess) backendProcess.kill();
+  if (frontendProcess) frontendProcess.kill();
   process.exit(0);
 });

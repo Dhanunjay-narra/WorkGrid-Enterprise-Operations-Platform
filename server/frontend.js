@@ -47,7 +47,6 @@ const htmlContent = `<!DOCTYPE html>
         <div class="flex items-center gap-2">
           <h1 class="text-base font-extrabold tracking-tight text-[#1E2022]">NEXORA</h1>
           <span class="text-[10px] font-bold px-2 py-0.5 rounded-full badge-pastel-blue">v2.4.0 PROD</span>
-          <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-[#EFECE6] text-[#1E2022]/70">1,063,575 LOC</span>
         </div>
         <p class="text-[11px] text-[#1E2022]/60 font-medium">Enterprise Autonomous Operations Platform</p>
       </div>
@@ -126,6 +125,77 @@ const htmlContent = `<!DOCTYPE html>
       <div id="toast" class="hidden fixed bottom-6 right-6 z-50 px-4 py-3 rounded-xl card-nude shadow-lg border border-[#E2DFD8] flex items-center gap-3 text-xs font-semibold transition">
         <span id="toast-icon">✅</span>
         <span id="toast-message">Action processed successfully</span>
+      </div>
+
+      <!-- Create Deal Modal Dialog -->
+      <div id="deal-modal" class="hidden fixed inset-0 z-50 bg-black/40 backdrop-blur-sm flex items-center justify-center p-4">
+        <div class="card-nude rounded-2xl max-w-lg w-full p-6 shadow-2xl space-y-5 border border-[#E2DFD8] bg-[#FBFBF9] relative animate-in fade-in zoom-in-95">
+          <div class="flex items-center justify-between pb-3 border-b border-[#E2DFD8]">
+            <div class="flex items-center gap-2.5">
+              <div class="w-8 h-8 rounded-xl bg-[#ECEFFE] flex items-center justify-center text-[#5E6AD2] font-bold text-sm">
+                💼
+              </div>
+              <div>
+                <h3 class="text-base font-bold text-[#1E2022]">Create New Enterprise Deal</h3>
+                <p class="text-xs text-[#1E2022]/60">Register a new enterprise opportunity into pipeline velocity.</p>
+              </div>
+            </div>
+            <button type="button" onclick="closeDealModal()" class="text-[#1E2022]/50 hover:text-[#1E2022] p-1.5 rounded-lg hover:bg-[#EFECE6] text-sm font-bold transition">
+              ✕
+            </button>
+          </div>
+
+          <form id="deal-form" onsubmit="handleDealSubmit(event)" class="space-y-4">
+            <div>
+              <label class="block text-[11px] font-bold uppercase tracking-wider text-[#1E2022]/70 mb-1">Deal Name *</label>
+              <input id="deal-name" required type="text" placeholder="e.g. Next-Gen Cloud Migration" class="w-full px-3.5 py-2.5 text-xs rounded-xl bg-[#F7F6F3] border border-[#E2DFD8] focus:outline-none focus:ring-2 focus:ring-[#5E6AD2]/30 text-[#1E2022]" />
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-3.5">
+              <div>
+                <label class="block text-[11px] font-bold uppercase tracking-wider text-[#1E2022]/70 mb-1">Company / Client *</label>
+                <input id="deal-company" required type="text" placeholder="e.g. Acme Logistics Corp" class="w-full px-3.5 py-2.5 text-xs rounded-xl bg-[#F7F6F3] border border-[#E2DFD8] focus:outline-none focus:ring-2 focus:ring-[#5E6AD2]/30 text-[#1E2022]" />
+              </div>
+
+              <div>
+                <label class="block text-[11px] font-bold uppercase tracking-wider text-[#1E2022]/70 mb-1">Contract Value ($) *</label>
+                <input id="deal-amount" required type="number" min="0" step="1000" placeholder="e.g. 650000" class="w-full px-3.5 py-2.5 text-xs rounded-xl bg-[#F7F6F3] border border-[#E2DFD8] focus:outline-none focus:ring-2 focus:ring-[#5E6AD2]/30 text-[#1E2022]" />
+              </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+              <div>
+                <label class="block text-[11px] font-bold uppercase tracking-wider text-[#1E2022]/70 mb-1">Stage *</label>
+                <select id="deal-stage" required class="w-full px-3 py-2.5 text-xs rounded-xl bg-[#F7F6F3] border border-[#E2DFD8] focus:outline-none focus:ring-2 focus:ring-[#5E6AD2]/30 text-[#1E2022]">
+                  <option value="Prospecting">Prospecting</option>
+                  <option value="Proposal" selected>Proposal</option>
+                  <option value="Negotiation">Negotiation</option>
+                  <option value="Closing">Closing</option>
+                  <option value="Won">Won</option>
+                </select>
+              </div>
+
+              <div>
+                <label class="block text-[11px] font-bold uppercase tracking-wider text-[#1E2022]/70 mb-1">Win Probability (%) *</label>
+                <input id="deal-prob" required type="number" min="0" max="100" value="70" placeholder="e.g. 70" class="w-full px-3.5 py-2.5 text-xs rounded-xl bg-[#F7F6F3] border border-[#E2DFD8] focus:outline-none focus:ring-2 focus:ring-[#5E6AD2]/30 text-[#1E2022]" />
+              </div>
+
+              <div>
+                <label class="block text-[11px] font-bold uppercase tracking-wider text-[#1E2022]/70 mb-1">Deal Owner *</label>
+                <input id="deal-owner" required type="text" placeholder="e.g. Sarah Jenkins" value="Sarah Jenkins" class="w-full px-3.5 py-2.5 text-xs rounded-xl bg-[#F7F6F3] border border-[#E2DFD8] focus:outline-none focus:ring-2 focus:ring-[#5E6AD2]/30 text-[#1E2022]" />
+              </div>
+            </div>
+
+            <div class="flex justify-end items-center gap-2.5 pt-3 border-t border-[#E2DFD8]">
+              <button type="button" onclick="closeDealModal()" class="px-4 py-2 text-xs font-semibold text-[#1E2022]/70 hover:bg-[#EFECE6] rounded-xl transition">
+                Cancel
+              </button>
+              <button type="submit" id="btn-submit-deal" class="px-4 py-2 bg-[#5E6AD2] hover:bg-[#4E5AC2] text-white text-xs font-bold rounded-xl transition shadow-sm flex items-center gap-1.5">
+                <span>+</span> Create Deal
+              </button>
+            </div>
+          </form>
+        </div>
       </div>
 
       <!-- TAB 1: OVERVIEW COCKPIT -->
@@ -447,7 +517,7 @@ const htmlContent = `<!DOCTYPE html>
   </div>
 
   <script>
-    const API_BASE = 'http://localhost:${BACKEND_PORT}';
+    const API_BASE = '';
     let selectedAgentName = 'Executive';
 
     function showToast(msg, icon = '✅') {
@@ -456,6 +526,90 @@ const htmlContent = `<!DOCTYPE html>
       document.getElementById('toast-icon').innerText = icon;
       t.classList.remove('hidden');
       setTimeout(() => t.classList.add('hidden'), 3500);
+    }
+
+    function openDealModal() {
+      const modal = document.getElementById('deal-modal');
+      if (modal) {
+        modal.classList.remove('hidden');
+        setTimeout(() => {
+          const input = document.getElementById('deal-name');
+          if (input) input.focus();
+        }, 50);
+      }
+    }
+
+    function closeDealModal() {
+      const modal = document.getElementById('deal-modal');
+      if (modal) {
+        modal.classList.add('hidden');
+        const form = document.getElementById('deal-form');
+        if (form) form.reset();
+        const prob = document.getElementById('deal-prob');
+        if (prob) prob.value = '70';
+        const owner = document.getElementById('deal-owner');
+        if (owner) owner.value = 'Sarah Jenkins';
+      }
+    }
+
+    async function handleDealSubmit(e) {
+      if (e) e.preventDefault();
+      const name = document.getElementById('deal-name').value.trim();
+      const company = document.getElementById('deal-company').value.trim();
+      const amount = Number(document.getElementById('deal-amount').value) || 0;
+      const stage = document.getElementById('deal-stage').value;
+      const probability = Number(document.getElementById('deal-prob').value) || 0;
+      const owner = document.getElementById('deal-owner').value.trim() || 'Unassigned';
+
+      if (!name || !company) {
+        showToast('Please enter both Deal Name and Company', '⚠️');
+        return;
+      }
+
+      const submitBtn = document.getElementById('btn-submit-deal');
+      const origText = submitBtn.innerHTML;
+      submitBtn.innerHTML = '<span class="animate-spin">⚙</span> Saving...';
+      submitBtn.disabled = true;
+
+      const newDealPayload = { name, company, amount, stage, probability, owner };
+
+      try {
+        const res = await fetch(API_BASE + '/api/v1/crm/deals', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(newDealPayload)
+        });
+
+        if (res.ok) {
+          const data = await res.json();
+          closeDealModal();
+          showToast('Deal "' + (data.deal && data.deal.name ? data.deal.name : name) + '" created successfully!', '💼');
+          await loadData();
+        } else {
+          throw new Error('Server returned ' + res.status);
+        }
+      } catch (err) {
+        console.warn('Backend deal creation error, using optimistic local state:', err);
+        if (!window.localDealsList) {
+          window.localDealsList = [];
+        }
+        const fallbackDeal = {
+          id: 'DEAL-' + String(Date.now()).slice(-3),
+          name: name,
+          company: company,
+          amount: amount,
+          stage: stage,
+          probability: probability,
+          owner: owner
+        };
+        window.localDealsList.unshift(fallbackDeal);
+        closeDealModal();
+        showToast('Deal "' + name + '" created (Saved Locally)!', '💼');
+        await loadData();
+      } finally {
+        submitBtn.innerHTML = origText;
+        submitBtn.disabled = false;
+      }
     }
 
     function switchTab(tab) {
@@ -564,19 +718,60 @@ const htmlContent = `<!DOCTYPE html>
       }
     }
 
+    function getStageBadgeClass(stage) {
+      switch (stage) {
+        case 'Closing':
+        case 'Won':
+          return 'badge-pastel-green';
+        case 'Proposal':
+        case 'Prospecting':
+          return 'badge-pastel-blue';
+        case 'Negotiation':
+          return 'badge-pastel-terracotta';
+        default:
+          return 'badge-pastel-blue';
+      }
+    }
+
+    function updateDealFunnel(deals) {
+      const funnelGrid = document.getElementById('deal-funnel-grid');
+      if (!funnelGrid) return;
+      const stages = [
+        { key: 'Prospecting', label: 'Prospecting' },
+        { key: 'Proposal', label: 'Proposal' },
+        { key: 'Negotiation', label: 'Negotiation' },
+        { key: 'Closing', label: 'Closing' }
+      ];
+      funnelGrid.innerHTML = stages.map(s => {
+        const stageDeals = deals.filter(d => (d.stage || '').toLowerCase() === s.key.toLowerCase());
+        const count = stageDeals.length;
+        const sum = stageDeals.reduce((acc, d) => acc + (Number(d.amount) || 0), 0);
+        const formattedAmount = sum >= 1000000 ? '$' + (sum / 1000000).toFixed(2) + 'M' : '$' + Math.round(sum / 1000) + 'K';
+        return '<div class="p-3 rounded-xl bg-[#F7F6F3] border border-[#E2DFD8]">' +
+          '<p class="text-[11px] font-semibold text-[#1E2022]/60">' + s.label + '</p>' +
+          '<p class="text-base font-bold text-[#1E2022] mt-1">' + formattedAmount + '</p>' +
+          '<p class="text-[10px] text-[#1E2022]/50">' + count + ' deal' + (count === 1 ? '' : 's') + '</p>' +
+        '</div>';
+      }).join('');
+    }
+
     function renderDeals(deals) {
+      const allDeals = (window.localDealsList && window.localDealsList.length > 0)
+        ? [...window.localDealsList, ...deals.filter(d => !window.localDealsList.some(ld => ld.id === d.id))]
+        : deals;
       const tbody = document.getElementById('crm-deals-tbody');
-      tbody.innerHTML = deals.map(d => \`
+      tbody.innerHTML = allDeals.map(d => \`
         <tr class="hover:bg-[#F7F6F3] transition">
           <td class="p-4 font-bold text-[#5E6AD2]">\${d.id}</td>
           <td class="p-4 font-semibold text-[#1E2022]">\${d.name}</td>
           <td class="p-4 text-[#1E2022]/70">\${d.company}</td>
-          <td class="p-4 font-bold text-[#1E2022]">$\${(d.amount).toLocaleString()}</td>
-          <td class="p-4"><span class="px-2.5 py-1 rounded-full text-[11px] font-bold badge-pastel-green">\${d.stage}</span></td>
+          <td class="p-4 font-bold text-[#1E2022]">$\${Number(d.amount || 0).toLocaleString()}</td>
+          <td class="p-4"><span class="px-2.5 py-1 rounded-full text-[11px] font-bold \${getStageBadgeClass(d.stage)}">\${d.stage}</span></td>
           <td class="p-4 font-semibold">\${d.probability}%</td>
           <td class="p-4 text-[#1E2022]/70">\${d.owner}</td>
         </tr>
       \`).join('');
+      updateDealFunnel(allDeals);
     }
 
     function renderProjects(projects) {
@@ -766,12 +961,43 @@ const htmlContent = `<!DOCTYPE html>
       await loadData();
       initRealtimeStream();
       setInterval(checkBackendConnection, 5000);
+
+      // Modal listeners
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') closeDealModal();
+      });
+
+      const modalBackdrop = document.getElementById('deal-modal');
+      if (modalBackdrop) {
+        modalBackdrop.addEventListener('click', (e) => {
+          if (e.target === modalBackdrop) closeDealModal();
+        });
+      }
     });
   </script>
 </body>
 </html>`;
 
 const server = http.createServer((req, res) => {
+  if (req.url.startsWith('/api/')) {
+    const proxyReq = http.request({
+      hostname: '127.0.0.1',
+      port: BACKEND_PORT,
+      path: req.url,
+      method: req.method,
+      headers: { ...req.headers, host: `127.0.0.1:${BACKEND_PORT}` }
+    }, (proxyRes) => {
+      res.writeHead(proxyRes.statusCode, proxyRes.headers);
+      proxyRes.pipe(res);
+    });
+    proxyReq.on('error', (err) => {
+      res.writeHead(502, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ error: 'Backend unavailable', details: err.message }));
+    });
+    req.pipe(proxyReq);
+    return;
+  }
+
   res.writeHead(200, {
     'Content-Type': 'text/html; charset=utf-8',
     'Cache-Control': 'no-cache'
