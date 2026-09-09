@@ -1,0 +1,6 @@
+export class IntFieldMappingSchemaRpcServer {
+  public async handleRpcRequest(method: string, params: Record<string, any>): Promise<any> {
+    console.log("[RPC-SERVER] Handled IntFieldMappingSchema method " + method);
+    return { success: true, processedAt: new Date().toISOString() };
+  }
+}

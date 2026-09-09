@@ -1,0 +1,16 @@
+import { PrjTaskRpcServer } from "../../../services/core-engine/src/projects/rpc/servers/PrjTaskRpcServer";
+import { PrjTaskFormValidator } from "../../../packages/types/src/forms/projects/PrjTaskFormSchema";
+
+describe("PrjTask System Level Integration Test", () => {
+  const server = new PrjTaskRpcServer();
+
+  test("dispatches RPC query successfully", async () => {
+    const res = await server.handleRpcRequest("query", { id: "sys-01" });
+    expect(res.success).toBe(true);
+  });
+
+  test("validates form schema", () => {
+    const errs = PrjTaskFormValidator.validateForm({ code: "C1", name: "N1" });
+    expect(errs.length).toBe(0);
+  });
+});

@@ -1,0 +1,16 @@
+import { AiModelRoutingRuleRpcServer } from "../../../services/core-engine/src/ai/rpc/servers/AiModelRoutingRuleRpcServer";
+import { AiModelRoutingRuleFormValidator } from "../../../packages/types/src/forms/ai/AiModelRoutingRuleFormSchema";
+
+describe("AiModelRoutingRule System Level Integration Test", () => {
+  const server = new AiModelRoutingRuleRpcServer();
+
+  test("dispatches RPC query successfully", async () => {
+    const res = await server.handleRpcRequest("query", { id: "sys-01" });
+    expect(res.success).toBe(true);
+  });
+
+  test("validates form schema", () => {
+    const errs = AiModelRoutingRuleFormValidator.validateForm({ code: "C1", name: "N1" });
+    expect(errs.length).toBe(0);
+  });
+});
