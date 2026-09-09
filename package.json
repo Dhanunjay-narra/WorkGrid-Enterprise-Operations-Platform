@@ -9,6 +9,9 @@
     "packages/*"
   ],
   "scripts": {
+    "start": "node server/start-app.js",
+    "start:backend": "node server/backend.js",
+    "start:frontend": "node server/frontend.js",
     "build": "npm run build --workspaces --if-present",
     "dev": "npm run dev --workspaces --if-present",
     "test": "npm run test --workspaces --if-present",
