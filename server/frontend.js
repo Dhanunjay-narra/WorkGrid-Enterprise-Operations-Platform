@@ -61,7 +61,6 @@ const htmlContent = `<!DOCTYPE html>
         <div class="flex items-center gap-2">
           <h1 class="text-base font-extrabold tracking-tight text-[#1E2022]">NEXORA</h1>
           <span class="text-[10px] font-bold px-2 py-0.5 rounded-full badge-pastel-blue">v2.4.0 PROD</span>
-          <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-[#EFECE6] text-[#1E2022]/70">1,063,575 LOC</span>
         </div>
         <p class="text-[11px] text-[#1E2022]/60 font-medium">Enterprise Autonomous Operations Platform</p>
       </div>
