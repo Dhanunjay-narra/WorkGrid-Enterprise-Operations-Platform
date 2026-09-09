@@ -1,0 +1,5 @@
+export class InvStockLevelCli {
+  public static async run(action: string, args: string[]): Promise<void> {
+    console.log("[CLI-ENTITY] Performing " + action + " for InvStockLevel with args:", args);
+  }
+}
