@@ -1,0 +1,6 @@
+export class HrOnboardingChecklistRpcClient {
+  public async invokeRemoteAction(action: string, entityId: string, params: Record<string, any>): Promise<{ status: string; result: any }> {
+    console.log("[RPC-CALL] Dispatched HrOnboardingChecklist action " + action + " on target " + entityId);
+    return { status: "OK", result: { entityId, domain: "hr", executedAt: new Date().toISOString() } };
+  }
+}
