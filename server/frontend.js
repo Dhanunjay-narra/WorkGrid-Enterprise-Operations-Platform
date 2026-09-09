@@ -24,14 +24,22 @@ const htmlContent = `<!DOCTYPE html>
     .badge-pastel-green { background-color: #E8F0EC; color: #2E5A44; border: 1px solid #C8DDD2; }
     .badge-pastel-blue { background-color: #ECEFFE; color: #4351B8; border: 1px solid #D0D7FA; }
     .badge-pastel-terracotta { background-color: #FAEEEB; color: #9E4F39; border: 1px solid #F2D3CC; }
+    .badge-pastel-purple { background-color: #F3EDFC; color: #6933A6; border: 1px solid #DFD0F5; }
     .card-nude { background-color: #FBFBF9; border: 1px solid #E2DFD8; }
     .sidebar-active { background-color: #EFECE6; color: #1E2022; font-weight: 700; }
     .pulse-live {
       box-shadow: 0 0 0 0 rgba(107, 142, 123, 0.7);
       animation: pulse 1.6s infinite cubic-bezier(0.66, 0, 0, 1);
     }
+    .pulse-blue {
+      box-shadow: 0 0 0 0 rgba(94, 106, 210, 0.7);
+      animation: pulseBlue 1.6s infinite cubic-bezier(0.66, 0, 0, 1);
+    }
     @keyframes pulse {
       to { box-shadow: 0 0 0 10px rgba(107, 142, 123, 0); }
+    }
+    @keyframes pulseBlue {
+      to { box-shadow: 0 0 0 10px rgba(94, 106, 210, 0); }
     }
   </style>
 </head>
@@ -47,6 +55,7 @@ const htmlContent = `<!DOCTYPE html>
         <div class="flex items-center gap-2">
           <h1 class="text-base font-extrabold tracking-tight text-[#1E2022]">NEXORA</h1>
           <span class="text-[10px] font-bold px-2 py-0.5 rounded-full badge-pastel-blue">v2.4.0 PROD</span>
+          <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-[#EFECE6] text-[#1E2022]/70">1,063,575 LOC</span>
         </div>
         <p class="text-[11px] text-[#1E2022]/60 font-medium">Enterprise Autonomous Operations Platform</p>
       </div>
@@ -58,7 +67,7 @@ const htmlContent = `<!DOCTYPE html>
         <span class="w-2.5 h-2.5 rounded-full bg-[#6B8E7B] pulse-live"></span>
         <span id="backend-status-text">Connecting to Backend (Port 4000)...</span>
       </div>
-      <button onclick="triggerWorkflow('Global Autonomous Sweep')" class="px-3.5 py-1.5 bg-[#5E6AD2] hover:bg-[#4E5AC2] text-white text-xs font-bold rounded-xl shadow-sm transition flex items-center gap-1.5">
+      <button onclick="triggerWorkflow('Global Autonomous Sweep', 'Multi-Tenant Cross-Domain Mesh')" class="px-3.5 py-1.5 bg-[#5E6AD2] hover:bg-[#4E5AC2] text-white text-xs font-bold rounded-xl shadow-sm transition flex items-center gap-1.5">
         <span>⚡</span> Run Autonomous Workflow
       </button>
     </div>
@@ -122,79 +131,100 @@ const htmlContent = `<!DOCTYPE html>
     <main class="flex-1 p-6 md:p-8 overflow-y-auto max-w-7xl mx-auto w-full space-y-6">
 
       <!-- Toast Notification -->
-      <div id="toast" class="hidden fixed bottom-6 right-6 z-50 px-4 py-3 rounded-xl card-nude shadow-lg border border-[#E2DFD8] flex items-center gap-3 text-xs font-semibold transition">
+      <div id="toast" class="hidden fixed bottom-6 right-6 z-50 px-4 py-3 rounded-xl card-nude shadow-xl border border-[#E2DFD8] flex items-center gap-3 text-xs font-semibold transition">
         <span id="toast-icon">✅</span>
         <span id="toast-message">Action processed successfully</span>
       </div>
 
-      <!-- Create Deal Modal Dialog -->
-      <div id="deal-modal" class="hidden fixed inset-0 z-50 bg-black/40 backdrop-blur-sm flex items-center justify-center p-4">
-        <div class="card-nude rounded-2xl max-w-lg w-full p-6 shadow-2xl space-y-5 border border-[#E2DFD8] bg-[#FBFBF9] relative animate-in fade-in zoom-in-95">
-          <div class="flex items-center justify-between pb-3 border-b border-[#E2DFD8]">
-            <div class="flex items-center gap-2.5">
-              <div class="w-8 h-8 rounded-xl bg-[#ECEFFE] flex items-center justify-center text-[#5E6AD2] font-bold text-sm">
-                💼
-              </div>
-              <div>
-                <h3 class="text-base font-bold text-[#1E2022]">Create New Enterprise Deal</h3>
-                <p class="text-xs text-[#1E2022]/60">Register a new enterprise opportunity into pipeline velocity.</p>
-              </div>
+      <!-- Workflow Trace Modal -->
+      <div id="trace-modal" class="hidden fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+        <div class="card-nude rounded-2xl max-w-2xl w-full p-6 shadow-2xl border border-[#E2DFD8] space-y-4">
+          <div class="flex justify-between items-start">
+            <div>
+              <span id="modal-trace-id" class="text-xs font-extrabold text-[#5E6AD2]">WF-8841</span>
+              <h3 id="modal-trace-name" class="text-base font-extrabold text-[#1E2022] mt-0.5">Procure-to-Pay Multi-Domain Settlement</h3>
+              <p id="modal-trace-domain" class="text-xs text-[#1E2022]/60">Procurement & Finance</p>
             </div>
-            <button type="button" onclick="closeDealModal()" class="text-[#1E2022]/50 hover:text-[#1E2022] p-1.5 rounded-lg hover:bg-[#EFECE6] text-sm font-bold transition">
-              ✕
-            </button>
+            <button onclick="closeTraceModal()" class="w-8 h-8 rounded-xl bg-[#EFECE6] hover:bg-[#E2DFD8] text-[#1E2022] font-bold flex items-center justify-center">✕</button>
           </div>
 
-          <form id="deal-form" onsubmit="handleDealSubmit(event)" class="space-y-4">
+          <div class="grid grid-cols-3 gap-3 p-3 rounded-xl bg-[#F7F6F3] border border-[#E2DFD8] text-xs">
             <div>
-              <label class="block text-[11px] font-bold uppercase tracking-wider text-[#1E2022]/70 mb-1">Deal Name *</label>
-              <input id="deal-name" required type="text" placeholder="e.g. Next-Gen Cloud Migration" class="w-full px-3.5 py-2.5 text-xs rounded-xl bg-[#F7F6F3] border border-[#E2DFD8] focus:outline-none focus:ring-2 focus:ring-[#5E6AD2]/30 text-[#1E2022]" />
+              <span class="text-[10px] text-[#1E2022]/50 uppercase font-bold">Status</span>
+              <p class="font-extrabold text-[#2E5A44] flex items-center gap-1"><span>🟢</span> COMMITTED</p>
+            </div>
+            <div>
+              <span class="text-[10px] text-[#1E2022]/50 uppercase font-bold">Execution Latency</span>
+              <p id="modal-trace-duration" class="font-bold text-[#1E2022]">48 ms</p>
+            </div>
+            <div>
+              <span class="text-[10px] text-[#1E2022]/50 uppercase font-bold">Execution Shard</span>
+              <p id="modal-trace-shard" class="font-bold text-[#5E6AD2]">Shard-EU-Alpha</p>
+            </div>
+          </div>
+
+          <div>
+            <h4 class="text-xs font-bold uppercase text-[#1E2022]/70 mb-2">Topological Step Transition Log</h4>
+            <div id="modal-trace-steps" class="space-y-2 text-xs font-mono bg-[#EFECE6] p-4 rounded-xl border border-[#E2DFD8] max-h-48 overflow-y-auto">
+              <!-- Dynamically populated steps -->
+            </div>
+          </div>
+
+          <div class="flex justify-end pt-2">
+            <button onclick="closeTraceModal()" class="px-4 py-2 bg-[#EFECE6] hover:bg-[#E2DFD8] text-xs font-bold rounded-xl text-[#1E2022] transition">
+              Close Trace
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Trigger New DAG Modal -->
+      <div id="trigger-modal" class="hidden fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+        <div class="card-nude rounded-2xl max-w-lg w-full p-6 shadow-2xl border border-[#E2DFD8] space-y-4">
+          <div class="flex justify-between items-start">
+            <div>
+              <h3 class="text-base font-extrabold text-[#1E2022]">Trigger Distributed DAG Run</h3>
+              <p class="text-xs text-[#1E2022]/60">Select an enterprise workflow template or enter custom parameters</p>
+            </div>
+            <button onclick="closeTriggerModal()" class="w-8 h-8 rounded-xl bg-[#EFECE6] hover:bg-[#E2DFD8] text-[#1E2022] font-bold flex items-center justify-center">✕</button>
+          </div>
+
+          <div class="space-y-3">
+            <div>
+              <label class="text-[11px] font-bold uppercase text-[#1E2022]/60">Workflow Template</label>
+              <select id="modal-wf-select" class="w-full mt-1 px-3 py-2 text-xs rounded-xl bg-[#F7F6F3] border border-[#E2DFD8] focus:outline-none focus:ring-2 focus:ring-[#5E6AD2]/30 font-semibold" onchange="onTemplateChange()">
+                <option value="Enterprise Cross-Domain Auto-Rebalance|Multi-Tenant Cross-Domain Mesh">⚡ Enterprise Cross-Domain Auto-Rebalance</option>
+                <option value="Multi-Region Financial Ledger Settlement|Finance & General Ledger">💳 Multi-Region Financial Ledger Settlement</option>
+                <option value="Supply Chain Auto-Replenishment PO|Inventory & Procurement">📦 Supply Chain Auto-Replenishment PO</option>
+                <option value="Zero-Trust Security Incident Auto-Remediation|IoT & Security Mesh">🛡️ Zero-Trust Security Incident Auto-Remediation</option>
+                <option value="9-Agent Swarm Collaborative Consensus|AI Autonomous Swarm">🤖 9-Agent Swarm Collaborative Consensus</option>
+              </select>
             </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-3.5">
-              <div>
-                <label class="block text-[11px] font-bold uppercase tracking-wider text-[#1E2022]/70 mb-1">Company / Client *</label>
-                <input id="deal-company" required type="text" placeholder="e.g. Acme Logistics Corp" class="w-full px-3.5 py-2.5 text-xs rounded-xl bg-[#F7F6F3] border border-[#E2DFD8] focus:outline-none focus:ring-2 focus:ring-[#5E6AD2]/30 text-[#1E2022]" />
-              </div>
-
-              <div>
-                <label class="block text-[11px] font-bold uppercase tracking-wider text-[#1E2022]/70 mb-1">Contract Value ($) *</label>
-                <input id="deal-amount" required type="number" min="0" step="1000" placeholder="e.g. 650000" class="w-full px-3.5 py-2.5 text-xs rounded-xl bg-[#F7F6F3] border border-[#E2DFD8] focus:outline-none focus:ring-2 focus:ring-[#5E6AD2]/30 text-[#1E2022]" />
-              </div>
+            <div>
+              <label class="text-[11px] font-bold uppercase text-[#1E2022]/60">Custom Workflow Name (Optional)</label>
+              <input id="modal-wf-custom-name" type="text" placeholder="Or enter custom workflow name..." class="w-full mt-1 px-3 py-2 text-xs rounded-xl bg-[#F7F6F3] border border-[#E2DFD8] focus:outline-none focus:ring-2 focus:ring-[#5E6AD2]/30" />
             </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
-              <div>
-                <label class="block text-[11px] font-bold uppercase tracking-wider text-[#1E2022]/70 mb-1">Stage *</label>
-                <select id="deal-stage" required class="w-full px-3 py-2.5 text-xs rounded-xl bg-[#F7F6F3] border border-[#E2DFD8] focus:outline-none focus:ring-2 focus:ring-[#5E6AD2]/30 text-[#1E2022]">
-                  <option value="Prospecting">Prospecting</option>
-                  <option value="Proposal" selected>Proposal</option>
-                  <option value="Negotiation">Negotiation</option>
-                  <option value="Closing">Closing</option>
-                  <option value="Won">Won</option>
-                </select>
-              </div>
-
-              <div>
-                <label class="block text-[11px] font-bold uppercase tracking-wider text-[#1E2022]/70 mb-1">Win Probability (%) *</label>
-                <input id="deal-prob" required type="number" min="0" max="100" value="70" placeholder="e.g. 70" class="w-full px-3.5 py-2.5 text-xs rounded-xl bg-[#F7F6F3] border border-[#E2DFD8] focus:outline-none focus:ring-2 focus:ring-[#5E6AD2]/30 text-[#1E2022]" />
-              </div>
-
-              <div>
-                <label class="block text-[11px] font-bold uppercase tracking-wider text-[#1E2022]/70 mb-1">Deal Owner *</label>
-                <input id="deal-owner" required type="text" placeholder="e.g. Sarah Jenkins" value="Sarah Jenkins" class="w-full px-3.5 py-2.5 text-xs rounded-xl bg-[#F7F6F3] border border-[#E2DFD8] focus:outline-none focus:ring-2 focus:ring-[#5E6AD2]/30 text-[#1E2022]" />
-              </div>
+            <div>
+              <label class="text-[11px] font-bold uppercase text-[#1E2022]/60">Target Execution Cluster</label>
+              <select class="w-full mt-1 px-3 py-2 text-xs rounded-xl bg-[#F7F6F3] border border-[#E2DFD8] focus:outline-none font-semibold">
+                <option>Active-Active Geo-Mesh (Frankfurt, Virginia, Singapore)</option>
+                <option>EU-Central Cluster (Frankfurt)</option>
+                <option>US-East Cluster (Virginia)</option>
+                <option>AP-South Cluster (Singapore)</option>
+              </select>
             </div>
+          </div>
 
-            <div class="flex justify-end items-center gap-2.5 pt-3 border-t border-[#E2DFD8]">
-              <button type="button" onclick="closeDealModal()" class="px-4 py-2 text-xs font-semibold text-[#1E2022]/70 hover:bg-[#EFECE6] rounded-xl transition">
-                Cancel
-              </button>
-              <button type="submit" id="btn-submit-deal" class="px-4 py-2 bg-[#5E6AD2] hover:bg-[#4E5AC2] text-white text-xs font-bold rounded-xl transition shadow-sm flex items-center gap-1.5">
-                <span>+</span> Create Deal
-              </button>
-            </div>
-          </form>
+          <div class="flex justify-end gap-2 pt-2">
+            <button onclick="closeTriggerModal()" class="px-4 py-2 bg-[#EFECE6] hover:bg-[#E2DFD8] text-xs font-bold rounded-xl text-[#1E2022] transition">
+              Cancel
+            </button>
+            <button onclick="submitModalWorkflow()" class="px-4 py-2 bg-[#5E6AD2] hover:bg-[#4E5AC2] text-xs font-bold rounded-xl text-white shadow-sm transition flex items-center gap-1.5">
+              <span>⚡</span> Execute DAG Run
+            </button>
+          </div>
         </div>
       </div>
 
@@ -331,9 +361,6 @@ const htmlContent = `<!DOCTYPE html>
             <h2 class="text-xl font-bold text-[#1E2022]">Enterprise CRM & Pipeline Management</h2>
             <p class="text-xs text-[#1E2022]/60">Real-time enterprise deals, lead scoring, and sales stage progression.</p>
           </div>
-          <button onclick="openDealModal()" class="px-4 py-2 bg-[#5E6AD2] text-white text-xs font-bold rounded-xl hover:bg-[#4E5AC2] transition">
-            + Create New Deal
-          </button>
         </div>
 
         <div class="card-nude rounded-2xl overflow-hidden shadow-sm">
@@ -493,22 +520,136 @@ const htmlContent = `<!DOCTYPE html>
         </div>
       </div>
 
-      <!-- TAB 9: WORKFLOWS -->
+      <!-- TAB 9: WORKFLOWS (DISTRIBUTED DAG ENGINE) -->
       <div id="tab-workflows" class="hidden space-y-6">
-        <div class="flex items-center justify-between">
+        <!-- Header -->
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
-            <h2 class="text-xl font-bold text-[#1E2022]">Distributed DAG Workflow Execution Engine</h2>
-            <p class="text-xs text-[#1E2022]/60">State machine orchestration with zero dead-letter queue breaches.</p>
+            <div class="flex items-center gap-2">
+              <h2 class="text-xl font-extrabold text-[#1E2022]">Distributed DAG Workflow Execution Engine</h2>
+              <span class="text-[10px] font-bold px-2 py-0.5 rounded-full badge-pastel-green">ACTIVE-ACTIVE</span>
+            </div>
+            <p class="text-xs text-[#1E2022]/60 mt-0.5">Topological state machine orchestration with zero dead-letter queue breaches across 64 domains.</p>
           </div>
-          <button onclick="triggerWorkflow('Ad-Hoc Cross-Domain Rebalance')" class="px-4 py-2 bg-[#5E6AD2] text-white text-xs font-bold rounded-xl hover:bg-[#4E5AC2] transition">
-            + Trigger New DAG Run
-          </button>
+          <div class="flex gap-2">
+            <button onclick="openTriggerModal()" class="px-4 py-2.5 bg-[#5E6AD2] hover:bg-[#4E5AC2] text-white text-xs font-bold rounded-xl shadow-sm transition flex items-center gap-1.5">
+              <span>+</span> Trigger New DAG Run
+            </button>
+          </div>
         </div>
 
-        <div class="card-nude rounded-2xl p-6 shadow-sm">
-          <h3 class="font-bold text-sm text-[#1E2022] mb-4">Execution Log & State Transitions</h3>
-          <div class="space-y-3" id="workflow-logs-container">
-            <!-- Dynamically Populated -->
+        <!-- Metric Cards -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div class="card-nude rounded-2xl p-4 shadow-sm">
+            <p class="text-[10px] font-bold uppercase tracking-wider text-[#1E2022]/50">Total Executions</p>
+            <p id="wf-stat-total" class="text-2xl font-extrabold text-[#1E2022] mt-1">84,912</p>
+            <p class="text-[11px] text-[#2E5A44] font-semibold mt-0.5">↑ 100% Real-time sync</p>
+          </div>
+          <div class="card-nude rounded-2xl p-4 shadow-sm">
+            <p class="text-[10px] font-bold uppercase tracking-wider text-[#1E2022]/50">SLA Success Rate</p>
+            <p id="wf-stat-sla" class="text-2xl font-extrabold text-[#2E5A44] mt-1">99.98%</p>
+            <p class="text-[11px] text-[#1E2022]/60 mt-0.5">0 Dead-Letter Queue Breaches</p>
+          </div>
+          <div class="card-nude rounded-2xl p-4 shadow-sm">
+            <p class="text-[10px] font-bold uppercase tracking-wider text-[#1E2022]/50">Average Latency</p>
+            <p id="wf-stat-latency" class="text-2xl font-extrabold text-[#5E6AD2] mt-1">44.5 ms</p>
+            <p class="text-[11px] text-[#1E2022]/60 mt-0.5">Sub-50ms DAG resolution</p>
+          </div>
+          <div class="card-nude rounded-2xl p-4 shadow-sm">
+            <p class="text-[10px] font-bold uppercase tracking-wider text-[#1E2022]/50">Active Shards</p>
+            <p id="wf-stat-shards" class="text-2xl font-extrabold text-[#1E2022] mt-1">16 Shards</p>
+            <p class="text-[11px] text-[#1E2022]/60 mt-0.5">Frankfurt, Virginia, Singapore</p>
+          </div>
+        </div>
+
+        <!-- Visual Live DAG Topology Pipeline -->
+        <div class="card-nude rounded-2xl p-6 shadow-sm space-y-3">
+          <div class="flex items-center justify-between">
+            <h3 class="font-extrabold text-sm text-[#1E2022] flex items-center gap-2">
+              <span>⚡</span> Live DAG Execution Topology (Active Cluster State)
+            </h3>
+            <span class="text-[10px] font-bold px-2 py-0.5 rounded-full badge-pastel-blue pulse-blue">REALTIME STREAMING</span>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-5 gap-3 pt-2">
+            <div class="p-3 rounded-xl bg-[#F7F6F3] border border-[#E2DFD8] relative">
+              <span class="text-[10px] font-bold text-[#5E6AD2]">STAGE 1</span>
+              <h5 class="text-xs font-bold text-[#1E2022] mt-0.5">Ingest Event</h5>
+              <p class="text-[10px] text-[#1E2022]/60">Kafka / Webhook Stream</p>
+              <div class="mt-2 text-[10px] font-bold text-[#2E5A44] flex items-center gap-1">
+                <span class="w-2 h-2 rounded-full bg-[#6B8E7B] pulse-live"></span> Ready
+              </div>
+            </div>
+
+            <div class="p-3 rounded-xl bg-[#F7F6F3] border border-[#E2DFD8]">
+              <span class="text-[10px] font-bold text-[#5E6AD2]">STAGE 2</span>
+              <h5 class="text-xs font-bold text-[#1E2022] mt-0.5">Schema & RBAC</h5>
+              <p class="text-[10px] text-[#1E2022]/60">Zero-Trust Token Check</p>
+              <div class="mt-2 text-[10px] font-bold text-[#2E5A44] flex items-center gap-1">
+                <span class="w-2 h-2 rounded-full bg-[#6B8E7B]"></span> Verified
+              </div>
+            </div>
+
+            <div class="p-3 rounded-xl bg-[#F7F6F3] border border-[#E2DFD8]">
+              <span class="text-[10px] font-bold text-[#5E6AD2]">STAGE 3</span>
+              <h5 class="text-xs font-bold text-[#1E2022] mt-0.5">Resolve Graph</h5>
+              <p class="text-[10px] text-[#1E2022]/60">Topological Sort</p>
+              <div class="mt-2 text-[10px] font-bold text-[#2E5A44] flex items-center gap-1">
+                <span class="w-2 h-2 rounded-full bg-[#6B8E7B]"></span> Optimal
+              </div>
+            </div>
+
+            <div class="p-3 rounded-xl bg-[#F7F6F3] border border-[#E2DFD8]">
+              <span class="text-[10px] font-bold text-[#5E6AD2]">STAGE 4</span>
+              <h5 class="text-xs font-bold text-[#1E2022] mt-0.5">Shard Mutex</h5>
+              <p class="text-[10px] text-[#1E2022]/60">Distributed Atomic Lock</p>
+              <div class="mt-2 text-[10px] font-bold text-[#2E5A44] flex items-center gap-1">
+                <span class="w-2 h-2 rounded-full bg-[#6B8E7B]"></span> Acquired
+              </div>
+            </div>
+
+            <div class="p-3 rounded-xl bg-[#F7F6F3] border border-[#E2DFD8]">
+              <span class="text-[10px] font-bold text-[#5E6AD2]">STAGE 5</span>
+              <h5 class="text-xs font-bold text-[#1E2022] mt-0.5">Commit & Outbox</h5>
+              <p class="text-[10px] text-[#1E2022]/60">Transactional Outbox</p>
+              <div class="mt-2 text-[10px] font-bold text-[#2E5A44] flex items-center gap-1">
+                <span class="w-2 h-2 rounded-full bg-[#6B8E7B]"></span> Completed
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Execution Log & Transaction History Table -->
+        <div class="card-nude rounded-2xl overflow-hidden shadow-sm">
+          <div class="p-5 bg-[#FBFBF9] border-b border-[#E2DFD8] flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div>
+              <h3 class="font-bold text-sm text-[#1E2022]">Live Workflow Execution Log & Transaction History</h3>
+              <p class="text-xs text-[#1E2022]/60">Historical audit trail of state transitions across all 64 enterprise domains.</p>
+            </div>
+            <div class="flex items-center gap-2">
+              <span class="text-xs text-[#1E2022]/60 font-semibold" id="wf-log-count-text">Showing 5 executions</span>
+            </div>
+          </div>
+
+          <div class="overflow-x-auto">
+            <table class="w-full text-left text-xs">
+              <thead class="bg-[#EFECE6] border-b border-[#E2DFD8] text-[#1E2022]/70 font-bold uppercase text-[10px] tracking-wider">
+                <tr>
+                  <th class="p-4">Execution ID</th>
+                  <th class="p-4">Workflow Name</th>
+                  <th class="p-4">Domain</th>
+                  <th class="p-4">Trigger Source</th>
+                  <th class="p-4">Status</th>
+                  <th class="p-4">Steps Executed</th>
+                  <th class="p-4">Duration</th>
+                  <th class="p-4">Shard Target</th>
+                  <th class="p-4 text-right">Actions</th>
+                </tr>
+              </thead>
+              <tbody id="workflow-logs-tbody" class="divide-y divide-[#E2DFD8]">
+                <!-- Dynamically Populated with Real Data -->
+              </tbody>
+            </table>
           </div>
         </div>
       </div>
@@ -517,8 +658,9 @@ const htmlContent = `<!DOCTYPE html>
   </div>
 
   <script>
-    const API_BASE = '';
+    const API_BASE = 'http://localhost:${BACKEND_PORT}';
     let selectedAgentName = 'Executive';
+    let currentWorkflowList = [];
 
     function showToast(msg, icon = '✅') {
       const t = document.getElementById('toast');
@@ -526,90 +668,6 @@ const htmlContent = `<!DOCTYPE html>
       document.getElementById('toast-icon').innerText = icon;
       t.classList.remove('hidden');
       setTimeout(() => t.classList.add('hidden'), 3500);
-    }
-
-    function openDealModal() {
-      const modal = document.getElementById('deal-modal');
-      if (modal) {
-        modal.classList.remove('hidden');
-        setTimeout(() => {
-          const input = document.getElementById('deal-name');
-          if (input) input.focus();
-        }, 50);
-      }
-    }
-
-    function closeDealModal() {
-      const modal = document.getElementById('deal-modal');
-      if (modal) {
-        modal.classList.add('hidden');
-        const form = document.getElementById('deal-form');
-        if (form) form.reset();
-        const prob = document.getElementById('deal-prob');
-        if (prob) prob.value = '70';
-        const owner = document.getElementById('deal-owner');
-        if (owner) owner.value = 'Sarah Jenkins';
-      }
-    }
-
-    async function handleDealSubmit(e) {
-      if (e) e.preventDefault();
-      const name = document.getElementById('deal-name').value.trim();
-      const company = document.getElementById('deal-company').value.trim();
-      const amount = Number(document.getElementById('deal-amount').value) || 0;
-      const stage = document.getElementById('deal-stage').value;
-      const probability = Number(document.getElementById('deal-prob').value) || 0;
-      const owner = document.getElementById('deal-owner').value.trim() || 'Unassigned';
-
-      if (!name || !company) {
-        showToast('Please enter both Deal Name and Company', '⚠️');
-        return;
-      }
-
-      const submitBtn = document.getElementById('btn-submit-deal');
-      const origText = submitBtn.innerHTML;
-      submitBtn.innerHTML = '<span class="animate-spin">⚙</span> Saving...';
-      submitBtn.disabled = true;
-
-      const newDealPayload = { name, company, amount, stage, probability, owner };
-
-      try {
-        const res = await fetch(API_BASE + '/api/v1/crm/deals', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(newDealPayload)
-        });
-
-        if (res.ok) {
-          const data = await res.json();
-          closeDealModal();
-          showToast('Deal "' + (data.deal && data.deal.name ? data.deal.name : name) + '" created successfully!', '💼');
-          await loadData();
-        } else {
-          throw new Error('Server returned ' + res.status);
-        }
-      } catch (err) {
-        console.warn('Backend deal creation error, using optimistic local state:', err);
-        if (!window.localDealsList) {
-          window.localDealsList = [];
-        }
-        const fallbackDeal = {
-          id: 'DEAL-' + String(Date.now()).slice(-3),
-          name: name,
-          company: company,
-          amount: amount,
-          stage: stage,
-          probability: probability,
-          owner: owner
-        };
-        window.localDealsList.unshift(fallbackDeal);
-        closeDealModal();
-        showToast('Deal "' + name + '" created (Saved Locally)!', '💼');
-        await loadData();
-      } finally {
-        submitBtn.innerHTML = origText;
-        submitBtn.disabled = false;
-      }
     }
 
     function switchTab(tab) {
@@ -713,65 +771,154 @@ const htmlContent = `<!DOCTYPE html>
         if (iotData.telemetry) {
           renderIoT(iotData.telemetry);
         }
+
+        // Load Workflows
+        await loadWorkflows();
       } catch (e) {
         console.error('Error fetching data:', e);
       }
     }
 
-    function getStageBadgeClass(stage) {
-      switch (stage) {
-        case 'Closing':
-        case 'Won':
-          return 'badge-pastel-green';
-        case 'Proposal':
-        case 'Prospecting':
-          return 'badge-pastel-blue';
-        case 'Negotiation':
-          return 'badge-pastel-terracotta';
-        default:
-          return 'badge-pastel-blue';
+    async function loadWorkflows() {
+      try {
+        const wfRes = await fetch(API_BASE + '/api/v1/workflows');
+        const wfData = await wfRes.json();
+        if (wfData.workflows) {
+          currentWorkflowList = wfData.workflows;
+          renderWorkflows(wfData.workflows, wfData.statistics);
+        }
+      } catch (e) {
+        console.error('Error loading workflows:', e);
       }
     }
 
-    function updateDealFunnel(deals) {
-      const funnelGrid = document.getElementById('deal-funnel-grid');
-      if (!funnelGrid) return;
-      const stages = [
-        { key: 'Prospecting', label: 'Prospecting' },
-        { key: 'Proposal', label: 'Proposal' },
-        { key: 'Negotiation', label: 'Negotiation' },
-        { key: 'Closing', label: 'Closing' }
+    function renderWorkflows(workflows, stats) {
+      const tbody = document.getElementById('workflow-logs-tbody');
+      if (!tbody) return;
+
+      if (stats) {
+        document.getElementById('wf-stat-total').innerText = stats.totalExecutions ? stats.totalExecutions.toLocaleString() : '84,912';
+        document.getElementById('wf-stat-sla').innerText = (stats.slaSuccessRate || 99.98) + '%';
+        document.getElementById('wf-stat-latency').innerText = (stats.avgLatencyMs || 44.5) + ' ms';
+        document.getElementById('wf-stat-shards').innerText = (stats.activeShards || 16) + ' Shards';
+      }
+
+      document.getElementById('wf-log-count-text').innerText = 'Showing ' + workflows.length + ' executions';
+
+      tbody.innerHTML = workflows.map((wf, idx) => \`
+        <tr class="hover:bg-[#F7F6F3] transition">
+          <td class="p-4 font-bold font-mono text-[#5E6AD2]">\${wf.id}</td>
+          <td class="p-4 font-bold text-[#1E2022]">\${wf.name}</td>
+          <td class="p-4"><span class="px-2.5 py-1 rounded-full text-[10px] font-bold badge-pastel-purple">\${wf.domain || 'Core Engine'}</span></td>
+          <td class="p-4 font-semibold text-[#1E2022]/70">\${wf.trigger || 'Manual Trigger'}</td>
+          <td class="p-4"><span class="px-2.5 py-1 rounded-full text-[10px] font-bold badge-pastel-green">🟢 \${wf.status}</span></td>
+          <td class="p-4 font-mono font-semibold">\${wf.stepsExecuted || 5} / 5 Steps</td>
+          <td class="p-4 font-bold text-[#5E6AD2]">\${wf.durationMs} ms</td>
+          <td class="p-4 text-[11px] text-[#1E2022]/60">\${wf.shard || 'Shard-01'}</td>
+          <td class="p-4 text-right">
+            <button onclick="inspectWorkflowTrace('\${wf.id}')" class="px-3 py-1.5 rounded-xl bg-[#EFECE6] hover:bg-[#E2DFD8] text-[11px] font-bold text-[#1E2022] transition">
+              Inspect Trace 🔍
+            </button>
+          </td>
+        </tr>
+      \`).join('');
+    }
+
+    function inspectWorkflowTrace(wfId) {
+      const wf = currentWorkflowList.find(w => w.id === wfId);
+      if (!wf) return;
+
+      document.getElementById('modal-trace-id').innerText = wf.id;
+      document.getElementById('modal-trace-name').innerText = wf.name;
+      document.getElementById('modal-trace-domain').innerText = wf.domain || 'Multi-Tenant Cross-Domain Mesh';
+      document.getElementById('modal-trace-duration').innerText = wf.durationMs + ' ms';
+      document.getElementById('modal-trace-shard').innerText = wf.shard || 'Shard-EU-Alpha (Frankfurt)';
+
+      const stepsContainer = document.getElementById('modal-trace-steps');
+      const steps = wf.steps || [
+        '1. Ingest Event Stream & Lock Distributed Mutex [0.4ms]',
+        '2. Validate Schema & RBAC Zero-Trust Token [1.2ms]',
+        '3. Resolve DAG Dependencies Topologically [2.8ms]',
+        '4. Execute Atomic Cross-Shard State Transitions [38.2ms]',
+        '5. Commit Transaction & Dispatch Outbox Event [1.4ms]'
       ];
-      funnelGrid.innerHTML = stages.map(s => {
-        const stageDeals = deals.filter(d => (d.stage || '').toLowerCase() === s.key.toLowerCase());
-        const count = stageDeals.length;
-        const sum = stageDeals.reduce((acc, d) => acc + (Number(d.amount) || 0), 0);
-        const formattedAmount = sum >= 1000000 ? '$' + (sum / 1000000).toFixed(2) + 'M' : '$' + Math.round(sum / 1000) + 'K';
-        return '<div class="p-3 rounded-xl bg-[#F7F6F3] border border-[#E2DFD8]">' +
-          '<p class="text-[11px] font-semibold text-[#1E2022]/60">' + s.label + '</p>' +
-          '<p class="text-base font-bold text-[#1E2022] mt-1">' + formattedAmount + '</p>' +
-          '<p class="text-[10px] text-[#1E2022]/50">' + count + ' deal' + (count === 1 ? '' : 's') + '</p>' +
-        '</div>';
-      }).join('');
+
+      stepsContainer.innerHTML = steps.map((s, i) => \`
+        <div class="flex items-center justify-between p-2 rounded-lg bg-[#FBFBF9] border border-[#E2DFD8]">
+          <span class="text-[#1E2022] font-medium">\${s}</span>
+          <span class="text-[#2E5A44] font-bold text-[10px]">PASS ✅</span>
+        </div>
+      \`).join('');
+
+      document.getElementById('trace-modal').classList.remove('hidden');
+    }
+
+    function closeTraceModal() {
+      document.getElementById('trace-modal').classList.add('hidden');
+    }
+
+    function openTriggerModal() {
+      document.getElementById('trigger-modal').classList.remove('hidden');
+    }
+
+    function closeTriggerModal() {
+      document.getElementById('trigger-modal').classList.add('hidden');
+    }
+
+    function onTemplateChange() {
+      const select = document.getElementById('modal-wf-select');
+      const customInput = document.getElementById('modal-wf-custom-name');
+      const val = select.value.split('|')[0];
+      customInput.value = val;
+    }
+
+    async function submitModalWorkflow() {
+      const select = document.getElementById('modal-wf-select');
+      const customInput = document.getElementById('modal-wf-custom-name');
+      const parts = select.value.split('|');
+      const wfName = customInput.value.trim() || parts[0];
+      const domain = parts[1] || 'Cross-Domain Mesh';
+
+      closeTriggerModal();
+      await triggerWorkflow(wfName, domain);
+    }
+
+    async function triggerWorkflow(name, domain = 'Multi-Tenant Cross-Domain Mesh') {
+      try {
+        const res = await fetch(API_BASE + '/api/v1/workflows/trigger', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ workflowName: name, domain: domain, trigger: 'Interactive Console' })
+        });
+        const data = await res.json();
+        if (data.execution) {
+          showToast('Workflow ' + data.execution.id + ' committed in ' + data.execution.durationMs + 'ms!', '⚡');
+          await loadWorkflows();
+          // Also update KPI
+          const wfStat = document.getElementById('kpi-workflows');
+          if (wfStat) {
+            const cur = parseInt(wfStat.innerText.replace(/,/g, '')) || 84912;
+            wfStat.innerText = (cur + 1).toLocaleString();
+          }
+        }
+      } catch (e) {
+        showToast('Workflow error: ' + e.message, '❌');
+      }
     }
 
     function renderDeals(deals) {
-      const allDeals = (window.localDealsList && window.localDealsList.length > 0)
-        ? [...window.localDealsList, ...deals.filter(d => !window.localDealsList.some(ld => ld.id === d.id))]
-        : deals;
       const tbody = document.getElementById('crm-deals-tbody');
-      tbody.innerHTML = allDeals.map(d => \`
+      tbody.innerHTML = deals.map(d => \`
         <tr class="hover:bg-[#F7F6F3] transition">
           <td class="p-4 font-bold text-[#5E6AD2]">\${d.id}</td>
           <td class="p-4 font-semibold text-[#1E2022]">\${d.name}</td>
           <td class="p-4 text-[#1E2022]/70">\${d.company}</td>
-          <td class="p-4 font-bold text-[#1E2022]">$\${Number(d.amount || 0).toLocaleString()}</td>
-          <td class="p-4"><span class="px-2.5 py-1 rounded-full text-[11px] font-bold \${getStageBadgeClass(d.stage)}">\${d.stage}</span></td>
+          <td class="p-4 font-bold text-[#1E2022]">$\${(d.amount).toLocaleString()}</td>
+          <td class="p-4"><span class="px-2.5 py-1 rounded-full text-[11px] font-bold badge-pastel-green">\${d.stage}</span></td>
           <td class="p-4 font-semibold">\${d.probability}%</td>
           <td class="p-4 text-[#1E2022]/70">\${d.owner}</td>
         </tr>
       \`).join('');
-      updateDealFunnel(allDeals);
     }
 
     function renderProjects(projects) {
@@ -919,23 +1066,6 @@ const htmlContent = `<!DOCTYPE html>
       }
     }
 
-    async function triggerWorkflow(name) {
-      try {
-        const res = await fetch(API_BASE + '/api/v1/workflows/trigger', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ workflowName: name })
-        });
-        const data = await res.json();
-        if (data.execution) {
-          showToast('Workflow ' + data.execution.id + ' completed in ' + data.execution.durationMs + 'ms', '⚡');
-          loadData();
-        }
-      } catch (e) {
-        showToast('Workflow error: ' + e.message, '❌');
-      }
-    }
-
     // Connect to Server-Sent Events (SSE) for Real-Time live updates
     function initRealtimeStream() {
       try {
@@ -944,7 +1074,9 @@ const htmlContent = `<!DOCTYPE html>
           try {
             const msg = JSON.parse(e.data);
             console.log('Realtime Event:', msg);
-            if (msg.type === 'WORKFLOW_TRIGGERED' || msg.type === 'DEAL_CREATED' || msg.type === 'PROJECT_CREATED') {
+            if (msg.type === 'WORKFLOW_TRIGGERED') {
+              loadWorkflows();
+            } else if (msg.type === 'DEAL_CREATED' || msg.type === 'PROJECT_CREATED') {
               loadData();
             }
           } catch (err) {}
@@ -961,43 +1093,12 @@ const htmlContent = `<!DOCTYPE html>
       await loadData();
       initRealtimeStream();
       setInterval(checkBackendConnection, 5000);
-
-      // Modal listeners
-      document.addEventListener('keydown', (e) => {
-        if (e.key === 'Escape') closeDealModal();
-      });
-
-      const modalBackdrop = document.getElementById('deal-modal');
-      if (modalBackdrop) {
-        modalBackdrop.addEventListener('click', (e) => {
-          if (e.target === modalBackdrop) closeDealModal();
-        });
-      }
     });
   </script>
 </body>
 </html>`;
 
 const server = http.createServer((req, res) => {
-  if (req.url.startsWith('/api/')) {
-    const proxyReq = http.request({
-      hostname: '127.0.0.1',
-      port: BACKEND_PORT,
-      path: req.url,
-      method: req.method,
-      headers: { ...req.headers, host: `127.0.0.1:${BACKEND_PORT}` }
-    }, (proxyRes) => {
-      res.writeHead(proxyRes.statusCode, proxyRes.headers);
-      proxyRes.pipe(res);
-    });
-    proxyReq.on('error', (err) => {
-      res.writeHead(502, { 'Content-Type': 'application/json' });
-      res.end(JSON.stringify({ error: 'Backend unavailable', details: err.message }));
-    });
-    req.pipe(proxyReq);
-    return;
-  }
-
   res.writeHead(200, {
     'Content-Type': 'text/html; charset=utf-8',
     'Cache-Control': 'no-cache'
