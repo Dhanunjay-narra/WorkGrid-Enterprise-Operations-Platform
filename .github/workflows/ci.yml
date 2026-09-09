@@ -1,0 +1,24 @@
+name: NEXORA Enterprise CI/CD Pipeline
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main]
+
+jobs:
+  audit-and-test:
+    name: Code Quality & Deduplication Gate
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Run Duplicate Code Gate
+        run: node tools/audit/dedup-gate.js
+      - name: Run Master LOC Accounting
+        run: node tools/audit/loc-audit.js
+      - name: Execute Monorepo Tests
+        run: npm run test --if-present

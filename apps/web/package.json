@@ -1,0 +1,19 @@
+{
+  "name": "@nexora/web",
+  "version": "2.4.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev -p 3000",
+    "build": "next build",
+    "start": "next start"
+  },
+  "dependencies": {
+    "@nexora/types": "*",
+    "@nexora/config": "*",
+    "@nexora/design-system": "*",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "next": "^15.0.0",
+    "lucide-react": "^0.460.0"
+  }
+}

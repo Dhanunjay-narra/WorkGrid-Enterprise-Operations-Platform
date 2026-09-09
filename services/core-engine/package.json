@@ -1,0 +1,6 @@
+{
+  "name": "@nexora/core-engine",
+  "version": "2.4.0",
+  "main": "./src/index.ts",
+  "private": true
+}

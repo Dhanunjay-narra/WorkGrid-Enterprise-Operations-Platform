@@ -1,0 +1,27 @@
+global:
+  environment: production
+  domain: nexora.io
+
+apiGateway:
+  replicaCount: 3
+  image:
+    repository: nexora/api-gateway
+    tag: 2.4.0
+  service:
+    type: ClusterIP
+    port: 4000
+
+web:
+  replicaCount: 2
+  image:
+    repository: nexora/web
+    tag: 2.4.0
+  service:
+    type: ClusterIP
+    port: 3000
+
+postgresql:
+  enabled: true
+  auth:
+    database: nexora_enterprise
+    username: nexora

@@ -1,0 +1,8 @@
+{
+  "name": "@nexora/cli",
+  "version": "2.4.0",
+  "bin": {
+    "nexora": "./src/index.js"
+  },
+  "private": true
+}

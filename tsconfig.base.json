@@ -1,0 +1,76 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "lib": [
+      "ES2022",
+      "DOM",
+      "DOM.Iterable"
+    ],
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+    "resolveJsonModule": true,
+    "allowJs": true,
+    "checkJs": false,
+    "declaration": true,
+    "declarationMap": true,
+    "sourceMap": true,
+    "strict": true,
+    "noImplicitAny": true,
+    "strictNullChecks": true,
+    "strictFunctionTypes": true,
+    "strictBindCallApply": true,
+    "strictPropertyInitialization": true,
+    "noImplicitThis": true,
+    "alwaysStrict": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noImplicitReturns": true,
+    "noFallthroughCasesInSwitch": true,
+    "noUncheckedIndexedAccess": true,
+    "noImplicitOverride": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "baseUrl": ".",
+    "paths": {
+      "@nexora/types": [
+        "./packages/types/src"
+      ],
+      "@nexora/types/*": [
+        "./packages/types/src/*"
+      ],
+      "@nexora/design-system": [
+        "./packages/design-system/src"
+      ],
+      "@nexora/design-system/*": [
+        "./packages/design-system/src/*"
+      ],
+      "@nexora/database": [
+        "./packages/database/src"
+      ],
+      "@nexora/database/*": [
+        "./packages/database/src/*"
+      ],
+      "@nexora/sdk": [
+        "./packages/sdk/src"
+      ],
+      "@nexora/sdk/*": [
+        "./packages/sdk/src/*"
+      ],
+      "@nexora/config": [
+        "./packages/config/src"
+      ],
+      "@nexora/config/*": [
+        "./packages/config/src/*"
+      ]
+    }
+  },
+  "exclude": [
+    "node_modules",
+    "dist",
+    "build",
+    ".next",
+    ".expo",
+    "coverage"
+  ]
+}

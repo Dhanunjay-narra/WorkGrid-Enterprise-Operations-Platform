@@ -1,0 +1,6 @@
+{
+  "name": "@nexora/background-worker",
+  "version": "2.4.0",
+  "main": "./src/worker.ts",
+  "private": true
+}

@@ -1,0 +1,20 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --canvas: #FBFBF9;
+  --sand: #EFECE6;
+  --stone: #E2DFD8;
+  --charcoal: #1E2022;
+  --sage: #6B8E7B;
+  --terracotta: #C27D66;
+  --indigo: #5E6AD2;
+  --amber: #D99E4B;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  background-color: var(--canvas);
+  color: var(--charcoal);
+}

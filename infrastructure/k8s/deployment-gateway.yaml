@@ -1,0 +1,35 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nexora-api-gateway
+  namespace: nexora-prod
+  labels:
+    app: nexora-api-gateway
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: nexora-api-gateway
+  template:
+    metadata:
+      labels:
+        app: nexora-api-gateway
+    spec:
+      containers:
+        - name: gateway
+          image: nexora/api-gateway:2.4.0
+          ports:
+            - containerPort: 4000
+          resources:
+            requests:
+              cpu: "250m"
+              memory: "512Mi"
+            limits:
+              cpu: "1000m"
+              memory: "1536Mi"
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 4000
+            initialDelaySeconds: 5
+            periodSeconds: 10

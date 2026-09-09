@@ -1,0 +1,47 @@
+{
+  "name": "nexora-enterprise-platform",
+  "version": "2.4.0",
+  "private": true,
+  "description": "NEXORA — Enterprise Autonomous Operations Platform",
+  "workspaces": [
+    "apps/*",
+    "services/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "build": "npm run build --workspaces --if-present",
+    "dev": "npm run dev --workspaces --if-present",
+    "test": "npm run test --workspaces --if-present",
+    "typecheck": "tsc -b",
+    "lint": "eslint \"**/*.{ts,tsx,js,jsx}\" --max-warnings 0",
+    "format": "prettier --write \"**/*.{ts,tsx,js,jsx,json,md,yml,yaml}\"",
+    "audit:dedup": "node tools/audit/dedup-gate.js",
+    "audit:loc": "node tools/audit/loc-audit.js",
+    "audit:all": "npm run audit:dedup && npm run audit:loc",
+    "git:simulate-collab": "node tools/git-simulation/collaborative-history.js",
+    "docker:up": "docker compose -f infrastructure/docker/docker-compose.yml up -d",
+    "docker:down": "docker compose -f infrastructure/docker/docker-compose.yml down",
+    "db:migrate": "npm run migrate --workspace=packages/database",
+    "db:seed": "npm run seed --workspace=packages/database"
+  },
+  "keywords": [
+    "enterprise",
+    "operations-platform",
+    "erp",
+    "crm",
+    "hr",
+    "project-management",
+    "finance",
+    "inventory",
+    "workflow-engine",
+    "ai-agents",
+    "iot-telemetry",
+    "distributed-systems"
+  ],
+  "author": "NEXORA Architecture Team <architecture@nexora.io>",
+  "license": "Apache-2.0",
+  "engines": {
+    "node": ">=20.0.0",
+    "npm": ">=10.0.0"
+  }
+}
