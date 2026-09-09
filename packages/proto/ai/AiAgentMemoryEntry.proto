@@ -1,0 +1,20 @@
+syntax = "proto3";
+
+package nexora.ai;
+
+message AiAgentMemoryEntryMessage {
+  string id = 1;
+  string tenant_id = 2;
+  string code = 3;
+  string name = 4;
+  string status = 5;
+  int64 created_at_unix = 6;
+}
+
+service AiAgentMemoryEntryService {
+  rpc GetAiAgentMemoryEntry (GetAiAgentMemoryEntryRequest) returns (AiAgentMemoryEntryMessage);
+  rpc ListAiAgentMemoryEntrys (ListAiAgentMemoryEntryRequest) returns (stream AiAgentMemoryEntryMessage);
+}
+
+message GetAiAgentMemoryEntryRequest { string id = 1; }
+message ListAiAgentMemoryEntryRequest { string tenant_id = 1; int32 limit = 2; }

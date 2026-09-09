@@ -1,0 +1,20 @@
+syntax = "proto3";
+
+package nexora.hr;
+
+message HrJobPostingMessage {
+  string id = 1;
+  string tenant_id = 2;
+  string code = 3;
+  string name = 4;
+  string status = 5;
+  int64 created_at_unix = 6;
+}
+
+service HrJobPostingService {
+  rpc GetHrJobPosting (GetHrJobPostingRequest) returns (HrJobPostingMessage);
+  rpc ListHrJobPostings (ListHrJobPostingRequest) returns (stream HrJobPostingMessage);
+}
+
+message GetHrJobPostingRequest { string id = 1; }
+message ListHrJobPostingRequest { string tenant_id = 1; int32 limit = 2; }

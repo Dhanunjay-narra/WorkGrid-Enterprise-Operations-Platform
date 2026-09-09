@@ -1,0 +1,20 @@
+syntax = "proto3";
+
+package nexora.events;
+
+message EvtPublishMetricMessage {
+  string id = 1;
+  string tenant_id = 2;
+  string code = 3;
+  string name = 4;
+  string status = 5;
+  int64 created_at_unix = 6;
+}
+
+service EvtPublishMetricService {
+  rpc GetEvtPublishMetric (GetEvtPublishMetricRequest) returns (EvtPublishMetricMessage);
+  rpc ListEvtPublishMetrics (ListEvtPublishMetricRequest) returns (stream EvtPublishMetricMessage);
+}
+
+message GetEvtPublishMetricRequest { string id = 1; }
+message ListEvtPublishMetricRequest { string tenant_id = 1; int32 limit = 2; }

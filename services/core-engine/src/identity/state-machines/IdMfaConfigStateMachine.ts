@@ -1,0 +1,22 @@
+export type IdMfaConfigState = "DRAFT" | "PENDING_APPROVAL" | "ACTIVE" | "SUSPENDED" | "ARCHIVED";
+
+export class IdMfaConfigStateMachine {
+  private validTransitions: Record<IdMfaConfigState, IdMfaConfigState[]> = {
+    DRAFT: ["PENDING_APPROVAL", "ACTIVE", "ARCHIVED"],
+    PENDING_APPROVAL: ["ACTIVE", "DRAFT", "ARCHIVED"],
+    ACTIVE: ["SUSPENDED", "ARCHIVED"],
+    SUSPENDED: ["ACTIVE", "ARCHIVED"],
+    ARCHIVED: []
+  };
+
+  public canTransition(current: IdMfaConfigState, next: IdMfaConfigState): boolean {
+    return this.validTransitions[current]?.includes(next) ?? false;
+  }
+
+  public transition(current: IdMfaConfigState, next: IdMfaConfigState): IdMfaConfigState {
+    if (!this.canTransition(current, next)) {
+      throw new Error("Illegal state transition for IdMfaConfig: from " + current + " to " + next);
+    }
+    return next;
+  }
+}

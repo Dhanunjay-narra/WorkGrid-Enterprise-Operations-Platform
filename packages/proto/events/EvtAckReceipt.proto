@@ -1,0 +1,20 @@
+syntax = "proto3";
+
+package nexora.events;
+
+message EvtAckReceiptMessage {
+  string id = 1;
+  string tenant_id = 2;
+  string code = 3;
+  string name = 4;
+  string status = 5;
+  int64 created_at_unix = 6;
+}
+
+service EvtAckReceiptService {
+  rpc GetEvtAckReceipt (GetEvtAckReceiptRequest) returns (EvtAckReceiptMessage);
+  rpc ListEvtAckReceipts (ListEvtAckReceiptRequest) returns (stream EvtAckReceiptMessage);
+}
+
+message GetEvtAckReceiptRequest { string id = 1; }
+message ListEvtAckReceiptRequest { string tenant_id = 1; int32 limit = 2; }

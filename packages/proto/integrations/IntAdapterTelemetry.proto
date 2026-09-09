@@ -1,0 +1,20 @@
+syntax = "proto3";
+
+package nexora.integrations;
+
+message IntAdapterTelemetryMessage {
+  string id = 1;
+  string tenant_id = 2;
+  string code = 3;
+  string name = 4;
+  string status = 5;
+  int64 created_at_unix = 6;
+}
+
+service IntAdapterTelemetryService {
+  rpc GetIntAdapterTelemetry (GetIntAdapterTelemetryRequest) returns (IntAdapterTelemetryMessage);
+  rpc ListIntAdapterTelemetrys (ListIntAdapterTelemetryRequest) returns (stream IntAdapterTelemetryMessage);
+}
+
+message GetIntAdapterTelemetryRequest { string id = 1; }
+message ListIntAdapterTelemetryRequest { string tenant_id = 1; int32 limit = 2; }

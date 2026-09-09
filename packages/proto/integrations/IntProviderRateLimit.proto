@@ -1,0 +1,20 @@
+syntax = "proto3";
+
+package nexora.integrations;
+
+message IntProviderRateLimitMessage {
+  string id = 1;
+  string tenant_id = 2;
+  string code = 3;
+  string name = 4;
+  string status = 5;
+  int64 created_at_unix = 6;
+}
+
+service IntProviderRateLimitService {
+  rpc GetIntProviderRateLimit (GetIntProviderRateLimitRequest) returns (IntProviderRateLimitMessage);
+  rpc ListIntProviderRateLimits (ListIntProviderRateLimitRequest) returns (stream IntProviderRateLimitMessage);
+}
+
+message GetIntProviderRateLimitRequest { string id = 1; }
+message ListIntProviderRateLimitRequest { string tenant_id = 1; int32 limit = 2; }

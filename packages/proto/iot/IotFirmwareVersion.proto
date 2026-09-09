@@ -1,0 +1,20 @@
+syntax = "proto3";
+
+package nexora.iot;
+
+message IotFirmwareVersionMessage {
+  string id = 1;
+  string tenant_id = 2;
+  string code = 3;
+  string name = 4;
+  string status = 5;
+  int64 created_at_unix = 6;
+}
+
+service IotFirmwareVersionService {
+  rpc GetIotFirmwareVersion (GetIotFirmwareVersionRequest) returns (IotFirmwareVersionMessage);
+  rpc ListIotFirmwareVersions (ListIotFirmwareVersionRequest) returns (stream IotFirmwareVersionMessage);
+}
+
+message GetIotFirmwareVersionRequest { string id = 1; }
+message ListIotFirmwareVersionRequest { string tenant_id = 1; int32 limit = 2; }

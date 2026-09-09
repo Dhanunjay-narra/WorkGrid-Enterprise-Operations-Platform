@@ -1,0 +1,20 @@
+syntax = "proto3";
+
+package nexora.communication;
+
+message CommChannelMemberMessage {
+  string id = 1;
+  string tenant_id = 2;
+  string code = 3;
+  string name = 4;
+  string status = 5;
+  int64 created_at_unix = 6;
+}
+
+service CommChannelMemberService {
+  rpc GetCommChannelMember (GetCommChannelMemberRequest) returns (CommChannelMemberMessage);
+  rpc ListCommChannelMembers (ListCommChannelMemberRequest) returns (stream CommChannelMemberMessage);
+}
+
+message GetCommChannelMemberRequest { string id = 1; }
+message ListCommChannelMemberRequest { string tenant_id = 1; int32 limit = 2; }

@@ -1,0 +1,20 @@
+syntax = "proto3";
+
+package nexora.ai;
+
+message AiTokenUsageRecordMessage {
+  string id = 1;
+  string tenant_id = 2;
+  string code = 3;
+  string name = 4;
+  string status = 5;
+  int64 created_at_unix = 6;
+}
+
+service AiTokenUsageRecordService {
+  rpc GetAiTokenUsageRecord (GetAiTokenUsageRecordRequest) returns (AiTokenUsageRecordMessage);
+  rpc ListAiTokenUsageRecords (ListAiTokenUsageRecordRequest) returns (stream AiTokenUsageRecordMessage);
+}
+
+message GetAiTokenUsageRecordRequest { string id = 1; }
+message ListAiTokenUsageRecordRequest { string tenant_id = 1; int32 limit = 2; }

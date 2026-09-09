@@ -1,0 +1,20 @@
+syntax = "proto3";
+
+package nexora.workflow;
+
+message WfNodeExecutionLogMessage {
+  string id = 1;
+  string tenant_id = 2;
+  string code = 3;
+  string name = 4;
+  string status = 5;
+  int64 created_at_unix = 6;
+}
+
+service WfNodeExecutionLogService {
+  rpc GetWfNodeExecutionLog (GetWfNodeExecutionLogRequest) returns (WfNodeExecutionLogMessage);
+  rpc ListWfNodeExecutionLogs (ListWfNodeExecutionLogRequest) returns (stream WfNodeExecutionLogMessage);
+}
+
+message GetWfNodeExecutionLogRequest { string id = 1; }
+message ListWfNodeExecutionLogRequest { string tenant_id = 1; int32 limit = 2; }

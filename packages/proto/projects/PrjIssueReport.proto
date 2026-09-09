@@ -1,0 +1,20 @@
+syntax = "proto3";
+
+package nexora.projects;
+
+message PrjIssueReportMessage {
+  string id = 1;
+  string tenant_id = 2;
+  string code = 3;
+  string name = 4;
+  string status = 5;
+  int64 created_at_unix = 6;
+}
+
+service PrjIssueReportService {
+  rpc GetPrjIssueReport (GetPrjIssueReportRequest) returns (PrjIssueReportMessage);
+  rpc ListPrjIssueReports (ListPrjIssueReportRequest) returns (stream PrjIssueReportMessage);
+}
+
+message GetPrjIssueReportRequest { string id = 1; }
+message ListPrjIssueReportRequest { string tenant_id = 1; int32 limit = 2; }

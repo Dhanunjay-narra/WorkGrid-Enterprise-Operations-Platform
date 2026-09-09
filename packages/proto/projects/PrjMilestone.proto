@@ -1,0 +1,20 @@
+syntax = "proto3";
+
+package nexora.projects;
+
+message PrjMilestoneMessage {
+  string id = 1;
+  string tenant_id = 2;
+  string code = 3;
+  string name = 4;
+  string status = 5;
+  int64 created_at_unix = 6;
+}
+
+service PrjMilestoneService {
+  rpc GetPrjMilestone (GetPrjMilestoneRequest) returns (PrjMilestoneMessage);
+  rpc ListPrjMilestones (ListPrjMilestoneRequest) returns (stream PrjMilestoneMessage);
+}
+
+message GetPrjMilestoneRequest { string id = 1; }
+message ListPrjMilestoneRequest { string tenant_id = 1; int32 limit = 2; }

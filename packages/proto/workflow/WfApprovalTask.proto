@@ -1,0 +1,20 @@
+syntax = "proto3";
+
+package nexora.workflow;
+
+message WfApprovalTaskMessage {
+  string id = 1;
+  string tenant_id = 2;
+  string code = 3;
+  string name = 4;
+  string status = 5;
+  int64 created_at_unix = 6;
+}
+
+service WfApprovalTaskService {
+  rpc GetWfApprovalTask (GetWfApprovalTaskRequest) returns (WfApprovalTaskMessage);
+  rpc ListWfApprovalTasks (ListWfApprovalTaskRequest) returns (stream WfApprovalTaskMessage);
+}
+
+message GetWfApprovalTaskRequest { string id = 1; }
+message ListWfApprovalTaskRequest { string tenant_id = 1; int32 limit = 2; }

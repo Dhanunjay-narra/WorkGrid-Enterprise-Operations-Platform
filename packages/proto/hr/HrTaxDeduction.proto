@@ -1,0 +1,20 @@
+syntax = "proto3";
+
+package nexora.hr;
+
+message HrTaxDeductionMessage {
+  string id = 1;
+  string tenant_id = 2;
+  string code = 3;
+  string name = 4;
+  string status = 5;
+  int64 created_at_unix = 6;
+}
+
+service HrTaxDeductionService {
+  rpc GetHrTaxDeduction (GetHrTaxDeductionRequest) returns (HrTaxDeductionMessage);
+  rpc ListHrTaxDeductions (ListHrTaxDeductionRequest) returns (stream HrTaxDeductionMessage);
+}
+
+message GetHrTaxDeductionRequest { string id = 1; }
+message ListHrTaxDeductionRequest { string tenant_id = 1; int32 limit = 2; }

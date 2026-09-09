@@ -1,0 +1,20 @@
+syntax = "proto3";
+
+package nexora.finance;
+
+message FinPaymentTransactionMessage {
+  string id = 1;
+  string tenant_id = 2;
+  string code = 3;
+  string name = 4;
+  string status = 5;
+  int64 created_at_unix = 6;
+}
+
+service FinPaymentTransactionService {
+  rpc GetFinPaymentTransaction (GetFinPaymentTransactionRequest) returns (FinPaymentTransactionMessage);
+  rpc ListFinPaymentTransactions (ListFinPaymentTransactionRequest) returns (stream FinPaymentTransactionMessage);
+}
+
+message GetFinPaymentTransactionRequest { string id = 1; }
+message ListFinPaymentTransactionRequest { string tenant_id = 1; int32 limit = 2; }

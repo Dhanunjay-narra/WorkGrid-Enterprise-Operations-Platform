@@ -1,0 +1,20 @@
+syntax = "proto3";
+
+package nexora.support;
+
+message SupSlaPolicyMessage {
+  string id = 1;
+  string tenant_id = 2;
+  string code = 3;
+  string name = 4;
+  string status = 5;
+  int64 created_at_unix = 6;
+}
+
+service SupSlaPolicyService {
+  rpc GetSupSlaPolicy (GetSupSlaPolicyRequest) returns (SupSlaPolicyMessage);
+  rpc ListSupSlaPolicys (ListSupSlaPolicyRequest) returns (stream SupSlaPolicyMessage);
+}
+
+message GetSupSlaPolicyRequest { string id = 1; }
+message ListSupSlaPolicyRequest { string tenant_id = 1; int32 limit = 2; }

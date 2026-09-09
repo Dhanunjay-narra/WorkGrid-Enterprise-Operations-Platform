@@ -1,0 +1,20 @@
+syntax = "proto3";
+
+package nexora.events;
+
+message EvtStreamSnapshotMessage {
+  string id = 1;
+  string tenant_id = 2;
+  string code = 3;
+  string name = 4;
+  string status = 5;
+  int64 created_at_unix = 6;
+}
+
+service EvtStreamSnapshotService {
+  rpc GetEvtStreamSnapshot (GetEvtStreamSnapshotRequest) returns (EvtStreamSnapshotMessage);
+  rpc ListEvtStreamSnapshots (ListEvtStreamSnapshotRequest) returns (stream EvtStreamSnapshotMessage);
+}
+
+message GetEvtStreamSnapshotRequest { string id = 1; }
+message ListEvtStreamSnapshotRequest { string tenant_id = 1; int32 limit = 2; }

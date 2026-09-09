@@ -1,0 +1,20 @@
+syntax = "proto3";
+
+package nexora.crm;
+
+message CrmSalesContractMessage {
+  string id = 1;
+  string tenant_id = 2;
+  string code = 3;
+  string name = 4;
+  string status = 5;
+  int64 created_at_unix = 6;
+}
+
+service CrmSalesContractService {
+  rpc GetCrmSalesContract (GetCrmSalesContractRequest) returns (CrmSalesContractMessage);
+  rpc ListCrmSalesContracts (ListCrmSalesContractRequest) returns (stream CrmSalesContractMessage);
+}
+
+message GetCrmSalesContractRequest { string id = 1; }
+message ListCrmSalesContractRequest { string tenant_id = 1; int32 limit = 2; }

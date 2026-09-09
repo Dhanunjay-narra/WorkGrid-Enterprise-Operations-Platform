@@ -1,0 +1,20 @@
+syntax = "proto3";
+
+package nexora.support;
+
+message SupTicketMessageMessage {
+  string id = 1;
+  string tenant_id = 2;
+  string code = 3;
+  string name = 4;
+  string status = 5;
+  int64 created_at_unix = 6;
+}
+
+service SupTicketMessageService {
+  rpc GetSupTicketMessage (GetSupTicketMessageRequest) returns (SupTicketMessageMessage);
+  rpc ListSupTicketMessages (ListSupTicketMessageRequest) returns (stream SupTicketMessageMessage);
+}
+
+message GetSupTicketMessageRequest { string id = 1; }
+message ListSupTicketMessageRequest { string tenant_id = 1; int32 limit = 2; }

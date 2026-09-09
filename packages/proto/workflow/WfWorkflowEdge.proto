@@ -1,0 +1,20 @@
+syntax = "proto3";
+
+package nexora.workflow;
+
+message WfWorkflowEdgeMessage {
+  string id = 1;
+  string tenant_id = 2;
+  string code = 3;
+  string name = 4;
+  string status = 5;
+  int64 created_at_unix = 6;
+}
+
+service WfWorkflowEdgeService {
+  rpc GetWfWorkflowEdge (GetWfWorkflowEdgeRequest) returns (WfWorkflowEdgeMessage);
+  rpc ListWfWorkflowEdges (ListWfWorkflowEdgeRequest) returns (stream WfWorkflowEdgeMessage);
+}
+
+message GetWfWorkflowEdgeRequest { string id = 1; }
+message ListWfWorkflowEdgeRequest { string tenant_id = 1; int32 limit = 2; }

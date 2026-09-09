@@ -1,0 +1,20 @@
+syntax = "proto3";
+
+package nexora.projects;
+
+message PrjEpicMessage {
+  string id = 1;
+  string tenant_id = 2;
+  string code = 3;
+  string name = 4;
+  string status = 5;
+  int64 created_at_unix = 6;
+}
+
+service PrjEpicService {
+  rpc GetPrjEpic (GetPrjEpicRequest) returns (PrjEpicMessage);
+  rpc ListPrjEpics (ListPrjEpicRequest) returns (stream PrjEpicMessage);
+}
+
+message GetPrjEpicRequest { string id = 1; }
+message ListPrjEpicRequest { string tenant_id = 1; int32 limit = 2; }

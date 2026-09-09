@@ -1,0 +1,20 @@
+syntax = "proto3";
+
+package nexora.crm;
+
+message CrmActivityMessage {
+  string id = 1;
+  string tenant_id = 2;
+  string code = 3;
+  string name = 4;
+  string status = 5;
+  int64 created_at_unix = 6;
+}
+
+service CrmActivityService {
+  rpc GetCrmActivity (GetCrmActivityRequest) returns (CrmActivityMessage);
+  rpc ListCrmActivitys (ListCrmActivityRequest) returns (stream CrmActivityMessage);
+}
+
+message GetCrmActivityRequest { string id = 1; }
+message ListCrmActivityRequest { string tenant_id = 1; int32 limit = 2; }
