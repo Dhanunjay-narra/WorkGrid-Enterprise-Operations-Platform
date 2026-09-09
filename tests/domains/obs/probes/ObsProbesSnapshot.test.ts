@@ -1,0 +1,32 @@
+import { ObsProbesSnapshotService } from "../../../services/core-engine/src/obs/probes/services/ObsProbesSnapshotService";
+import { ObsProbesSnapshotValidator } from "../../../packages/types/src/domains/obs/probes/ObsProbesSnapshot";
+import { ObsProbesSnapshotStateMachine } from "../../../services/core-engine/src/obs/probes/state-machines/ObsProbesSnapshotStateMachine";
+
+describe("ObsProbesSnapshot Comprehensive Domain Test Suite", () => {
+  const service = new ObsProbesSnapshotService();
+  const sm = new ObsProbesSnapshotStateMachine();
+
+  test("creates entity with initial version 1", () => {
+    const created = service.create({
+      tenantId: "tenant-alpha",
+      code: "ENT-001",
+      name: "ObsProbesSnapshot Instance",
+      domain: "obs_probes",
+      status: "ACTIVE",
+      metadata: { priority: "HIGH" }
+    });
+    expect(created.id).toBeDefined();
+    expect(created.version).toBe(1);
+    expect(service.findById(created.id)).toBeDefined();
+  });
+
+  test("validates required schema constraints", () => {
+    const res = ObsProbesSnapshotValidator.validate({ version: 2 });
+    expect(res.isValid).toBe(true);
+  });
+
+  test("enforces state machine transition rules", () => {
+    expect(sm.canTransition("DRAFT", "PENDING_REVIEW")).toBe(true);
+    expect(sm.canTransition("DRAFT", "SUSPENDED")).toBe(false);
+  });
+});

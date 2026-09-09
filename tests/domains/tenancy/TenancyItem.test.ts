@@ -1,0 +1,32 @@
+import { TenancyItemService } from "../../../services/core-engine/src/tenancy/services/TenancyItemService";
+import { TenancyItemValidator } from "../../../packages/types/src/domains/tenancy/TenancyItem";
+import { TenancyItemStateMachine } from "../../../services/core-engine/src/tenancy/state-machines/TenancyItemStateMachine";
+
+describe("TenancyItem Comprehensive Domain Test Suite", () => {
+  const service = new TenancyItemService();
+  const sm = new TenancyItemStateMachine();
+
+  test("creates entity with initial version 1", () => {
+    const created = service.create({
+      tenantId: "tenant-alpha",
+      code: "ENT-001",
+      name: "TenancyItem Instance",
+      domain: "tenancy",
+      status: "ACTIVE",
+      metadata: { priority: "HIGH" }
+    });
+    expect(created.id).toBeDefined();
+    expect(created.version).toBe(1);
+    expect(service.findById(created.id)).toBeDefined();
+  });
+
+  test("validates required schema constraints", () => {
+    const res = TenancyItemValidator.validate({ version: 2 });
+    expect(res.isValid).toBe(true);
+  });
+
+  test("enforces state machine transition rules", () => {
+    expect(sm.canTransition("DRAFT", "PENDING_REVIEW")).toBe(true);
+    expect(sm.canTransition("DRAFT", "SUSPENDED")).toBe(false);
+  });
+});

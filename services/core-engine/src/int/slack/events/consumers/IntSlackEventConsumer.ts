@@ -1,0 +1,13 @@
+export class IntSlackEventConsumer {
+  public async handleCreated(event: { id: string; tenantId: string; entityId: string; occurredAt: string }): Promise<void> {
+    console.log("[EVENT-BUS] Consumed IntSlackEvent created event for entity " + event.entityId + " in int_slack");
+  }
+
+  public async handleUpdated(event: { id: string; tenantId: string; entityId: string; delta: Record<string, any> }): Promise<void> {
+    console.log("[EVENT-BUS] Consumed IntSlackEvent updated event for entity " + event.entityId + " in int_slack");
+  }
+
+  public async handleDeleted(event: { id: string; tenantId: string; entityId: string }): Promise<void> {
+    console.log("[EVENT-BUS] Consumed IntSlackEvent deleted event for entity " + event.entityId + " in int_slack");
+  }
+}

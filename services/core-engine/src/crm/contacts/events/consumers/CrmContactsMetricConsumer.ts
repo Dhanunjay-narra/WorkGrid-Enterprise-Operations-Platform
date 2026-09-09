@@ -1,0 +1,13 @@
+export class CrmContactsMetricConsumer {
+  public async handleCreated(event: { id: string; tenantId: string; entityId: string; occurredAt: string }): Promise<void> {
+    console.log("[EVENT-BUS] Consumed CrmContactsMetric created event for entity " + event.entityId + " in crm_contacts");
+  }
+
+  public async handleUpdated(event: { id: string; tenantId: string; entityId: string; delta: Record<string, any> }): Promise<void> {
+    console.log("[EVENT-BUS] Consumed CrmContactsMetric updated event for entity " + event.entityId + " in crm_contacts");
+  }
+
+  public async handleDeleted(event: { id: string; tenantId: string; entityId: string }): Promise<void> {
+    console.log("[EVENT-BUS] Consumed CrmContactsMetric deleted event for entity " + event.entityId + " in crm_contacts");
+  }
+}

@@ -1,0 +1,23 @@
+export type ObsSpansTransactionState = "DRAFT" | "PENDING_REVIEW" | "APPROVED" | "ACTIVE" | "SUSPENDED" | "TERMINATED";
+
+export class ObsSpansTransactionStateMachine {
+  private allowedTransitions: Record<ObsSpansTransactionState, ObsSpansTransactionState[]> = {
+    DRAFT: ["PENDING_REVIEW", "ACTIVE", "TERMINATED"],
+    PENDING_REVIEW: ["APPROVED", "DRAFT", "TERMINATED"],
+    APPROVED: ["ACTIVE", "TERMINATED"],
+    ACTIVE: ["SUSPENDED", "TERMINATED"],
+    SUSPENDED: ["ACTIVE", "TERMINATED"],
+    TERMINATED: []
+  };
+
+  public canTransition(from: ObsSpansTransactionState, to: ObsSpansTransactionState): boolean {
+    return this.allowedTransitions[from]?.includes(to) ?? false;
+  }
+
+  public transition(from: ObsSpansTransactionState, to: ObsSpansTransactionState): ObsSpansTransactionState {
+    if (!this.canTransition(from, to)) {
+      throw new Error("Invalid state transition for ObsSpansTransaction: " + from + " -> " + to);
+    }
+    return to;
+  }
+}

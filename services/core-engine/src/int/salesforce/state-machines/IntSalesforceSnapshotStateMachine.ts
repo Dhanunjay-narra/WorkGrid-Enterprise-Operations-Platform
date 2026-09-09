@@ -1,0 +1,23 @@
+export type IntSalesforceSnapshotState = "DRAFT" | "PENDING_REVIEW" | "APPROVED" | "ACTIVE" | "SUSPENDED" | "TERMINATED";
+
+export class IntSalesforceSnapshotStateMachine {
+  private allowedTransitions: Record<IntSalesforceSnapshotState, IntSalesforceSnapshotState[]> = {
+    DRAFT: ["PENDING_REVIEW", "ACTIVE", "TERMINATED"],
+    PENDING_REVIEW: ["APPROVED", "DRAFT", "TERMINATED"],
+    APPROVED: ["ACTIVE", "TERMINATED"],
+    ACTIVE: ["SUSPENDED", "TERMINATED"],
+    SUSPENDED: ["ACTIVE", "TERMINATED"],
+    TERMINATED: []
+  };
+
+  public canTransition(from: IntSalesforceSnapshotState, to: IntSalesforceSnapshotState): boolean {
+    return this.allowedTransitions[from]?.includes(to) ?? false;
+  }
+
+  public transition(from: IntSalesforceSnapshotState, to: IntSalesforceSnapshotState): IntSalesforceSnapshotState {
+    if (!this.canTransition(from, to)) {
+      throw new Error("Invalid state transition for IntSalesforceSnapshot: " + from + " -> " + to);
+    }
+    return to;
+  }
+}

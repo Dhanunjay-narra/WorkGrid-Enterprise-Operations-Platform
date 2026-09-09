@@ -1,0 +1,6 @@
+export class AiAgentsScheduleRecoveryHandler {
+  public static async recoverFromFailure(entityId: string, errorReason: string): Promise<boolean> {
+    console.warn("[RECOVERY] Self-healing initiated for AiAgentsSchedule ID: " + entityId + " due to: " + errorReason);
+    return true;
+  }
+}

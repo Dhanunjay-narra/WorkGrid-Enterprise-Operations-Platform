@@ -1,0 +1,49 @@
+import { FinanceLedgerPayloadModel, FinanceLedgerPayloadValidator } from "@nexora/types/domains/finance/ledger/FinanceLedgerPayload";
+
+export class FinanceLedgerPayloadService {
+  private repository = new Map<string, FinanceLedgerPayloadModel>();
+
+  public create(data: Omit<FinanceLedgerPayloadModel, "id" | "version" | "createdAt" | "updatedAt">): FinanceLedgerPayloadModel {
+    const id = "fina_" + Math.random().toString(36).substring(2, 11);
+    const now = new Date().toISOString();
+    const item: FinanceLedgerPayloadModel = {
+      ...data,
+      id,
+      version: 1,
+      createdAt: now,
+      updatedAt: now
+    };
+    const validation = FinanceLedgerPayloadValidator.validate(item);
+    if (!validation.isValid) {
+      throw new Error("Validation failure for FinanceLedgerPayload: " + validation.errors.join(", "));
+    }
+    this.repository.set(id, item);
+    return item;
+  }
+
+  public findById(id: string): FinanceLedgerPayloadModel | undefined {
+    return this.repository.get(id);
+  }
+
+  public list(tenantId: string, limit: number = 50, offset: number = 0): { items: FinanceLedgerPayloadModel[]; total: number } {
+    const all = Array.from(this.repository.values()).filter(i => i.tenantId === tenantId);
+    return { items: all.slice(offset, offset + limit), total: all.length };
+  }
+
+  public update(id: string, updates: Partial<FinanceLedgerPayloadModel>): FinanceLedgerPayloadModel | null {
+    const existing = this.repository.get(id);
+    if (!existing) return null;
+    const updated: FinanceLedgerPayloadModel = {
+      ...existing,
+      ...updates,
+      version: existing.version + 1,
+      updatedAt: new Date().toISOString()
+    };
+    this.repository.set(id, updated);
+    return updated;
+  }
+
+  public remove(id: string): boolean {
+    return this.repository.delete(id);
+  }
+}

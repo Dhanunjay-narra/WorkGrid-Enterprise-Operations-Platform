@@ -1,0 +1,13 @@
+export class CrmPipelineReportConsumer {
+  public async handleCreated(event: { id: string; tenantId: string; entityId: string; occurredAt: string }): Promise<void> {
+    console.log("[EVENT-BUS] Consumed CrmPipelineReport created event for entity " + event.entityId + " in crm_pipeline");
+  }
+
+  public async handleUpdated(event: { id: string; tenantId: string; entityId: string; delta: Record<string, any> }): Promise<void> {
+    console.log("[EVENT-BUS] Consumed CrmPipelineReport updated event for entity " + event.entityId + " in crm_pipeline");
+  }
+
+  public async handleDeleted(event: { id: string; tenantId: string; entityId: string }): Promise<void> {
+    console.log("[EVENT-BUS] Consumed CrmPipelineReport deleted event for entity " + event.entityId + " in crm_pipeline");
+  }
+}

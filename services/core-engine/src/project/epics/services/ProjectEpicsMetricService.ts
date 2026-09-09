@@ -1,0 +1,49 @@
+import { ProjectEpicsMetricModel, ProjectEpicsMetricValidator } from "@nexora/types/domains/project/epics/ProjectEpicsMetric";
+
+export class ProjectEpicsMetricService {
+  private repository = new Map<string, ProjectEpicsMetricModel>();
+
+  public create(data: Omit<ProjectEpicsMetricModel, "id" | "version" | "createdAt" | "updatedAt">): ProjectEpicsMetricModel {
+    const id = "proj_" + Math.random().toString(36).substring(2, 11);
+    const now = new Date().toISOString();
+    const item: ProjectEpicsMetricModel = {
+      ...data,
+      id,
+      version: 1,
+      createdAt: now,
+      updatedAt: now
+    };
+    const validation = ProjectEpicsMetricValidator.validate(item);
+    if (!validation.isValid) {
+      throw new Error("Validation failure for ProjectEpicsMetric: " + validation.errors.join(", "));
+    }
+    this.repository.set(id, item);
+    return item;
+  }
+
+  public findById(id: string): ProjectEpicsMetricModel | undefined {
+    return this.repository.get(id);
+  }
+
+  public list(tenantId: string, limit: number = 50, offset: number = 0): { items: ProjectEpicsMetricModel[]; total: number } {
+    const all = Array.from(this.repository.values()).filter(i => i.tenantId === tenantId);
+    return { items: all.slice(offset, offset + limit), total: all.length };
+  }
+
+  public update(id: string, updates: Partial<ProjectEpicsMetricModel>): ProjectEpicsMetricModel | null {
+    const existing = this.repository.get(id);
+    if (!existing) return null;
+    const updated: ProjectEpicsMetricModel = {
+      ...existing,
+      ...updates,
+      version: existing.version + 1,
+      updatedAt: new Date().toISOString()
+    };
+    this.repository.set(id, updated);
+    return updated;
+  }
+
+  public remove(id: string): boolean {
+    return this.repository.delete(id);
+  }
+}

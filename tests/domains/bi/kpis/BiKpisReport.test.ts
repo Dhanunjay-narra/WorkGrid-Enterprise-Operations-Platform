@@ -1,0 +1,32 @@
+import { BiKpisReportService } from "../../../services/core-engine/src/bi/kpis/services/BiKpisReportService";
+import { BiKpisReportValidator } from "../../../packages/types/src/domains/bi/kpis/BiKpisReport";
+import { BiKpisReportStateMachine } from "../../../services/core-engine/src/bi/kpis/state-machines/BiKpisReportStateMachine";
+
+describe("BiKpisReport Comprehensive Domain Test Suite", () => {
+  const service = new BiKpisReportService();
+  const sm = new BiKpisReportStateMachine();
+
+  test("creates entity with initial version 1", () => {
+    const created = service.create({
+      tenantId: "tenant-alpha",
+      code: "ENT-001",
+      name: "BiKpisReport Instance",
+      domain: "bi_kpis",
+      status: "ACTIVE",
+      metadata: { priority: "HIGH" }
+    });
+    expect(created.id).toBeDefined();
+    expect(created.version).toBe(1);
+    expect(service.findById(created.id)).toBeDefined();
+  });
+
+  test("validates required schema constraints", () => {
+    const res = BiKpisReportValidator.validate({ version: 2 });
+    expect(res.isValid).toBe(true);
+  });
+
+  test("enforces state machine transition rules", () => {
+    expect(sm.canTransition("DRAFT", "PENDING_REVIEW")).toBe(true);
+    expect(sm.canTransition("DRAFT", "SUSPENDED")).toBe(false);
+  });
+});

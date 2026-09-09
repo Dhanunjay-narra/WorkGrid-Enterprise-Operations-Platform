@@ -1,0 +1,32 @@
+import { HrPayrollNodeService } from "../../../services/core-engine/src/hr/payroll/services/HrPayrollNodeService";
+import { HrPayrollNodeValidator } from "../../../packages/types/src/domains/hr/payroll/HrPayrollNode";
+import { HrPayrollNodeStateMachine } from "../../../services/core-engine/src/hr/payroll/state-machines/HrPayrollNodeStateMachine";
+
+describe("HrPayrollNode Comprehensive Domain Test Suite", () => {
+  const service = new HrPayrollNodeService();
+  const sm = new HrPayrollNodeStateMachine();
+
+  test("creates entity with initial version 1", () => {
+    const created = service.create({
+      tenantId: "tenant-alpha",
+      code: "ENT-001",
+      name: "HrPayrollNode Instance",
+      domain: "hr_payroll",
+      status: "ACTIVE",
+      metadata: { priority: "HIGH" }
+    });
+    expect(created.id).toBeDefined();
+    expect(created.version).toBe(1);
+    expect(service.findById(created.id)).toBeDefined();
+  });
+
+  test("validates required schema constraints", () => {
+    const res = HrPayrollNodeValidator.validate({ version: 2 });
+    expect(res.isValid).toBe(true);
+  });
+
+  test("enforces state machine transition rules", () => {
+    expect(sm.canTransition("DRAFT", "PENDING_REVIEW")).toBe(true);
+    expect(sm.canTransition("DRAFT", "SUSPENDED")).toBe(false);
+  });
+});

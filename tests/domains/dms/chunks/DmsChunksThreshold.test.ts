@@ -1,0 +1,32 @@
+import { DmsChunksThresholdService } from "../../../services/core-engine/src/dms/chunks/services/DmsChunksThresholdService";
+import { DmsChunksThresholdValidator } from "../../../packages/types/src/domains/dms/chunks/DmsChunksThreshold";
+import { DmsChunksThresholdStateMachine } from "../../../services/core-engine/src/dms/chunks/state-machines/DmsChunksThresholdStateMachine";
+
+describe("DmsChunksThreshold Comprehensive Domain Test Suite", () => {
+  const service = new DmsChunksThresholdService();
+  const sm = new DmsChunksThresholdStateMachine();
+
+  test("creates entity with initial version 1", () => {
+    const created = service.create({
+      tenantId: "tenant-alpha",
+      code: "ENT-001",
+      name: "DmsChunksThreshold Instance",
+      domain: "dms_chunks",
+      status: "ACTIVE",
+      metadata: { priority: "HIGH" }
+    });
+    expect(created.id).toBeDefined();
+    expect(created.version).toBe(1);
+    expect(service.findById(created.id)).toBeDefined();
+  });
+
+  test("validates required schema constraints", () => {
+    const res = DmsChunksThresholdValidator.validate({ version: 2 });
+    expect(res.isValid).toBe(true);
+  });
+
+  test("enforces state machine transition rules", () => {
+    expect(sm.canTransition("DRAFT", "PENDING_REVIEW")).toBe(true);
+    expect(sm.canTransition("DRAFT", "SUSPENDED")).toBe(false);
+  });
+});

@@ -1,0 +1,9 @@
+export class DmsFilesEntryWsGateway {
+  public static handleClientConnection(socketId: string, tenantId: string): void {
+    console.log("[WS-GATEWAY] Client " + socketId + " connected to DmsFilesEntry channel in tenant " + tenantId);
+  }
+
+  public static handleClientDisconnection(socketId: string): void {
+    console.log("[WS-GATEWAY] Client " + socketId + " disconnected from DmsFilesEntry");
+  }
+}

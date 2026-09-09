@@ -1,0 +1,32 @@
+import { IntOauthProfileService } from "../../../services/core-engine/src/int/oauth/services/IntOauthProfileService";
+import { IntOauthProfileValidator } from "../../../packages/types/src/domains/int/oauth/IntOauthProfile";
+import { IntOauthProfileStateMachine } from "../../../services/core-engine/src/int/oauth/state-machines/IntOauthProfileStateMachine";
+
+describe("IntOauthProfile Comprehensive Domain Test Suite", () => {
+  const service = new IntOauthProfileService();
+  const sm = new IntOauthProfileStateMachine();
+
+  test("creates entity with initial version 1", () => {
+    const created = service.create({
+      tenantId: "tenant-alpha",
+      code: "ENT-001",
+      name: "IntOauthProfile Instance",
+      domain: "int_oauth",
+      status: "ACTIVE",
+      metadata: { priority: "HIGH" }
+    });
+    expect(created.id).toBeDefined();
+    expect(created.version).toBe(1);
+    expect(service.findById(created.id)).toBeDefined();
+  });
+
+  test("validates required schema constraints", () => {
+    const res = IntOauthProfileValidator.validate({ version: 2 });
+    expect(res.isValid).toBe(true);
+  });
+
+  test("enforces state machine transition rules", () => {
+    expect(sm.canTransition("DRAFT", "PENDING_REVIEW")).toBe(true);
+    expect(sm.canTransition("DRAFT", "SUSPENDED")).toBe(false);
+  });
+});
