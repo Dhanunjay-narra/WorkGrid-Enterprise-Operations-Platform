@@ -53,13 +53,51 @@ const htmlContent = `<!DOCTYPE html>
 
   <!-- Top Global Bar -->
   <header class="bg-[#FBFBF9] border-b border-[#E2DFD8] px-6 py-3.5 flex items-center justify-between sticky top-0 z-50">
-    <div class="flex items-center gap-4">
-      <div class="w-9 h-9 rounded-xl bg-[#5E6AD2] flex items-center justify-center text-white font-black text-lg shadow-sm">
-        N
+    <!-- Stylish Humanized NEXORA Brand Logo -->
+    <div class="flex items-center gap-3.5 group cursor-pointer">
+      <div class="relative w-10 h-10 rounded-2xl bg-gradient-to-br from-[#1E2022] via-[#2D3033] to-[#1E2022] p-[1.5px] shadow-md transition-all duration-300 group-hover:scale-105 group-hover:shadow-indigo-500/20">
+        <div class="w-full h-full bg-[#1E2022] rounded-2xl flex items-center justify-center relative overflow-hidden">
+          <!-- Subtle ambient background glow -->
+          <div class="absolute -top-3 -right-3 w-8 h-8 rounded-full bg-[#5E6AD2]/30 blur-md pointer-events-none"></div>
+          <div class="absolute -bottom-3 -left-3 w-8 h-8 rounded-full bg-[#C27D66]/25 blur-md pointer-events-none"></div>
+          
+          <!-- Interconnected Humanized "N" Mesh SVG Icon -->
+          <svg class="w-6 h-6 transform transition duration-300 group-hover:rotate-3" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <linearGradient id="nexoraGrad1" x1="4" y1="4" x2="32" y2="32" gradientUnits="userSpaceOnUse">
+                <stop offset="0%" stop-color="#7F8DF5" />
+                <stop offset="50%" stop-color="#5E6AD2" />
+                <stop offset="100%" stop-color="#4E5AC2" />
+              </linearGradient>
+              <linearGradient id="nexoraGrad2" x1="32" y1="4" x2="4" y2="32" gradientUnits="userSpaceOnUse">
+                <stop offset="0%" stop-color="#E89C82" />
+                <stop offset="60%" stop-color="#C27D66" />
+                <stop offset="100%" stop-color="#6B8E7B" />
+              </linearGradient>
+              <linearGradient id="nexoraGradAccent" x1="0" y1="0" x2="1" y2="1">
+                <stop offset="0%" stop-color="#FCD34D" />
+                <stop offset="100%" stop-color="#F59E0B" />
+              </linearGradient>
+            </defs>
+            <!-- Left Vertical Pillar -->
+            <path d="M9 27V11C9 8.79086 10.7909 7 13 7C15.2091 7 17 8.79086 17 11V27" stroke="url(#nexoraGrad1)" stroke-width="3" stroke-linecap="round" />
+            <!-- Diagonal Flowing Bridge (Humanized Synergy Wave) -->
+            <path d="M13 10L23 26" stroke="url(#nexoraGrad2)" stroke-width="3" stroke-linecap="round" />
+            <!-- Right Vertical Pillar -->
+            <path d="M19 9V25C19 27.2091 20.7909 29 23 29C25.2091 29 27 27.2091 27 25V9" stroke="url(#nexoraGrad1)" stroke-width="3" stroke-linecap="round" />
+            <!-- Humanized Golden Synergy Node -->
+            <circle cx="18" cy="18" r="2.5" fill="url(#nexoraGradAccent)" />
+            <circle cx="18" cy="18" r="4.5" stroke="#FCD34D" stroke-opacity="0.4" stroke-width="1" />
+          </svg>
+        </div>
       </div>
+
       <div>
         <div class="flex items-center gap-2">
-          <h1 class="text-base font-extrabold tracking-tight text-[#1E2022]">NEXORA</h1>
+          <h1 class="text-base font-extrabold tracking-tight text-[#1E2022] flex items-center">
+            <span>NEX</span><span class="text-[#5E6AD2]">O</span><span>RA</span>
+            <span class="inline-block w-1.5 h-1.5 rounded-full bg-[#C27D66] ml-1"></span>
+          </h1>
           <span class="text-[10px] font-bold px-2 py-0.5 rounded-full badge-pastel-blue">v2.4.0 PROD</span>
         </div>
         <p class="text-[11px] text-[#1E2022]/60 font-medium">Enterprise Autonomous Operations Platform</p>
