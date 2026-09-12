@@ -239,6 +239,19 @@ export default function LoginPage() {
             <span className="text-[#5E6AD2] text-xs">🛡️</span> SSO
           </button>
         </div>
+
+        <div className="mt-4 pt-3 border-t border-[#E2DFD8] flex items-center justify-between">
+          <span className="text-[11px] text-[#1E2022]/60 font-medium">Audit & Logins:</span>
+          <a
+            href="http://localhost:4000/api/v1/export/logins.xlsx"
+            download
+            className="px-3 py-1.5 bg-[#E8F0EC] hover:bg-[#D5E5DC] text-[#2E5A44] border border-[#C8DDD2] text-xs font-bold rounded-xl shadow-sm transition flex items-center gap-1.5"
+            title="Download Excel report of all user logins"
+          >
+            <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+            <span>Download Login Excel</span>
+          </a>
+        </div>
       </div>
 
       {/* FORGOT PASSWORD MODAL */}

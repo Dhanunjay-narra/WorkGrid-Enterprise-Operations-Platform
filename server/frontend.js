@@ -17,16 +17,16 @@ const htmlContent = `<!DOCTYPE html>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>NEXORA — Enterprise Autonomous Operations Platform</title>
   <script>
-    // Immediate Auth Guard: Redirect unauthenticated visitors straight to Sign In / Login
+    // Immediate Auth Guard: Redirect unauthenticated visitors to Sign In / Login page
     (function() {
       try {
         var token = localStorage.getItem('nexora_auth_token') || sessionStorage.getItem('nexora_auth_token');
         var user = localStorage.getItem('nexora_auth_user') || sessionStorage.getItem('nexora_auth_user');
         if (!token || !user) {
-          window.location.replace('/login');
+          window.location.replace('/');
         }
       } catch (e) {
-        window.location.replace('/login');
+        window.location.replace('/');
       }
     })();
   </script>
@@ -123,11 +123,20 @@ const htmlContent = `<!DOCTYPE html>
       </div>
     </div>
 
-    <!-- Actions & Auth (Exclusively User Profile & Logout) -->
-    <div class="flex items-center gap-3">
+    <!-- Actions & Auth (Download Excel, Run Autonomous Workflow & Logout) -->
+    <div class="flex items-center gap-2.5">
+      <a href="/api/v1/export/logins.xlsx" download class="px-3.5 py-1.5 bg-[#E8F0EC] hover:bg-[#D5E5DC] text-[#2E5A44] border border-[#C8DDD2] text-xs font-bold rounded-xl shadow-sm transition flex items-center gap-1.5" title="Download Excel report of all user logins">
+        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+        <span>Download Login Excel</span>
+      </a>
+      <button onclick="switchTab('workflows'); openTriggerModal();" class="px-3.5 py-1.5 bg-[#5E6AD2] hover:bg-[#4E5AC2] text-white text-xs font-bold rounded-xl shadow-sm transition flex items-center gap-1.5">
+        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+        <span>Run Autonomous Workflow</span>
+      </button>
       <div id="header-auth-container" class="flex items-center gap-2">
         <button onclick="handleLogout()" class="px-3.5 py-1.5 bg-rose-50 hover:bg-rose-100 text-rose-700 text-xs font-bold rounded-xl border border-rose-200 shadow-sm transition flex items-center gap-1.5 cursor-pointer">
-          <span>🚪</span> Logout
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
+          <span>Logout</span>
         </button>
       </div>
     </div>
@@ -142,31 +151,40 @@ const htmlContent = `<!DOCTYPE html>
         <p class="text-[10px] font-bold uppercase tracking-wider text-[#1E2022]/40 px-3 mb-2">OPERATIONAL DOMAINS</p>
         
         <button onclick="switchTab('overview')" id="nav-overview" class="w-full text-left px-3 py-2 rounded-xl text-xs font-semibold text-[#1E2022] hover:bg-[#EFECE6] transition sidebar-active flex items-center gap-2.5">
-          <span>📊</span> Global Cockpit
+          <svg class="w-4 h-4 text-[#5E6AD2]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"/></svg>
+          <span>Global Cockpit</span>
         </button>
         <button onclick="switchTab('crm')" id="nav-crm" class="w-full text-left px-3 py-2 rounded-xl text-xs font-semibold text-[#1E2022]/70 hover:bg-[#EFECE6] hover:text-[#1E2022] transition flex items-center gap-2.5">
-          <span>💼</span> CRM & Deal Velocity
+          <svg class="w-4 h-4 text-[#C27D66]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+          <span>CRM & Deal Velocity</span>
         </button>
         <button onclick="switchTab('projects')" id="nav-projects" class="w-full text-left px-3 py-2 rounded-xl text-xs font-semibold text-[#1E2022]/70 hover:bg-[#EFECE6] hover:text-[#1E2022] transition flex items-center gap-2.5">
-          <span>🎯</span> Projects & Gantt CPM
+          <svg class="w-4 h-4 text-[#6B8E7B]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/></svg>
+          <span>Projects & Gantt CPM</span>
         </button>
         <button onclick="switchTab('finance')" id="nav-finance" class="w-full text-left px-3 py-2 rounded-xl text-xs font-semibold text-[#1E2022]/70 hover:bg-[#EFECE6] hover:text-[#1E2022] transition flex items-center gap-2.5">
-          <span>💳</span> Finance & General Ledger
+          <svg class="w-4 h-4 text-[#D08C49]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+          <span>Finance & General Ledger</span>
         </button>
         <button onclick="switchTab('hr')" id="nav-hr" class="w-full text-left px-3 py-2 rounded-xl text-xs font-semibold text-[#1E2022]/70 hover:bg-[#EFECE6] hover:text-[#1E2022] transition flex items-center gap-2.5">
-          <span>👥</span> HR & Payroll Engine
+          <svg class="w-4 h-4 text-[#8E6BB8]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
+          <span>HR & Payroll Engine</span>
         </button>
         <button onclick="switchTab('inventory')" id="nav-inventory" class="w-full text-left px-3 py-2 rounded-xl text-xs font-semibold text-[#1E2022]/70 hover:bg-[#EFECE6] hover:text-[#1E2022] transition flex items-center gap-2.5">
-          <span>📦</span> Inventory & Supply Chain
+          <svg class="w-4 h-4 text-[#C27D66]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/></svg>
+          <span>Inventory & Supply Chain</span>
         </button>
         <button onclick="switchTab('iot')" id="nav-iot" class="w-full text-left px-3 py-2 rounded-xl text-xs font-semibold text-[#1E2022]/70 hover:bg-[#EFECE6] hover:text-[#1E2022] transition flex items-center gap-2.5">
-          <span>📡</span> IoT Telemetry Mesh
+          <svg class="w-4 h-4 text-[#38A169]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.111 16.404a5.5 5.5 0 017.778 0M12 20h.01m-7.08-7.071c3.904-3.905 10.236-3.905 14.141 0M1.394 9.393c5.857-5.857 15.355-5.857 21.213 0"/></svg>
+          <span>IoT Telemetry Mesh</span>
         </button>
         <button onclick="switchTab('ai')" id="nav-ai" class="w-full text-left px-3 py-2 rounded-xl text-xs font-semibold text-[#1E2022]/70 hover:bg-[#EFECE6] hover:text-[#1E2022] transition flex items-center gap-2.5">
-          <span>🤖</span> 9-Agent AI Swarm
+          <svg class="w-4 h-4 text-[#5E6AD2]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 3v2m6-2v2M9 19v2m6-2v2M3 9h2m-2 6h2m14-6h2m-2 6h2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z"/></svg>
+          <span>9-Agent AI Swarm</span>
         </button>
         <button onclick="switchTab('workflows')" id="nav-workflows" class="w-full text-left px-3 py-2 rounded-xl text-xs font-semibold text-[#1E2022]/70 hover:bg-[#EFECE6] hover:text-[#1E2022] transition flex items-center gap-2.5">
-          <span>⚙️</span> Distributed DAG Engine
+          <svg class="w-4 h-4 text-[#4351B8]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+          <span>Runtime Autonomous Workflows</span>
         </button>
       </div>
 
@@ -243,8 +261,8 @@ const htmlContent = `<!DOCTYPE html>
         <div class="card-nude rounded-2xl max-w-lg w-full p-6 shadow-2xl border border-[#E2DFD8] space-y-4">
           <div class="flex justify-between items-start">
             <div>
-              <h3 class="text-base font-extrabold text-[#1E2022]">Trigger Distributed DAG Run</h3>
-              <p class="text-xs text-[#1E2022]/60">Select an enterprise workflow template or enter custom parameters</p>
+              <h3 class="text-base font-extrabold text-[#1E2022]">Launch Runtime Autonomous Workflow</h3>
+              <p class="text-xs text-[#1E2022]/60">Select an autonomous workflow template or enter custom parameters for live DAG execution</p>
             </div>
             <button onclick="closeTriggerModal()" class="w-8 h-8 rounded-xl bg-[#EFECE6] hover:bg-[#E2DFD8] text-[#1E2022] font-bold flex items-center justify-center">✕</button>
           </div>
@@ -253,11 +271,11 @@ const htmlContent = `<!DOCTYPE html>
             <div>
               <label class="text-[11px] font-bold uppercase text-[#1E2022]/60">Workflow Template</label>
               <select id="modal-wf-select" class="w-full mt-1 px-3 py-2 text-xs rounded-xl bg-[#F7F6F3] border border-[#E2DFD8] focus:outline-none focus:ring-2 focus:ring-[#5E6AD2]/30 font-semibold" onchange="onTemplateChange()">
-                <option value="Enterprise Cross-Domain Auto-Rebalance|Multi-Tenant Cross-Domain Mesh">⚡ Enterprise Cross-Domain Auto-Rebalance</option>
-                <option value="Multi-Region Financial Ledger Settlement|Finance & General Ledger">💳 Multi-Region Financial Ledger Settlement</option>
-                <option value="Supply Chain Auto-Replenishment PO|Inventory & Procurement">📦 Supply Chain Auto-Replenishment PO</option>
-                <option value="Zero-Trust Security Incident Auto-Remediation|IoT & Security Mesh">🛡️ Zero-Trust Security Incident Auto-Remediation</option>
-                <option value="9-Agent Swarm Collaborative Consensus|AI Autonomous Swarm">🤖 9-Agent Swarm Collaborative Consensus</option>
+                <option value="Enterprise Cross-Domain Auto-Rebalance|Multi-Tenant Cross-Domain Mesh">Enterprise Cross-Domain Auto-Rebalance</option>
+                <option value="Multi-Region Financial Ledger Settlement|Finance & General Ledger">Multi-Region Financial Ledger Settlement</option>
+                <option value="Supply Chain Auto-Replenishment PO|Inventory & Procurement">Supply Chain Auto-Replenishment PO</option>
+                <option value="Zero-Trust Security Incident Auto-Remediation|IoT & Security Mesh">Zero-Trust Security Incident Auto-Remediation</option>
+                <option value="9-Agent Swarm Collaborative Consensus|AI Autonomous Swarm">9-Agent Swarm Collaborative Consensus</option>
               </select>
             </div>
 
@@ -282,7 +300,8 @@ const htmlContent = `<!DOCTYPE html>
               Cancel
             </button>
             <button onclick="submitModalWorkflow()" class="px-4 py-2 bg-[#5E6AD2] hover:bg-[#4E5AC2] text-xs font-bold rounded-xl text-white shadow-sm transition flex items-center gap-1.5">
-              <span>⚡</span> Execute DAG Run
+              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+              <span>Execute DAG Run</span>
             </button>
           </div>
         </div>
@@ -818,14 +837,15 @@ const htmlContent = `<!DOCTYPE html>
         <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
             <div class="flex items-center gap-2">
-              <h2 class="text-xl font-extrabold text-[#1E2022]">Distributed DAG Workflow Execution Engine</h2>
+              <h2 class="text-xl font-extrabold text-[#1E2022]">Runtime Autonomous Workflow & Distributed DAG Engine</h2>
               <span class="text-[10px] font-bold px-2 py-0.5 rounded-full badge-pastel-green">ACTIVE-ACTIVE</span>
             </div>
-            <p class="text-xs text-[#1E2022]/60 mt-0.5">Topological state machine orchestration with zero dead-letter queue breaches across 64 domains.</p>
+            <p class="text-xs text-[#1E2022]/60 mt-0.5">Real-time autonomous state machine orchestration with zero dead-letter queue breaches across 64 domains.</p>
           </div>
           <div class="flex gap-2">
             <button onclick="openTriggerModal()" class="px-4 py-2.5 bg-[#5E6AD2] hover:bg-[#4E5AC2] text-white text-xs font-bold rounded-xl shadow-sm transition flex items-center gap-1.5">
-              <span>+</span> Trigger New DAG Run
+              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+              <span>Launch Autonomous Workflow Run</span>
             </button>
           </div>
         </div>
@@ -1864,7 +1884,8 @@ const loginHtmlContent = `<!DOCTYPE html>
     <div class="mt-4 pt-3 border-t border-[#E2DFD8] flex items-center justify-between">
       <span class="text-[11px] text-[#1E2022]/60 font-medium">Audit & Logins:</span>
       <a href="/api/v1/export/logins.xlsx" download class="px-3 py-1.5 bg-[#E8F0EC] hover:bg-[#D5E5DC] text-[#2E5A44] border border-[#C8DDD2] text-xs font-bold rounded-xl shadow-sm transition flex items-center gap-1.5" title="Download Excel report of all user logins">
-        <span>📊</span> Download Login Excel
+        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+        <span>Download Login Excel</span>
       </a>
     </div>
   </div>
@@ -2249,21 +2270,23 @@ const server = http.createServer(async (req, res) => {
   }
 
   const reqUrl = req.url || '/';
-  if (reqUrl.startsWith('/cockpit') || reqUrl.startsWith('/dashboard')) {
+
+  // Root (/) and /login / /signin serve the Login Page first
+  if (reqUrl === '/' || reqUrl.startsWith('/login') || reqUrl.startsWith('/signin')) {
     res.writeHead(200, {
       'Content-Type': 'text/html; charset=utf-8',
       'Cache-Control': 'no-cache'
     });
-    res.end(htmlContent);
+    res.end(loginHtmlContent);
     return;
   }
 
-  // Root (/) and /login directly serve the Login Page
+  // /cockpit and all operational workspace routes serve the Main Platform Dashboard
   res.writeHead(200, {
     'Content-Type': 'text/html; charset=utf-8',
     'Cache-Control': 'no-cache'
   });
-  res.end(loginHtmlContent);
+  res.end(htmlContent);
 });
 
 server.listen(FRONTEND_PORT, '0.0.0.0', () => {
