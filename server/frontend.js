@@ -152,7 +152,7 @@ const htmlContent = `<!DOCTYPE html>
         
         <button onclick="switchTab('overview')" id="nav-overview" class="w-full text-left px-3 py-2 rounded-xl text-xs font-semibold text-[#1E2022] hover:bg-[#EFECE6] transition sidebar-active flex items-center gap-2.5">
           <svg class="w-4 h-4 text-[#5E6AD2]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"/></svg>
-          <span>Global Cockpit</span>
+          <span>Global Overview</span>
         </button>
         <button onclick="switchTab('crm')" id="nav-crm" class="w-full text-left px-3 py-2 rounded-xl text-xs font-semibold text-[#1E2022]/70 hover:bg-[#EFECE6] hover:text-[#1E2022] transition flex items-center gap-2.5">
           <svg class="w-4 h-4 text-[#C27D66]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
@@ -1727,7 +1727,7 @@ const loginHtmlContent = `<!DOCTYPE html>
       </div>
 
       <div>
-        <h3 class="text-xl font-bold text-[#1E2022] tracking-tight">Sign In to Cockpit</h3>
+        <h3 class="text-xl font-bold text-[#1E2022] tracking-tight">Sign In</h3>
         <p class="text-xs text-[#1E2022]/60 mt-0.5">Enter credentials or choose an enterprise role to enter</p>
       </div>
     </div>
@@ -1742,7 +1742,7 @@ const loginHtmlContent = `<!DOCTYPE html>
       </div>
       <div class="mt-2 flex gap-2">
         <a href="/cockpit" class="px-3 py-1.5 bg-[#2E5A44] hover:bg-[#234735] text-white text-xs font-bold rounded-xl transition inline-flex items-center gap-1">
-          <span>➔</span> Open Cockpit
+          <span>➔</span> Continue to Dashboard
         </a>
         <button type="button" onclick="clearExistingSession()" class="px-3 py-1.5 bg-white hover:bg-slate-100 text-slate-700 text-xs font-semibold rounded-xl border border-slate-200 transition">
           Switch Account
