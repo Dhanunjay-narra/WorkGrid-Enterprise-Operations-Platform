@@ -25,7 +25,8 @@
     "docker:up": "docker compose -f infrastructure/docker/docker-compose.yml up -d",
     "docker:down": "docker compose -f infrastructure/docker/docker-compose.yml down",
     "db:migrate": "npm run migrate --workspace=packages/database",
-    "db:seed": "npm run seed --workspace=packages/database"
+    "db:seed": "npm run seed --workspace=packages/database",
+    "db:view": "node server/view-db.js"
   },
   "keywords": [
     "enterprise",
