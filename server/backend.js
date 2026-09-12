@@ -4,7 +4,7 @@ let XLSX = null;
 try {
   XLSX = require('xlsx');
 } catch (e) {
-  console.warn('[EXPORT INFO] "xlsx" module not found; Excel export will seamlessly fall back to UTF-8 CSV.');
+  // Seamless fallback to RFC 4180 CSV export
 }
 const { initDatabase, queryAll, queryOne, runCommand, DB_PATH } = require('./db');
 

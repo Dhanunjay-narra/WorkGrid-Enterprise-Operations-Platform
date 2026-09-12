@@ -123,18 +123,12 @@ const htmlContent = `<!DOCTYPE html>
       </div>
     </div>
 
-    <!-- Actions & Auth -->
+    <!-- Actions & Auth (Exclusively User Profile & Logout) -->
     <div class="flex items-center gap-3">
-      <a href="/api/v1/export/logins.xlsx" download class="px-3.5 py-1.5 bg-[#E8F0EC] hover:bg-[#D5E5DC] text-[#2E5A44] border border-[#C8DDD2] text-xs font-bold rounded-xl shadow-sm transition flex items-center gap-1.5" title="Download Excel report of all user logins">
-        <span>📊</span> Download Login Excel
-      </a>
-      <button onclick="triggerWorkflow('Global Autonomous Sweep', 'Multi-Tenant Cross-Domain Mesh')" class="px-3.5 py-1.5 bg-[#5E6AD2] hover:bg-[#4E5AC2] text-white text-xs font-bold rounded-xl shadow-sm transition flex items-center gap-1.5">
-        <span>⚡</span> Run Autonomous Workflow
-      </button>
       <div id="header-auth-container" class="flex items-center gap-2">
-        <a href="/login" class="px-3.5 py-1.5 bg-[#EFECE6] hover:bg-[#E2DFD8] text-[#1E2022] text-xs font-bold rounded-xl border border-[#E2DFD8] transition flex items-center gap-1.5">
-          <span>🔒</span> Sign In
-        </a>
+        <button onclick="handleLogout()" class="px-3.5 py-1.5 bg-rose-50 hover:bg-rose-100 text-rose-700 text-xs font-bold rounded-xl border border-rose-200 shadow-sm transition flex items-center gap-1.5 cursor-pointer">
+          <span>🚪</span> Logout
+        </button>
       </div>
     </div>
   </header>
@@ -1616,21 +1610,24 @@ const htmlContent = `<!DOCTYPE html>
         if (userStr) {
           try {
             const user = JSON.parse(userStr);
-            container.innerHTML = '<div class="flex items-center gap-2">' +
-              '<span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-[#6B8E7B]/15 text-[#6B8E7B] border border-[#6B8E7B]/30">' +
+            container.innerHTML = '<div class="flex items-center gap-2.5">' +
+              '<div class="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-[#EFECE6] border border-[#E2DFD8] shadow-sm">' +
+              '<span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>' +
+              '<span class="text-xs font-bold text-[#1E2022]">' + (user.name || 'Dhanunjay Narra') + '</span>' +
+              '<span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-[#5E6AD2]/15 text-[#5E6AD2] border border-[#5E6AD2]/30">' +
               (user.role || 'Executive') +
               '</span>' +
-              '<span class="text-xs font-semibold text-[#1E2022] hidden sm:inline">' + (user.name || 'User') + '</span>' +
-              '<button onclick="handleLogout()" class="px-3 py-1.5 bg-rose-50 hover:bg-rose-100 text-rose-700 text-xs font-bold rounded-xl border border-rose-200 transition flex items-center gap-1">' +
+              '</div>' +
+              '<button onclick="handleLogout()" class="px-3.5 py-1.5 bg-rose-50 hover:bg-rose-100 text-rose-700 text-xs font-bold rounded-xl border border-rose-200 shadow-sm transition flex items-center gap-1.5 cursor-pointer" title="Sign out of NEXORA">' +
               '<span>🚪</span> Logout' +
               '</button>' +
               '</div>';
             return;
           } catch (e) {}
         }
-        container.innerHTML = '<a href="/login" class="px-3.5 py-1.5 bg-[#EFECE6] hover:bg-[#E2DFD8] text-[#1E2022] text-xs font-bold rounded-xl border border-[#E2DFD8] transition flex items-center gap-1.5">' +
-          '<span>🔒</span> Sign In' +
-          '</a>';
+        container.innerHTML = '<button onclick="handleLogout()" class="px-3.5 py-1.5 bg-rose-50 hover:bg-rose-100 text-rose-700 text-xs font-bold rounded-xl border border-rose-200 shadow-sm transition flex items-center gap-1.5 cursor-pointer">' +
+          '<span>🚪</span> Logout' +
+          '</button>';
       }
 
       window.handleLogout = function() {
@@ -1724,7 +1721,7 @@ const loginHtmlContent = `<!DOCTYPE html>
         </div>
       </div>
       <div class="mt-2 flex gap-2">
-        <a href="/" class="px-3 py-1.5 bg-[#2E5A44] hover:bg-[#234735] text-white text-xs font-bold rounded-xl transition inline-flex items-center gap-1">
+        <a href="/cockpit" class="px-3 py-1.5 bg-[#2E5A44] hover:bg-[#234735] text-white text-xs font-bold rounded-xl transition inline-flex items-center gap-1">
           <span>➔</span> Open Cockpit
         </a>
         <button type="button" onclick="clearExistingSession()" class="px-3 py-1.5 bg-white hover:bg-slate-100 text-slate-700 text-xs font-semibold rounded-xl border border-slate-200 transition">
@@ -2046,7 +2043,7 @@ const loginHtmlContent = `<!DOCTYPE html>
 
       btn.innerHTML = '<span>✓</span> Signed In! Redirecting...';
       setTimeout(() => {
-        window.location.href = '/';
+        window.location.href = '/cockpit';
       }, 500);
     }
 
@@ -2081,7 +2078,7 @@ const loginHtmlContent = `<!DOCTYPE html>
 
       btn.innerHTML = '<span>✓</span> ' + provider + ' Verified! Redirecting...';
       setTimeout(() => {
-        window.location.href = '/';
+        window.location.href = '/cockpit';
       }, 500);
     }
 
@@ -2251,20 +2248,22 @@ const server = http.createServer(async (req, res) => {
     return;
   }
 
-  if (req.url === '/login' || req.url.startsWith('/login?')) {
+  const reqUrl = req.url || '/';
+  if (reqUrl.startsWith('/cockpit') || reqUrl.startsWith('/dashboard')) {
     res.writeHead(200, {
       'Content-Type': 'text/html; charset=utf-8',
       'Cache-Control': 'no-cache'
     });
-    res.end(loginHtmlContent);
+    res.end(htmlContent);
     return;
   }
 
+  // Root (/) and /login directly serve the Login Page
   res.writeHead(200, {
     'Content-Type': 'text/html; charset=utf-8',
     'Cache-Control': 'no-cache'
   });
-  res.end(htmlContent);
+  res.end(loginHtmlContent);
 });
 
 server.listen(FRONTEND_PORT, '0.0.0.0', () => {

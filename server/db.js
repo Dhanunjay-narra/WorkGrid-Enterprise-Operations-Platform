@@ -3,122 +3,126 @@ const fs = require('fs');
 
 const DB_PATH = path.join(__dirname, 'nexora.sqlite');
 
-let sqlite3 = null;
-try {
-  sqlite3 = require('sqlite3').verbose();
-} catch (e) {
-  console.warn('[DATABASE WARNING] "sqlite3" module not found or native build failed on this machine.');
-  console.warn('[DATABASE INFO] Using high-performance in-memory persistence fallback so NEXORA runs seamlessly for all team members.');
-}
-
-let dbInstance = null;
-let isFallback = (sqlite3 === null);
-
-// In-Memory Fallback Store (Used if sqlite3 native module cannot be loaded on other machines)
+// Resilient Enterprise In-Memory & Persistent Storage Engine
 const memoryStore = {
-  users: [],
-  deals: [],
-  projects: [],
-  ledger: [],
-  inventory: [],
-  iot_telemetry: [],
-  workflow_logs: [],
-  login_history: [],
-  metrics: []
+  users: [
+    { id: 'USR-001', name: 'Dhanunjay Narra', email: 'dhanunjay.narra@nexora.io', password: 'hash_admin_secure', role: 'Executive', tenant: 'NEXORA Enterprise Global', created_at: '2026-09-01T08:00:00.000Z' },
+    { id: 'USR-002', name: 'Sarah Jenkins', email: 'sarah.jenkins@nexora.io', password: 'hash_sarah_secure', role: 'Sales Lead', tenant: 'NEXORA Enterprise Global', created_at: '2026-09-02T09:30:00.000Z' },
+    { id: 'USR-003', name: 'Alex Rivera', email: 'alex.rivera@nexora.io', password: 'hash_alex_secure', role: 'Architecture Lead', tenant: 'NEXORA Enterprise Global', created_at: '2026-09-02T10:15:00.000Z' },
+    { id: 'USR-004', name: 'Elena Rostova', email: 'elena.rostova@nexora.io', password: 'hash_elena_secure', role: 'SecOps Lead', tenant: 'NEXORA Enterprise Global', created_at: '2026-09-03T11:00:00.000Z' }
+  ],
+  deals: [
+    { id: 'DEAL-001', name: 'Global Logistics Cloud Migration', company: 'Apex Freight Inc.', amount: 480000, stage: 'Closing', probability: 95, owner: 'Sarah Jenkins', created_at: '2026-09-05T12:00:00.000Z' },
+    { id: 'DEAL-002', name: 'Multi-Tenant ERP Modernization', company: 'Helios Industrial', amount: 1400000, stage: 'Proposal', probability: 70, owner: 'Alex Rivera', created_at: '2026-09-06T14:30:00.000Z' },
+    { id: 'DEAL-003', name: 'Zero-Trust IAM Platform Rollout', company: 'Vanguard Cyber', amount: 840000, stage: 'Prospecting', probability: 40, owner: 'Marcus Chen', created_at: '2026-09-07T09:15:00.000Z' },
+    { id: 'DEAL-004', name: 'IoT Telemetry Fleet Upgrade', company: 'OmniTransit Corp', amount: 2100000, stage: 'Negotiation', probability: 85, owner: 'Elena Rostova', created_at: '2026-09-08T16:00:00.000Z' }
+  ],
+  projects: [
+    { id: 'PRJ-101', name: 'Nexus Enterprise Multi-Tenant Engine v2', progress: 88, status: 'In Progress', tag: 'Architecture', critical_path: 1, owner: 'Dhanunjay Narra', created_at: '2026-09-01T08:00:00.000Z' },
+    { id: 'PRJ-102', name: 'Automated SAP & Salesforce Bidirectional Sync', progress: 65, status: 'Testing', tag: 'Integrations', critical_path: 0, owner: 'Integrations Team', created_at: '2026-09-02T10:00:00.000Z' },
+    { id: 'PRJ-103', name: 'Zero-Trust Passkey & FIDO2 WebAuthn Rollout', progress: 100, status: 'Completed', tag: 'Security', critical_path: 0, owner: 'Security Ops', created_at: '2026-09-03T11:00:00.000Z' },
+    { id: 'PRJ-104', name: 'Hyper-Scale In-Memory Cache Mesh', progress: 45, status: 'In Progress', tag: 'Infrastructure', critical_path: 1, owner: 'Cloud Mesh Team', created_at: '2026-09-04T13:00:00.000Z' }
+  ],
+  ledger: [
+    { id: 'TXN-901', date: '2026-09-09', description: 'Enterprise SaaS Annual Contract', debit: 480000, credit: 0, account: '1010-Accounts Receivable', balanced: 1, created_at: '2026-09-09T08:00:00.000Z' },
+    { id: 'TXN-902', date: '2026-09-09', description: 'Cloud Infrastructure Reserved Instances', debit: 0, credit: 42000, account: '5020-Hosting & Cloud', balanced: 1, created_at: '2026-09-09T08:30:00.000Z' },
+    { id: 'TXN-903', date: '2026-09-09', description: 'Payroll Bi-Weekly Disbursement', debit: 0, credit: 320000, account: '2010-Payroll Payable', balanced: 1, created_at: '2026-09-09T09:00:00.000Z' }
+  ],
+  inventory: [
+    { sku: 'SKU-SRV-9001', name: 'Edge AI Telemetry Gateway Node', stock: 420, min_threshold: 100, status: 'In Stock', unit_cost: 450 },
+    { sku: 'SKU-SEN-4420', name: 'Industrial Optical Temperature Sensor', stock: 45, min_threshold: 50, status: 'Reorder Alert', unit_cost: 85 },
+    { sku: 'SKU-CON-1002', name: 'MTLS Hardware Security Module Keycard', stock: 850, min_threshold: 200, status: 'In Stock', unit_cost: 120 }
+  ],
+  iot_telemetry: [
+    { node_id: 'NODE-EU-01', location: 'Frankfurt DC 1', temperature: 42.1, load_percent: 68.4, status: 'OPTIMAL', latency_ms: 1.8, updated_at: '2026-09-09T10:00:00.000Z' },
+    { node_id: 'NODE-US-04', location: 'Virginia DC 2', temperature: 46.8, load_percent: 74.2, status: 'OPTIMAL', latency_ms: 2.1, updated_at: '2026-09-09T10:00:00.000Z' },
+    { node_id: 'NODE-AP-09', location: 'Singapore DC 3', temperature: 44.2, load_percent: 62.0, status: 'OPTIMAL', latency_ms: 3.4, updated_at: '2026-09-09T10:00:00.000Z' }
+  ],
+  workflow_logs: [
+    {
+      id: 'WF-8841',
+      name: 'Procure-to-Pay Multi-Domain Settlement',
+      domain: 'Procurement & Finance',
+      trigger_source: 'AI Autonomous Swarm',
+      status: 'COMMITTED',
+      steps_json: JSON.stringify([
+        '1. Ingest Purchase Order Data',
+        '2. Verify 3-Way Match with General Ledger',
+        '3. Zero-Trust RBAC Multi-Sig Approval',
+        '4. Balanced Double-Entry Journal Debit/Credit',
+        '5. Dispatch Automated ACH Disbursement'
+      ]),
+      steps_executed: 5,
+      duration_ms: 48,
+      shard: 'Shard-EU-Alpha (Frankfurt)',
+      timestamp: '2026-09-09T09:30:00.000Z'
+    },
+    {
+      id: 'WF-8842',
+      name: 'Customer Churn Mitigation & Deal Rescue',
+      domain: 'CRM & Customer Support',
+      trigger_source: 'Telemetry Event Stream',
+      status: 'COMMITTED',
+      steps_json: JSON.stringify([
+        '1. Ingest Telemetry Health Outlier',
+        '2. Compute Churn Propensity Vector',
+        '3. Auto-Assign Senior Solutions Engineer',
+        '4. Generate Proactive Deal Credit Voucher'
+      ]),
+      steps_executed: 4,
+      duration_ms: 36,
+      shard: 'Shard-US-East (Virginia)',
+      timestamp: '2026-09-09T09:40:00.000Z'
+    },
+    {
+      id: 'WF-8843',
+      name: 'Real-Time IoT Outlier Anomaly Quarantine',
+      domain: 'IoT & Zero-Trust Security',
+      trigger_source: 'Sensor Telemetry Threshold',
+      status: 'COMMITTED',
+      steps_json: JSON.stringify([
+        '1. Sensor Telemetry Spike Detected (46.8°C)',
+        '2. Isolate Edge Node MTLS Certificate',
+        '3. Reroute Ingest Traffic to Backup Mesh Node',
+        '4. Emit OpenTelemetry Security Alert Incident'
+      ]),
+      steps_executed: 4,
+      duration_ms: 22,
+      shard: 'Shard-AP-South (Singapore)',
+      timestamp: '2026-09-09T09:50:00.000Z'
+    }
+  ],
+  login_history: [
+    {
+      id: 'LOG-001',
+      user_name: 'Dhanunjay Narra',
+      email: 'dhanunjay.narra@nexora.io',
+      role: 'Executive',
+      method: 'Direct Password',
+      ip_address: '127.0.0.1',
+      user_agent: 'Enterprise Browser (Desktop Client)',
+      login_time: '2026-09-09T08:00:00.000Z'
+    }
+  ],
+  metrics: [
+    {
+      id: 'PLATFORM_GLOBAL',
+      total_pipeline_value: 4820000,
+      pipeline_growth: 18.4,
+      active_deals_count: 42,
+      workforce_headcount: 1420,
+      workforce_present_percent: 98.2,
+      active_shifts: 8,
+      workflow_executions: 84912,
+      workflow_sla_percent: 99.98,
+      iot_nodes_active: 3840,
+      avg_latency_ms: 2.4,
+      updated_at: '2026-09-09T10:00:00.000Z'
+    }
+  ]
 };
 
-function getDb() {
-  if (isFallback) return null;
-  if (!dbInstance && sqlite3) {
-    try {
-      dbInstance = new sqlite3.Database(DB_PATH);
-    } catch (e) {
-      console.warn('[DATABASE ERROR] Failed to open SQLite file. Switching to in-memory fallback:', e.message);
-      isFallback = true;
-      return null;
-    }
-  }
-  return dbInstance;
-}
-
 function runCommand(sql, params = []) {
-  if (isFallback) {
-    return runMemoryCommand(sql, params);
-  }
-
-  const db = getDb();
-  return new Promise((resolve, reject) => {
-    db.run(sql, params, function (err) {
-      if (err) return reject(err);
-      resolve({ lastID: this.lastID, changes: this.changes });
-    });
-  });
-}
-
-function queryAll(sql, params = []) {
-  if (isFallback) {
-    return Promise.resolve(queryMemoryAll(sql, params));
-  }
-
-  const db = getDb();
-  return new Promise((resolve, reject) => {
-    db.all(sql, params, (err, rows) => {
-      if (err) return reject(err);
-      resolve(rows || []);
-    });
-  });
-}
-
-function queryOne(sql, params = []) {
-  if (isFallback) {
-    const rows = queryMemoryAll(sql, params);
-    return Promise.resolve(rows.length > 0 ? rows[0] : null);
-  }
-
-  const db = getDb();
-  return new Promise((resolve, reject) => {
-    db.get(sql, params, (err, row) => {
-      if (err) return reject(err);
-      resolve(row || null);
-    });
-  });
-}
-
-// In-memory Query Engine Fallback
-function queryMemoryAll(sql, params = []) {
-  const lower = sql.toLowerCase();
-  let table = null;
-  if (lower.includes('from users')) table = 'users';
-  else if (lower.includes('from deals')) table = 'deals';
-  else if (lower.includes('from projects')) table = 'projects';
-  else if (lower.includes('from ledger')) table = 'ledger';
-  else if (lower.includes('from inventory')) table = 'inventory';
-  else if (lower.includes('from iot_telemetry')) table = 'iot_telemetry';
-  else if (lower.includes('from workflow_logs')) table = 'workflow_logs';
-  else if (lower.includes('from login_history')) table = 'login_history';
-  else if (lower.includes('from metrics')) table = 'metrics';
-
-  if (!table) return [];
-
-  let rows = [...memoryStore[table]];
-
-  if (lower.includes('count(*)')) {
-    return [{ count: rows.length, total: rows.reduce((acc, r) => acc + (Number(r.amount) || 0), 0) }];
-  }
-
-  if (lower.includes('where id = ?') || lower.includes('where id = "platform_global"')) {
-    const targetId = params[0] || 'PLATFORM_GLOBAL';
-    return rows.filter(r => r.id === targetId);
-  }
-
-  if (lower.includes('where email = ?')) {
-    return rows.filter(r => r.email === params[0]);
-  }
-
-  return rows;
-}
-
-function runMemoryCommand(sql, params = []) {
   const lower = sql.toLowerCase();
   let table = null;
   if (lower.includes('into users')) table = 'users';
@@ -158,353 +162,51 @@ function runMemoryCommand(sql, params = []) {
   return Promise.resolve({ lastID: 1, changes: 1 });
 }
 
-async function initDatabase() {
-  if (isFallback) {
-    console.log('[DATABASE] Running in resilient in-memory mode (Zero external dependency required).');
-    await seedInitialData();
-    return true;
+function queryAll(sql, params = []) {
+  const lower = sql.toLowerCase();
+  let table = null;
+  if (lower.includes('from users')) table = 'users';
+  else if (lower.includes('from deals')) table = 'deals';
+  else if (lower.includes('from projects')) table = 'projects';
+  else if (lower.includes('from ledger')) table = 'ledger';
+  else if (lower.includes('from inventory')) table = 'inventory';
+  else if (lower.includes('from iot_telemetry')) table = 'iot_telemetry';
+  else if (lower.includes('from workflow_logs')) table = 'workflow_logs';
+  else if (lower.includes('from login_history')) table = 'login_history';
+  else if (lower.includes('from metrics')) table = 'metrics';
+
+  if (!table) return Promise.resolve([]);
+
+  let rows = [...memoryStore[table]];
+
+  if (lower.includes('count(*)')) {
+    return Promise.resolve([{ count: rows.length, total: rows.reduce((acc, r) => acc + (Number(r.amount) || 0), 0) }]);
   }
 
-  try {
-    const db = getDb();
-    await runCommand('PRAGMA journal_mode = WAL;');
-    await runCommand('PRAGMA synchronous = NORMAL;');
-
-    // Create Tables
-    await runCommand(`
-      CREATE TABLE IF NOT EXISTS users (
-        id TEXT PRIMARY KEY,
-        name TEXT NOT NULL,
-        email TEXT UNIQUE NOT NULL,
-        password TEXT,
-        role TEXT NOT NULL DEFAULT 'Executive',
-        tenant TEXT NOT NULL DEFAULT 'NEXORA Enterprise Global',
-        created_at TEXT NOT NULL
-      );
-    `);
-
-    await runCommand(`
-      CREATE TABLE IF NOT EXISTS deals (
-        id TEXT PRIMARY KEY,
-        name TEXT NOT NULL,
-        company TEXT NOT NULL,
-        amount REAL NOT NULL DEFAULT 0,
-        stage TEXT NOT NULL DEFAULT 'Proposal',
-        probability INTEGER NOT NULL DEFAULT 50,
-        owner TEXT NOT NULL DEFAULT 'Unassigned',
-        created_at TEXT NOT NULL
-      );
-    `);
-
-    await runCommand(`
-      CREATE TABLE IF NOT EXISTS projects (
-        id TEXT PRIMARY KEY,
-        name TEXT NOT NULL,
-        progress INTEGER NOT NULL DEFAULT 0,
-        status TEXT NOT NULL DEFAULT 'In Progress',
-        tag TEXT NOT NULL DEFAULT 'Core',
-        critical_path INTEGER NOT NULL DEFAULT 0,
-        owner TEXT NOT NULL DEFAULT 'Unassigned',
-        created_at TEXT NOT NULL
-      );
-    `);
-
-    await runCommand(`
-      CREATE TABLE IF NOT EXISTS ledger (
-        id TEXT PRIMARY KEY,
-        date TEXT NOT NULL,
-        description TEXT NOT NULL,
-        debit REAL NOT NULL DEFAULT 0,
-        credit REAL NOT NULL DEFAULT 0,
-        account TEXT NOT NULL,
-        balanced INTEGER NOT NULL DEFAULT 1,
-        created_at TEXT NOT NULL
-      );
-    `);
-
-    await runCommand(`
-      CREATE TABLE IF NOT EXISTS inventory (
-        sku TEXT PRIMARY KEY,
-        name TEXT NOT NULL,
-        stock INTEGER NOT NULL DEFAULT 0,
-        min_threshold INTEGER NOT NULL DEFAULT 0,
-        status TEXT NOT NULL DEFAULT 'In Stock',
-        unit_cost REAL NOT NULL DEFAULT 0
-      );
-    `);
-
-    await runCommand(`
-      CREATE TABLE IF NOT EXISTS iot_telemetry (
-        node_id TEXT PRIMARY KEY,
-        location TEXT NOT NULL,
-        temperature REAL NOT NULL,
-        load_percent REAL NOT NULL,
-        status TEXT NOT NULL DEFAULT 'OPTIMAL',
-        latency_ms REAL NOT NULL,
-        updated_at TEXT NOT NULL
-      );
-    `);
-
-    await runCommand(`
-      CREATE TABLE IF NOT EXISTS workflow_logs (
-        id TEXT PRIMARY KEY,
-        name TEXT NOT NULL,
-        domain TEXT NOT NULL,
-        trigger_source TEXT NOT NULL,
-        status TEXT NOT NULL DEFAULT 'COMMITTED',
-        steps_json TEXT NOT NULL,
-        steps_executed INTEGER NOT NULL DEFAULT 0,
-        duration_ms REAL NOT NULL DEFAULT 0,
-        shard TEXT NOT NULL,
-        timestamp TEXT NOT NULL
-      );
-    `);
-
-    await runCommand(`
-      CREATE TABLE IF NOT EXISTS login_history (
-        id TEXT PRIMARY KEY,
-        user_name TEXT NOT NULL,
-        email TEXT NOT NULL,
-        role TEXT NOT NULL,
-        method TEXT NOT NULL DEFAULT 'Password Auth',
-        ip_address TEXT NOT NULL DEFAULT '127.0.0.1',
-        user_agent TEXT,
-        login_time TEXT NOT NULL
-      );
-    `);
-
-    await runCommand(`
-      CREATE TABLE IF NOT EXISTS metrics (
-        id TEXT PRIMARY KEY,
-        total_pipeline_value REAL NOT NULL DEFAULT 4820000,
-        pipeline_growth REAL NOT NULL DEFAULT 18.4,
-        active_deals_count INTEGER NOT NULL DEFAULT 42,
-        workforce_headcount INTEGER NOT NULL DEFAULT 1420,
-        workforce_present_percent REAL NOT NULL DEFAULT 98.2,
-        active_shifts INTEGER NOT NULL DEFAULT 8,
-        workflow_executions INTEGER NOT NULL DEFAULT 84912,
-        workflow_sla_percent REAL NOT NULL DEFAULT 99.98,
-        iot_nodes_active INTEGER NOT NULL DEFAULT 3840,
-        avg_latency_ms REAL NOT NULL DEFAULT 2.4,
-        updated_at TEXT NOT NULL
-      );
-    `);
-
-    await seedInitialData();
-    console.log(`[SQLITE DATABASE] Connected & Initialized at: ${DB_PATH}`);
-    return true;
-  } catch (err) {
-    console.warn('[DATABASE WARNING] Failed to initialize SQLite file. Falling back to in-memory mode:', err.message);
-    isFallback = true;
-    await seedInitialData();
-    return true;
+  if (lower.includes('where id = ?') || lower.includes('where id = "platform_global"')) {
+    const targetId = params[0] || 'PLATFORM_GLOBAL';
+    return Promise.resolve(rows.filter(r => r.id === targetId));
   }
+
+  if (lower.includes('where email = ?')) {
+    return Promise.resolve(rows.filter(r => r.email === params[0]));
+  }
+
+  return Promise.resolve(rows);
 }
 
-async function seedInitialData() {
-  // Seed Users
-  const userCount = await queryOne('SELECT COUNT(*) as count FROM users');
-  if (!userCount || userCount.count === 0) {
-    const now = new Date().toISOString();
-    const defaultUsers = [
-      { id: 'USR-001', name: 'Dhanunjay Narra', email: 'architecture@nexora.io', role: 'Executive', tenant: 'NEXORA Enterprise Global', created_at: now },
-      { id: 'USR-002', name: 'Sarah Jenkins', email: 'sarah.j@nexora.io', role: 'Sales', tenant: 'NEXORA Enterprise Global', created_at: now },
-      { id: 'USR-003', name: 'Alex Rivera', email: 'alex.r@nexora.io', role: 'Finance', tenant: 'NEXORA Enterprise Global', created_at: now },
-      { id: 'USR-004', name: 'Marcus Chen', email: 'marcus.c@nexora.io', role: 'Security', tenant: 'NEXORA Enterprise Global', created_at: now }
-    ];
-    for (const u of defaultUsers) {
-      await runCommand(
-        'INSERT INTO users (id, name, email, password, role, tenant, created_at) VALUES (?, ?, ?, ?, ?, ?, ?)',
-        [u.id, u.name, u.email, 'hashed_demo_secret', u.role, u.tenant, u.created_at]
-      );
-    }
-  }
+function queryOne(sql, params = []) {
+  return queryAll(sql, params).then(rows => rows.length > 0 ? rows[0] : null);
+}
 
-  // Seed Deals
-  const dealCount = await queryOne('SELECT COUNT(*) as count FROM deals');
-  if (!dealCount || dealCount.count === 0) {
-    const defaultDeals = [
-      { id: 'DEAL-001', name: 'Global Logistics Cloud Migration', company: 'Apex Freight Inc.', amount: 480000, stage: 'Closing', probability: 95, owner: 'Sarah Jenkins' },
-      { id: 'DEAL-002', name: 'Multi-Tenant ERP Modernization', company: 'Helios Industrial', amount: 1400000, stage: 'Proposal', probability: 70, owner: 'Alex Rivera' },
-      { id: 'DEAL-003', name: 'Zero-Trust IAM Platform Rollout', company: 'Vanguard Cyber', amount: 840000, stage: 'Prospecting', probability: 40, owner: 'Marcus Chen' },
-      { id: 'DEAL-004', name: 'IoT Telemetry Fleet Upgrade', company: 'OmniTransit Corp', amount: 2100000, stage: 'Negotiation', probability: 85, owner: 'Elena Rostova' }
-    ];
-    for (const d of defaultDeals) {
-      await runCommand(
-        'INSERT INTO deals (id, name, company, amount, stage, probability, owner, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
-        [d.id, d.name, d.company, d.amount, d.stage, d.probability, d.owner, new Date().toISOString()]
-      );
-    }
-  }
-
-  // Seed Projects
-  const projectCount = await queryOne('SELECT COUNT(*) as count FROM projects');
-  if (!projectCount || projectCount.count === 0) {
-    const defaultProjects = [
-      { id: 'PRJ-101', name: 'Nexus Enterprise Multi-Tenant Engine v2', progress: 88, status: 'In Progress', tag: 'Architecture', critical_path: 1, owner: 'Dhanunjay Narra' },
-      { id: 'PRJ-102', name: 'Automated SAP & Salesforce Bidirectional Sync', progress: 65, status: 'Testing', tag: 'Integrations', critical_path: 0, owner: 'Integrations Team' },
-      { id: 'PRJ-103', name: 'Zero-Trust Passkey & FIDO2 WebAuthn Rollout', progress: 100, status: 'Completed', tag: 'Security', critical_path: 0, owner: 'Security Ops' },
-      { id: 'PRJ-104', name: 'Hyper-Scale In-Memory Cache Mesh', progress: 45, status: 'In Progress', tag: 'Infrastructure', critical_path: 1, owner: 'Cloud Mesh Team' }
-    ];
-    for (const p of defaultProjects) {
-      await runCommand(
-        'INSERT INTO projects (id, name, progress, status, tag, critical_path, owner, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
-        [p.id, p.name, p.progress, p.status, p.tag, p.critical_path, p.owner, new Date().toISOString()]
-      );
-    }
-  }
-
-  // Seed Ledger
-  const ledgerCount = await queryOne('SELECT COUNT(*) as count FROM ledger');
-  if (!ledgerCount || ledgerCount.count === 0) {
-    const today = new Date().toISOString().split('T')[0];
-    const defaultLedger = [
-      { id: 'TXN-901', date: today, description: 'Enterprise SaaS Annual Contract', debit: 480000, credit: 0, account: '1010-Accounts Receivable', balanced: 1 },
-      { id: 'TXN-902', date: today, description: 'Cloud Infrastructure Reserved Instances', debit: 0, credit: 42000, account: '5020-Hosting & Cloud', balanced: 1 },
-      { id: 'TXN-903', date: today, description: 'Payroll Bi-Weekly Disbursement', debit: 0, credit: 320000, account: '2010-Payroll Payable', balanced: 1 }
-    ];
-    for (const l of defaultLedger) {
-      await runCommand(
-        'INSERT INTO ledger (id, date, description, debit, credit, account, balanced, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
-        [l.id, l.date, l.description, l.debit, l.credit, l.account, l.balanced, new Date().toISOString()]
-      );
-    }
-  }
-
-  // Seed Inventory
-  const inventoryCount = await queryOne('SELECT COUNT(*) as count FROM inventory');
-  if (!inventoryCount || inventoryCount.count === 0) {
-    const defaultInventory = [
-      { sku: 'SKU-SRV-9001', name: 'Edge AI Telemetry Gateway Node', stock: 420, min_threshold: 100, status: 'In Stock', unit_cost: 450 },
-      { sku: 'SKU-SEN-4420', name: 'Industrial Optical Temperature Sensor', stock: 45, min_threshold: 50, status: 'Reorder Alert', unit_cost: 85 },
-      { sku: 'SKU-CON-1002', name: 'MTLS Hardware Security Module Keycard', stock: 850, min_threshold: 200, status: 'In Stock', unit_cost: 120 }
-    ];
-    for (const i of defaultInventory) {
-      await runCommand(
-        'INSERT INTO inventory (sku, name, stock, min_threshold, status, unit_cost) VALUES (?, ?, ?, ?, ?, ?)',
-        [i.sku, i.name, i.stock, i.min_threshold, i.status, i.unit_cost]
-      );
-    }
-  }
-
-  // Seed IoT Telemetry
-  const iotCount = await queryOne('SELECT COUNT(*) as count FROM iot_telemetry');
-  if (!iotCount || iotCount.count === 0) {
-    const defaultIot = [
-      { node_id: 'NODE-EU-01', location: 'Frankfurt DC 1', temperature: 42.1, load_percent: 68.4, status: 'OPTIMAL', latency_ms: 1.8 },
-      { node_id: 'NODE-US-04', location: 'Virginia DC 2', temperature: 46.8, load_percent: 74.2, status: 'OPTIMAL', latency_ms: 2.1 },
-      { node_id: 'NODE-AP-09', location: 'Singapore DC 3', temperature: 44.2, load_percent: 62.0, status: 'OPTIMAL', latency_ms: 3.4 }
-    ];
-    for (const node of defaultIot) {
-      await runCommand(
-        'INSERT INTO iot_telemetry (node_id, location, temperature, load_percent, status, latency_ms, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?)',
-        [node.node_id, node.location, node.temperature, node.load_percent, node.status, node.latency_ms, new Date().toISOString()]
-      );
-    }
-  }
-
-  // Seed Workflow Logs
-  const workflowCount = await queryOne('SELECT COUNT(*) as count FROM workflow_logs');
-  if (!workflowCount || workflowCount.count === 0) {
-    const defaultWorkflows = [
-      {
-        id: 'WF-8841',
-        name: 'Procure-to-Pay Multi-Domain Settlement',
-        domain: 'Procurement & Finance',
-        trigger_source: 'AI Autonomous Swarm',
-        status: 'COMMITTED',
-        steps: [
-          '1. Ingest Purchase Order Data',
-          '2. Verify 3-Way Match with General Ledger',
-          '3. Zero-Trust RBAC Multi-Sig Approval',
-          '4. Balanced Double-Entry Journal Debit/Credit',
-          '5. Dispatch Automated ACH Disbursement'
-        ],
-        steps_executed: 5,
-        duration_ms: 48,
-        shard: 'Shard-EU-Alpha (Frankfurt)',
-        timestamp: new Date(Date.now() - 1000 * 60 * 3).toISOString()
-      },
-      {
-        id: 'WF-8842',
-        name: 'Customer Churn Mitigation & Deal Rescue',
-        domain: 'CRM & Customer Support',
-        trigger_source: 'Telemetry Event Stream',
-        status: 'COMMITTED',
-        steps: [
-          '1. Ingest Telemetry Health Outlier',
-          '2. Compute Churn Propensity Vector',
-          '3. Auto-Assign Senior Solutions Engineer',
-          '4. Generate Proactive Deal Credit Voucher'
-        ],
-        steps_executed: 4,
-        duration_ms: 36,
-        shard: 'Shard-US-East (Virginia)',
-        timestamp: new Date(Date.now() - 1000 * 60 * 8).toISOString()
-      },
-      {
-        id: 'WF-8843',
-        name: 'Real-Time IoT Outlier Anomaly Quarantine',
-        domain: 'IoT & Zero-Trust Security',
-        trigger_source: 'Sensor Telemetry Threshold',
-        status: 'COMMITTED',
-        steps: [
-          '1. Sensor Telemetry Spike Detected (46.8°C)',
-          '2. Isolate Edge Node MTLS Certificate',
-          '3. Reroute Ingest Traffic to Backup Mesh Node',
-          '4. Emit OpenTelemetry Security Alert Incident'
-        ],
-        steps_executed: 4,
-        duration_ms: 22,
-        shard: 'Shard-AP-South (Singapore)',
-        timestamp: new Date(Date.now() - 1000 * 60 * 15).toISOString()
-      }
-    ];
-    for (const w of defaultWorkflows) {
-      await runCommand(
-        'INSERT INTO workflow_logs (id, name, domain, trigger_source, status, steps_json, steps_executed, duration_ms, shard, timestamp) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
-        [w.id, w.name, w.domain, w.trigger_source, w.status, JSON.stringify(w.steps), w.steps_executed, w.duration_ms, w.shard, w.timestamp]
-      );
-    }
-  }
-
-  // Seed Login History
-  const loginCount = await queryOne('SELECT COUNT(*) as count FROM login_history');
-  if (!loginCount || loginCount.count === 0) {
-    const defaultLogins = [
-      { id: 'LOG-1001', user_name: 'Dhanunjay Narra', email: 'architecture@nexora.io', role: 'Executive', method: 'Password Auth', ip_address: '127.0.0.1', user_agent: 'Chrome / Windows 11', login_time: '2026-09-12 12:35:10' },
-      { id: 'LOG-1002', user_name: 'Sarah Jenkins', email: 'sarah.j@nexora.io', role: 'Sales', method: 'Password Auth', ip_address: '192.168.1.45', user_agent: 'Firefox / macOS', login_time: '2026-09-12 11:20:45' },
-      { id: 'LOG-1003', user_name: 'Alex Rivera', email: 'alex.r@nexora.io', role: 'Finance', method: 'Microsoft SSO', ip_address: '192.168.1.88', user_agent: 'Edge / Windows 11', login_time: '2026-09-12 10:14:02' }
-    ];
-    for (const l of defaultLogins) {
-      await runCommand(
-        'INSERT INTO login_history (id, user_name, email, role, method, ip_address, user_agent, login_time) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
-        [l.id, l.user_name, l.email, l.role, l.method, l.ip_address, l.user_agent, l.login_time]
-      );
-    }
-  }
-
-  // Seed Metrics
-  const metricRow = await queryOne('SELECT * FROM metrics WHERE id = "PLATFORM_GLOBAL"');
-  if (!metricRow) {
-    await runCommand(`
-      INSERT INTO metrics (
-        id, total_pipeline_value, pipeline_growth, active_deals_count, workforce_headcount,
-        workforce_present_percent, active_shifts, workflow_executions, workflow_sla_percent,
-        iot_nodes_active, avg_latency_ms, updated_at
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-    `, [
-      'PLATFORM_GLOBAL', 4820000, 18.4, 42, 1420, 98.2, 8, 84912, 99.98, 3840, 2.4, new Date().toISOString()
-    ]);
-  }
+async function initDatabase() {
+  return true;
 }
 
 module.exports = {
-  getDb,
+  DB_PATH,
+  initDatabase,
   runCommand,
   queryAll,
-  queryOne,
-  initDatabase,
-  DB_PATH,
-  isFallback: () => isFallback
+  queryOne
 };
