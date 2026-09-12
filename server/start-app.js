@@ -68,6 +68,9 @@ setTimeout(async () => {
   }
 }, 1200);
 
+// Keep supervisor process alive indefinitely
+setInterval(() => {}, 1000 * 60 * 60);
+
 // Graceful termination
 process.on('SIGINT', () => {
   console.log('\nStopping NEXORA Platform...');
