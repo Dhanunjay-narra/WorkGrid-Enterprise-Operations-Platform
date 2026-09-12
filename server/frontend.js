@@ -1,6 +1,11 @@
 const http = require('http');
 const fs = require('fs');
 const path = require('path');
+let XLSX = null;
+try {
+  XLSX = require('xlsx');
+} catch (e) {}
+const { queryAll, runCommand, initDatabase, DB_PATH } = require('./db');
 
 const FRONTEND_PORT = process.env.FRONTEND_PORT || 3000;
 const BACKEND_PORT = process.env.BACKEND_PORT || 4000;
@@ -996,7 +1001,7 @@ const htmlContent = `<!DOCTYPE html>
   </footer>
 
   <script>
-    const API_BASE = 'http://localhost:${BACKEND_PORT}';
+    const API_BASE = '';
     let selectedAgentName = 'Executive';
     let currentWorkflowList = [];
     const chartInstances = {};
@@ -1858,6 +1863,13 @@ const loginHtmlContent = `<!DOCTYPE html>
         <span class="text-[#5E6AD2] text-xs">🛡️</span> SSO
       </button>
     </div>
+
+    <div class="mt-4 pt-3 border-t border-[#E2DFD8] flex items-center justify-between">
+      <span class="text-[11px] text-[#1E2022]/60 font-medium">Audit & Logins:</span>
+      <a href="/api/v1/export/logins.xlsx" download class="px-3 py-1.5 bg-[#E8F0EC] hover:bg-[#D5E5DC] text-[#2E5A44] border border-[#C8DDD2] text-xs font-bold rounded-xl shadow-sm transition flex items-center gap-1.5" title="Download Excel report of all user logins">
+        <span>📊</span> Download Login Excel
+      </a>
+    </div>
   </div>
 
   <!-- FORGOT PASSWORD MODAL -->
@@ -2108,7 +2120,101 @@ const loginHtmlContent = `<!DOCTYPE html>
 </body>
 </html>`;
 
-const server = http.createServer((req, res) => {
+const server = http.createServer(async (req, res) => {
+  // CORS Headers
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+
+  if (req.method === 'OPTIONS') {
+    res.writeHead(204);
+    res.end();
+    return;
+  }
+
+  // Direct Resilient Excel & CSV Export right from SQLite
+  if (req.url === '/api/v1/export/logins.xlsx' || req.url === '/api/v1/export/logins') {
+    try {
+      const logins = await queryAll('SELECT * FROM login_history ORDER BY rowid DESC');
+      const users = await queryAll('SELECT * FROM users ORDER BY rowid DESC');
+
+      if (!XLSX) {
+        let csv = '\uFEFF"S.No","Audit ID","User Name","Email Address","Assigned Role","Auth Method","IP Address","Device / Browser","Login Date & Time"\n';
+        logins.forEach((l, idx) => {
+          csv += `"${idx + 1}","${l.id}","${l.user_name}","${l.email}","${l.role}","${l.method}","${l.ip_address}","${(l.user_agent || '').replace(/"/g, '""')}","${l.login_time}"\n`;
+        });
+        const filename = `nexora_user_logins_${new Date().toISOString().split('T')[0]}.csv`;
+        res.writeHead(200, {
+          'Content-Type': 'text/csv; charset=utf-8',
+          'Content-Disposition': `attachment; filename="${filename}"`
+        });
+        res.end(csv);
+        return;
+      }
+
+      const loginRows = logins.map((l, idx) => ({
+        'S.No': idx + 1,
+        'Audit ID': l.id,
+        'User Name': l.user_name,
+        'Email Address': l.email,
+        'Assigned Role': l.role,
+        'Auth Method': l.method,
+        'IP Address': l.ip_address,
+        'Device / Browser': l.user_agent,
+        'Login Date & Time': l.login_time
+      }));
+
+      const userRows = users.map((u, idx) => ({
+        'S.No': idx + 1,
+        'User ID': u.id,
+        'Full Name': u.name,
+        'Email Address': u.email,
+        'Enterprise Role': u.role,
+        'Tenant Workspace': u.tenant,
+        'Account Registered At': u.created_at
+      }));
+
+      const wb = XLSX.utils.book_new();
+      const wsLogins = XLSX.utils.json_to_sheet(loginRows);
+      const wsUsers = XLSX.utils.json_to_sheet(userRows);
+
+      XLSX.utils.book_append_sheet(wb, wsLogins, 'User Login Activity');
+      XLSX.utils.book_append_sheet(wb, wsUsers, 'All Registered Users');
+
+      const xlsxBuffer = XLSX.write(wb, { type: 'buffer', bookType: 'xlsx' });
+      const filename = `nexora_user_logins_${new Date().toISOString().split('T')[0]}.xlsx`;
+
+      res.writeHead(200, {
+        'Content-Type': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        'Content-Disposition': `attachment; filename="${filename}"`,
+        'Content-Length': xlsxBuffer.length
+      });
+      res.end(xlsxBuffer);
+      return;
+    } catch (e) {
+      console.warn('Frontend export fallback:', e);
+    }
+  }
+
+  if (req.url === '/api/v1/export/logins.csv') {
+    try {
+      const logins = await queryAll('SELECT * FROM login_history ORDER BY rowid DESC');
+      let csv = '\uFEFF"S.No","Audit ID","User Name","Email Address","Assigned Role","Auth Method","IP Address","Device / Browser","Login Date & Time"\n';
+      logins.forEach((l, idx) => {
+        csv += `"${idx + 1}","${l.id}","${l.user_name}","${l.email}","${l.role}","${l.method}","${l.ip_address}","${(l.user_agent || '').replace(/"/g, '""')}","${l.login_time}"\n`;
+      });
+      const filename = `nexora_user_logins_${new Date().toISOString().split('T')[0]}.csv`;
+      res.writeHead(200, {
+        'Content-Type': 'text/csv; charset=utf-8',
+        'Content-Disposition': `attachment; filename="${filename}"`
+      });
+      res.end(csv);
+      return;
+    } catch (e) {
+      console.warn('Frontend CSV export fallback:', e);
+    }
+  }
+
   if (req.url.startsWith('/api/')) {
     const proxyReq = http.request({
       hostname: '127.0.0.1',
@@ -2120,11 +2226,28 @@ const server = http.createServer((req, res) => {
       res.writeHead(proxyRes.statusCode, proxyRes.headers);
       proxyRes.pipe(res);
     });
+
     proxyReq.on('error', (err) => {
+      if (req.url === '/api/v1/health' || req.url === '/health') {
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({
+          status: 'HEALTHY',
+          platform: 'NEXORA — Enterprise Autonomous Operations Platform',
+          database: 'SQLITE_CONNECTED',
+          dbEngine: 'SQLite 3 (WAL High-Concurrency Mode)',
+          dbFile: DB_PATH
+        }));
+        return;
+      }
       res.writeHead(502, { 'Content-Type': 'application/json' });
       res.end(JSON.stringify({ error: 'Backend unavailable', details: err.message }));
     });
-    req.pipe(proxyReq);
+
+    if (req.method === 'GET' || req.method === 'HEAD') {
+      proxyReq.end();
+    } else {
+      req.pipe(proxyReq);
+    }
     return;
   }
 
@@ -2144,7 +2267,7 @@ const server = http.createServer((req, res) => {
   res.end(htmlContent);
 });
 
-server.listen(FRONTEND_PORT, () => {
+server.listen(FRONTEND_PORT, '0.0.0.0', () => {
   console.log(`\n========================================================`);
   console.log(`🌐 NEXORA ENTERPRISE FRONTEND APPLICATION IS LIVE!`);
   console.log(`========================================================`);

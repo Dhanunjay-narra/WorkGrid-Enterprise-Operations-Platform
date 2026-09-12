@@ -637,7 +637,7 @@ function broadcast(data) {
   }
 }
 
-server.listen(PORT, () => {
+server.listen(PORT, '0.0.0.0', () => {
   console.log(`\n========================================================`);
   console.log(`🚀 NEXORA ENTERPRISE BACKEND SERVER IS LIVE & RUNNING!`);
   console.log(`========================================================`);

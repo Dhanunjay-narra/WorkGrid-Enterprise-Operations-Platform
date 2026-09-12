@@ -48,5 +48,7 @@ Thumbs.db
 docker-data/
 scratch/
 tmp/
-*.sqlite*
+*.sqlite-wal
+*.sqlite-shm
+*.sqlite-journal
 

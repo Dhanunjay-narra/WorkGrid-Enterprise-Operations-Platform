@@ -5,32 +5,18 @@ const path = require('path');
 const BACKEND_PORT = process.env.BACKEND_PORT || 4000;
 const FRONTEND_PORT = process.env.FRONTEND_PORT || 3000;
 
+process.on('uncaughtException', err => console.error('[UNCAUGHT EXCEPTION]', err));
+process.on('unhandledRejection', err => console.error('[UNHANDLED REJECTION]', err));
+
+
 console.log('========================================================');
 console.log('🚀 NEXORA — Enterprise Autonomous Operations Platform  ');
 console.log('          STARTING BACKEND & FRONTEND SERVERS           ');
 console.log('========================================================\n');
 
-// 1. Free any stale processes on Ports 3000 & 4000 (Windows & POSIX)
-function freePorts() {
-  try {
-    if (process.platform === 'win32') {
-      execSync(`powershell -NoProfile -Command "Get-NetTCPConnection -LocalPort ${FRONTEND_PORT}, ${BACKEND_PORT} -ErrorAction SilentlyContinue | ForEach-Object { Stop-Process -Id $_.OwningProcess -Force -ErrorAction SilentlyContinue }"`, { stdio: 'ignore', timeout: 3000 });
-    } else {
-      execSync(`npx --yes kill-port ${FRONTEND_PORT} ${BACKEND_PORT} 2>/dev/null || fuser -k ${FRONTEND_PORT}/tcp ${BACKEND_PORT}/tcp 2>/dev/null || true`, { stdio: 'ignore', timeout: 3000 });
-    }
-  } catch (e) {}
-}
-
-freePorts();
-
-// 2. Start Servers
-const backendProcess = fork(path.join(__dirname, 'backend.js'), [], {
-  env: { ...process.env, BACKEND_PORT }
-});
-
-const frontendProcess = fork(path.join(__dirname, 'frontend.js'), [], {
-  env: { ...process.env, FRONTEND_PORT, BACKEND_PORT }
-});
+// Start Both Servers In-Process (Rock-Solid Cross-Platform Stability)
+const backend = require('./backend');
+const frontend = require('./frontend');
 
 function checkHealth(url, name) {
   return new Promise((resolve) => {
@@ -74,7 +60,7 @@ setInterval(() => {}, 1000 * 60 * 60);
 // Graceful termination
 process.on('SIGINT', () => {
   console.log('\nStopping NEXORA Platform...');
-  if (backendProcess) backendProcess.kill();
-  if (frontendProcess) frontendProcess.kill();
+  if (backend && backend.server) backend.server.close();
+  if (frontend && frontend.server) frontend.server.close();
   process.exit(0);
 });
