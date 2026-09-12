@@ -11,6 +11,20 @@ const htmlContent = `<!DOCTYPE html>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>NEXORA — Enterprise Autonomous Operations Platform</title>
+  <script>
+    // Immediate Auth Guard: Redirect unauthenticated visitors straight to Sign In / Login
+    (function() {
+      try {
+        var token = localStorage.getItem('nexora_auth_token') || sessionStorage.getItem('nexora_auth_token');
+        var user = localStorage.getItem('nexora_auth_user') || sessionStorage.getItem('nexora_auth_user');
+        if (!token || !user) {
+          window.location.replace('/login');
+        }
+      } catch (e) {
+        window.location.replace('/login');
+      }
+    })();
+  </script>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -1643,10 +1657,72 @@ const loginHtmlContent = `<!DOCTYPE html>
 </head>
 <body class="bg-[#F7F8FA] min-h-screen flex items-center justify-center p-4 md:p-8 text-[#1E2022] antialiased">
   <div class="w-full max-w-md bg-white rounded-3xl p-8 md:p-10 shadow-xl border border-[#E2DFD8]/60 space-y-6">
-    <!-- Header -->
-    <div class="space-y-1">
-      <h3 class="text-2xl font-bold text-[#1E2022] tracking-tight">Welcome Back</h3>
-      <p class="text-xs text-[#1E2022]/60">Sign in to your NEXORA account</p>
+    <!-- Brand Logo & Header -->
+    <div class="space-y-3">
+      <div class="flex items-center gap-3">
+        <div class="relative w-10 h-10 rounded-2xl bg-gradient-to-br from-[#1E2022] via-[#2D3033] to-[#1E2022] p-[1.5px] shadow-md">
+          <div class="w-full h-full bg-[#1E2022] rounded-2xl flex items-center justify-center relative overflow-hidden">
+            <div class="absolute -top-3 -right-3 w-8 h-8 rounded-full bg-[#5E6AD2]/30 blur-md pointer-events-none"></div>
+            <div class="absolute -bottom-3 -left-3 w-8 h-8 rounded-full bg-[#C27D66]/25 blur-md pointer-events-none"></div>
+            <svg class="w-6 h-6" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <defs>
+                <linearGradient id="loginLogoGrad1" x1="4" y1="4" x2="32" y2="32" gradientUnits="userSpaceOnUse">
+                  <stop offset="0%" stop-color="#7F8DF5" />
+                  <stop offset="50%" stop-color="#5E6AD2" />
+                  <stop offset="100%" stop-color="#4E5AC2" />
+                </linearGradient>
+                <linearGradient id="loginLogoGrad2" x1="32" y1="4" x2="4" y2="32" gradientUnits="userSpaceOnUse">
+                  <stop offset="0%" stop-color="#E89C82" />
+                  <stop offset="60%" stop-color="#C27D66" />
+                  <stop offset="100%" stop-color="#6B8E7B" />
+                </linearGradient>
+                <linearGradient id="loginLogoGradAccent" x1="0" y1="0" x2="1" y2="1">
+                  <stop offset="0%" stop-color="#FCD34D" />
+                  <stop offset="100%" stop-color="#F59E0B" />
+                </linearGradient>
+              </defs>
+              <path d="M9 27V11C9 8.79086 10.7909 7 13 7C15.2091 7 17 8.79086 17 11V27" stroke="url(#loginLogoGrad1)" stroke-width="3" stroke-linecap="round" />
+              <path d="M13 10L23 26" stroke="url(#loginLogoGrad2)" stroke-width="3" stroke-linecap="round" />
+              <path d="M19 9V25C19 27.2091 20.7909 29 23 29C25.2091 29 27 27.2091 27 25V9" stroke="url(#loginLogoGrad1)" stroke-width="3" stroke-linecap="round" />
+              <circle cx="18" cy="18" r="2.5" fill="url(#loginLogoGradAccent)" />
+              <circle cx="18" cy="18" r="4.5" stroke="#FCD34D" stroke-opacity="0.4" stroke-width="1" />
+            </svg>
+          </div>
+        </div>
+        <div>
+          <div class="flex items-center gap-2">
+            <h1 class="text-base font-extrabold tracking-tight text-[#1E2022] flex items-center">
+              <span>NEX</span><span class="text-[#5E6AD2]">O</span><span>RA</span>
+              <span class="inline-block w-1.5 h-1.5 rounded-full bg-[#C27D66] ml-1"></span>
+            </h1>
+            <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-[#ECEFFE] text-[#4351B8] border border-[#D0D7FA]">v2.4.0 PROD</span>
+          </div>
+          <p class="text-[11px] text-[#1E2022]/60 font-medium">Enterprise Autonomous Operations Platform</p>
+        </div>
+      </div>
+
+      <div>
+        <h3 class="text-xl font-bold text-[#1E2022] tracking-tight">Sign In to Cockpit</h3>
+        <p class="text-xs text-[#1E2022]/60 mt-0.5">Enter credentials or choose an enterprise role to enter</p>
+      </div>
+    </div>
+
+    <!-- Active Session Banner if already signed in -->
+    <div id="active-session-box" class="hidden p-3.5 rounded-2xl bg-[#E8F0EC] border border-[#C8DDD2] text-[#2E5A44] text-xs">
+      <div class="flex items-center justify-between">
+        <div>
+          <span class="font-bold">Active Session:</span> <span id="active-session-name" class="font-semibold"></span>
+          <span id="active-session-role" class="ml-1 text-[10px] px-2 py-0.5 rounded-full bg-white/80 border border-[#C8DDD2] font-bold"></span>
+        </div>
+      </div>
+      <div class="mt-2 flex gap-2">
+        <a href="/" class="px-3 py-1.5 bg-[#2E5A44] hover:bg-[#234735] text-white text-xs font-bold rounded-xl transition inline-flex items-center gap-1">
+          <span>➔</span> Open Cockpit
+        </a>
+        <button type="button" onclick="clearExistingSession()" class="px-3 py-1.5 bg-white hover:bg-slate-100 text-slate-700 text-xs font-semibold rounded-xl border border-slate-200 transition">
+          Switch Account
+        </button>
+      </div>
     </div>
 
     <div id="error-banner" class="hidden p-3.5 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 text-xs flex items-center gap-2">
@@ -1994,8 +2070,36 @@ const loginHtmlContent = `<!DOCTYPE html>
       }, 500);
     }
 
+    function checkExistingSession() {
+      try {
+        const userStr = localStorage.getItem('nexora_auth_user') || sessionStorage.getItem('nexora_auth_user');
+        const token = localStorage.getItem('nexora_auth_token') || sessionStorage.getItem('nexora_auth_token');
+        if (userStr && token) {
+          const user = JSON.parse(userStr);
+          const box = document.getElementById('active-session-box');
+          const nameEl = document.getElementById('active-session-name');
+          const roleEl = document.getElementById('active-session-role');
+          if (box && nameEl && roleEl) {
+            nameEl.innerText = user.name || 'User';
+            roleEl.innerText = user.role || 'Executive';
+            box.classList.remove('hidden');
+          }
+        }
+      } catch (e) {}
+    }
+
+    function clearExistingSession() {
+      localStorage.removeItem('nexora_auth_token');
+      localStorage.removeItem('nexora_auth_user');
+      sessionStorage.removeItem('nexora_auth_token');
+      sessionStorage.removeItem('nexora_auth_user');
+      const box = document.getElementById('active-session-box');
+      if (box) box.classList.add('hidden');
+    }
+
     window.addEventListener('DOMContentLoaded', () => {
       renderRoles();
+      checkExistingSession();
     });
   </script>
 </body>

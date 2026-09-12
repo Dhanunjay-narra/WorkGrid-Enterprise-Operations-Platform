@@ -41,15 +41,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setToken(savedToken);
         setUser(JSON.parse(savedUser));
       } else {
-        // Default demo session if no prior session exists
-        const defaultUser: UserProfile = {
-          name: 'Dhanunjay Narra',
-          email: 'architecture@nexora.io',
-          role: 'Executive',
-          tenant: 'NEXORA Enterprise Global'
-        };
-        setUser(defaultUser);
-        setToken('jwt_demo_session_active');
+        setToken(null);
+        setUser(null);
       }
     } catch (e) {
       console.error('Failed to parse saved auth session', e);
