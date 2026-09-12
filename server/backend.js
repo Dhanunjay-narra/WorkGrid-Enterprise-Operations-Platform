@@ -1,6 +1,11 @@
 const http = require('http');
 const url = require('url');
-const XLSX = require('xlsx');
+let XLSX = null;
+try {
+  XLSX = require('xlsx');
+} catch (e) {
+  console.warn('[EXPORT INFO] "xlsx" module not found; Excel export will seamlessly fall back to UTF-8 CSV.');
+}
 const { initDatabase, queryAll, queryOne, runCommand, DB_PATH } = require('./db');
 
 const PORT = process.env.BACKEND_PORT || 4000;
@@ -194,6 +199,21 @@ const server = http.createServer(async (req, res) => {
     if (pathname === '/api/v1/export/logins.xlsx' || pathname === '/api/v1/export/logins') {
       const logins = await queryAll('SELECT * FROM login_history ORDER BY rowid DESC');
       const users = await queryAll('SELECT * FROM users ORDER BY rowid DESC');
+
+      if (!XLSX) {
+        // Safe CSV Fallback for environments without xlsx module installed
+        let csv = '\uFEFF"S.No","Audit ID","User Name","Email Address","Assigned Role","Auth Method","IP Address","Device / Browser","Login Date & Time"\n';
+        logins.forEach((l, idx) => {
+          csv += `"${idx + 1}","${l.id}","${l.user_name}","${l.email}","${l.role}","${l.method}","${l.ip_address}","${(l.user_agent || '').replace(/"/g, '""')}","${l.login_time}"\n`;
+        });
+        const filename = `nexora_user_logins_${new Date().toISOString().split('T')[0]}.csv`;
+        res.writeHead(200, {
+          'Content-Type': 'text/csv; charset=utf-8',
+          'Content-Disposition': `attachment; filename="${filename}"`
+        });
+        res.end(csv);
+        return;
+      }
 
       const loginRows = logins.map((l, idx) => ({
         'S.No': idx + 1,

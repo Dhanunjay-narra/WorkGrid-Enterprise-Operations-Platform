@@ -79,14 +79,40 @@ NEXORA features a custom, ergonomic design system with a soothing, humanized pal
 
 ---
 
-## ⚡ Quick Start
+## ⚡ Quick Start (Run Application)
 
 ### 1. Prerequisites
-- Node.js `>= 20.0.0`
-- npm `>= 10.0.0`
-- Docker & Docker Compose (optional for local infrastructure)
+- **Node.js**: `>= 20.0.0` (Download from [nodejs.org](https://nodejs.org/))
+- **npm**: `>= 10.0.0`
 
-### 2. Verification & Auditing Commands
+### 2. Setup Instructions for Team Members
+
+Follow these 3 simple commands to clone and run NEXORA:
+
+```bash
+# 1. Clone the repository (or pull latest changes)
+git clone https://github.com/Dhanunjay-narra/WorkGrid-Enterprise-Operations-Platform.git
+cd WorkGrid-Enterprise-Operations-Platform
+
+# 2. Install all required dependencies
+npm install
+
+# 3. Start the entire platform (Frontend + Backend + Database)
+npm start
+```
+
+### 3. Access the Running Application
+Once started, the platform is immediately available at:
+- 🌐 **Web Dashboard Cockpit**: [http://localhost:3000](http://localhost:3000)
+- 🔑 **User Login Portal**: [http://localhost:3000/login](http://localhost:3000/login)
+- 🚀 **Backend REST API**: [http://localhost:4000](http://localhost:4000)
+- 📊 **Excel Login Audit Report**: [http://localhost:4000/api/v1/export/logins.xlsx](http://localhost:4000/api/v1/export/logins.xlsx)
+- 💾 **View SQLite Database**: `npm run db:view`
+
+---
+
+## 🛠 Advanced Developer Commands
+
 ```bash
 # Run duplicate code gate (Strict zero-duplication enforcement)
 npm run audit:dedup
@@ -94,17 +120,11 @@ npm run audit:dedup
 # Run LOC metrics accounting
 npm run audit:loc
 
-# Run full repository audit
-npm run audit:all
-```
+# View SQLite Database tables and recent logins in terminal
+npm run db:view
 
-### 3. Start Development Services
-```bash
-# Start Docker infrastructure (PostgreSQL, Redis, MinIO, Prometheus, Grafana)
+# Optional: Start Docker services (PostgreSQL, Redis, MinIO) if using cloud DB
 npm run docker:up
-
-# Start API Gateway & Core Engine
-npm run dev
 ```
 
 ---

@@ -14,9 +14,9 @@ console.log('========================================================\n');
 function freePorts() {
   try {
     if (process.platform === 'win32') {
-      execSync(`powershell -Command "Get-NetTCPConnection -LocalPort ${FRONTEND_PORT}, ${BACKEND_PORT} -ErrorAction SilentlyContinue | ForEach-Object { Stop-Process -Id $_.OwningProcess -Force -ErrorAction SilentlyContinue }"`, { stdio: 'ignore' });
+      execSync(`powershell -NoProfile -Command "Get-NetTCPConnection -LocalPort ${FRONTEND_PORT}, ${BACKEND_PORT} -ErrorAction SilentlyContinue | ForEach-Object { Stop-Process -Id $_.OwningProcess -Force -ErrorAction SilentlyContinue }"`, { stdio: 'ignore', timeout: 3000 });
     } else {
-      execSync(`npx kill-port ${FRONTEND_PORT} ${BACKEND_PORT}`, { stdio: 'ignore' });
+      execSync(`npx --yes kill-port ${FRONTEND_PORT} ${BACKEND_PORT} 2>/dev/null || fuser -k ${FRONTEND_PORT}/tcp ${BACKEND_PORT}/tcp 2>/dev/null || true`, { stdio: 'ignore', timeout: 3000 });
     }
   } catch (e) {}
 }
