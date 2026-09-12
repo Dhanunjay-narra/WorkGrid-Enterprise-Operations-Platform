@@ -1008,11 +1008,6 @@ const htmlContent = `<!DOCTYPE html>
       <span class="text-[11px] font-mono text-[#1E2022]/50 hidden sm:inline">HTTP/1.1 • WebSocket Mesh Connected</span>
     </div>
     <div class="flex items-center gap-3 text-[11px] font-semibold text-[#1E2022]/60">
-      <a href="/api/v1/export/logins.xlsx" download class="px-3 py-1 bg-[#E8F0EC] hover:bg-[#D5E5DC] text-[#2E5A44] border border-[#C8DDD2] text-[11px] font-bold rounded-lg shadow-xs transition flex items-center gap-1.5" title="Download Excel report of all user logins">
-        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
-        <span>Download Login Excel</span>
-      </a>
-      <span>•</span>
       <span>NEXORA v2.4.0 PROD</span>
       <span>•</span>
       <span class="text-[#5E6AD2]">Port 4000 (SQLite Persistent DB)</span>
@@ -1967,12 +1962,9 @@ const loginHtmlContent = `<!DOCTYPE html>
       <span class="text-[11px] font-mono text-[#1E2022]/50 hidden sm:inline">HTTP/1.1 • SQLite Active</span>
     </div>
     <div class="flex items-center gap-3 text-[11px] font-semibold text-[#1E2022]/60">
-      <a href="/api/v1/export/logins.xlsx" download class="px-3.5 py-1.5 bg-[#E8F0EC] hover:bg-[#D5E5DC] text-[#2E5A44] border border-[#C8DDD2] text-xs font-bold rounded-xl shadow-xs transition flex items-center gap-1.5" title="Download Excel report of all user logins">
-        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
-        <span>Download Login Excel</span>
-      </a>
-      <span>•</span>
       <span>NEXORA v2.4.0 PROD</span>
+      <span>•</span>
+      <span class="text-[#5E6AD2]">Port 4000 (SQLite Persistent DB)</span>
     </div>
   </footer>
 
