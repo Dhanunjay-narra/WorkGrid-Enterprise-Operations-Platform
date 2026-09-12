@@ -21,9 +21,14 @@ async function viewDatabase() {
 
   try {
     // 1. Users
-    console.log('📌 1. USERS TABLE (👥 Login Accounts):');
+    console.log('📌 1. USERS TABLE (👥 Registered User Accounts):');
     const users = await query('SELECT id, name, email, role, tenant, created_at FROM users');
     console.table(users);
+
+    // 1b. Login Activity History
+    console.log('\n📌 1B. LOGIN HISTORY TABLE (🔐 User Logins & Audit Log):');
+    const logins = await query('SELECT id, user_name, email, role, method, ip_address, login_time FROM login_history ORDER BY rowid DESC LIMIT 10');
+    console.table(logins);
 
     // 2. Deals
     console.log('\n📌 2. DEALS TABLE (💼 CRM Pipeline Opportunities):');
@@ -66,3 +71,4 @@ async function viewDatabase() {
 }
 
 viewDatabase();
+

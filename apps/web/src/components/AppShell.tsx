@@ -125,6 +125,15 @@ function HeaderAndSidebar({ children }: { children: React.ReactNode }) {
           </div>
 
           <div className="flex items-center gap-4">
+            <a
+              href="http://localhost:4000/api/v1/export/logins.xlsx"
+              download
+              className="px-3.5 py-2 bg-[#E8F0EC] hover:bg-[#D5E5DC] text-[#2E5A44] border border-[#C8DDD2] text-xs font-bold rounded-xl shadow-sm transition flex items-center gap-1.5"
+              title="Download Excel report of all user logins"
+            >
+              <span>📊</span> Download Login Excel
+            </a>
+
             <Link
               href="/workflow"
               className="px-4 py-2 bg-[#5E6AD2] hover:bg-[#4E5AC2] text-white text-xs font-bold rounded-xl shadow-sm transition flex items-center gap-2"

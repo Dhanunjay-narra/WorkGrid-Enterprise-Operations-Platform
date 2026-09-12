@@ -141,6 +141,19 @@ async function initDatabase() {
   `);
 
   await runCommand(`
+    CREATE TABLE IF NOT EXISTS login_history (
+      id TEXT PRIMARY KEY,
+      user_name TEXT NOT NULL,
+      email TEXT NOT NULL,
+      role TEXT NOT NULL,
+      method TEXT NOT NULL DEFAULT 'Password Auth',
+      ip_address TEXT NOT NULL DEFAULT '127.0.0.1',
+      user_agent TEXT,
+      login_time TEXT NOT NULL
+    );
+  `);
+
+  await runCommand(`
     CREATE TABLE IF NOT EXISTS metrics (
       id TEXT PRIMARY KEY,
       total_pipeline_value REAL NOT NULL DEFAULT 4820000,
@@ -365,6 +378,24 @@ async function seedInitialData() {
     }
   }
 
+  // Seed Login History
+  const loginCount = await queryOne('SELECT COUNT(*) as count FROM login_history');
+  if (loginCount.count === 0) {
+    const defaultLogins = [
+      { id: 'LOG-1001', user_name: 'Dhanunjay Narra', email: 'architecture@nexora.io', role: 'Executive', method: 'Password Auth', ip_address: '127.0.0.1', user_agent: 'Chrome / Windows 11', login_time: '2026-09-12 12:35:10' },
+      { id: 'LOG-1002', user_name: 'Sarah Jenkins', email: 'sarah.j@nexora.io', role: 'Sales', method: 'Password Auth', ip_address: '192.168.1.45', user_agent: 'Firefox / macOS', login_time: '2026-09-12 11:20:45' },
+      { id: 'LOG-1003', user_name: 'Alex Rivera', email: 'alex.r@nexora.io', role: 'Finance', method: 'Microsoft SSO', ip_address: '192.168.1.88', user_agent: 'Edge / Windows 11', login_time: '2026-09-12 10:14:02' },
+      { id: 'LOG-1004', user_name: 'Marcus Chen', email: 'marcus.c@nexora.io', role: 'Security', method: 'Google SSO', ip_address: '10.0.4.12', user_agent: 'Chrome / Linux', login_time: '2026-09-12 09:48:33' },
+      { id: 'LOG-1005', user_name: 'Elena Rostova', email: 'elena.r@nexora.io', role: 'Support', method: 'Password Auth', ip_address: '192.168.2.14', user_agent: 'Safari / iPadOS', login_time: '2026-09-12 09:12:18' }
+    ];
+    for (const l of defaultLogins) {
+      await runCommand(
+        'INSERT INTO login_history (id, user_name, email, role, method, ip_address, user_agent, login_time) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
+        [l.id, l.user_name, l.email, l.role, l.method, l.ip_address, l.user_agent, l.login_time]
+      );
+    }
+  }
+
   // Seed Metrics
   const metricRow = await queryOne('SELECT * FROM metrics WHERE id = "PLATFORM_GLOBAL"');
   if (!metricRow) {
@@ -388,3 +419,4 @@ module.exports = {
   initDatabase,
   DB_PATH
 };
+

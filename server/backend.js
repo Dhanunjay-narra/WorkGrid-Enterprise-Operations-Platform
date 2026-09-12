@@ -1,5 +1,6 @@
 const http = require('http');
 const url = require('url');
+const XLSX = require('xlsx');
 const { initDatabase, queryAll, queryOne, runCommand, DB_PATH } = require('./db');
 
 const PORT = process.env.BACKEND_PORT || 4000;
@@ -111,6 +112,20 @@ const server = http.createServer(async (req, res) => {
           userRow.role = role;
         }
 
+        // Record login activity in SQLite
+        try {
+          const loginLogId = 'LOG-' + Math.floor(1000 + Math.random() * 9000);
+          const clientIp = (req.headers['x-forwarded-for'] || req.socket.remoteAddress || '127.0.0.1').replace('::ffff:', '');
+          const userAgent = req.headers['user-agent'] || 'Web Browser';
+          const nowFormatted = new Date().toISOString().replace('T', ' ').substring(0, 19);
+          await runCommand(
+            'INSERT INTO login_history (id, user_name, email, role, method, ip_address, user_agent, login_time) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
+            [loginLogId, userRow.name, userRow.email, userRow.role, 'Password Auth', clientIp, userAgent, nowFormatted]
+          );
+        } catch (logErr) {
+          console.error('[AUDIT] Failed to record login history:', logErr.message);
+        }
+
         const token = 'jwt_nexora_' + Math.random().toString(36).substring(2, 12);
         return sendJson(200, {
           success: true,
@@ -151,6 +166,20 @@ const server = http.createServer(async (req, res) => {
           userRow = { id: newId, name, email, role, tenant: `NEXORA Enterprise Global (${provider})` };
         }
 
+        // Record SSO login activity in SQLite
+        try {
+          const loginLogId = 'LOG-SSO-' + Math.floor(1000 + Math.random() * 9000);
+          const clientIp = (req.headers['x-forwarded-for'] || req.socket.remoteAddress || '127.0.0.1').replace('::ffff:', '');
+          const userAgent = req.headers['user-agent'] || 'Web Browser';
+          const nowFormatted = new Date().toISOString().replace('T', ' ').substring(0, 19);
+          await runCommand(
+            'INSERT INTO login_history (id, user_name, email, role, method, ip_address, user_agent, login_time) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
+            [loginLogId, userRow.name, userRow.email, userRow.role, `${provider} SSO`, clientIp, userAgent, nowFormatted]
+          );
+        } catch (logErr) {
+          console.error('[AUDIT] Failed to record SSO login history:', logErr.message);
+        }
+
         const token = 'sso_' + provider.toLowerCase() + '_' + Math.random().toString(36).substring(2, 10);
         return sendJson(200, {
           success: true,
@@ -159,6 +188,97 @@ const server = http.createServer(async (req, res) => {
         });
       });
       return;
+    }
+
+    // Export: Download User Logins as Excel Sheet (.xlsx)
+    if (pathname === '/api/v1/export/logins.xlsx' || pathname === '/api/v1/export/logins') {
+      const logins = await queryAll('SELECT * FROM login_history ORDER BY rowid DESC');
+      const users = await queryAll('SELECT * FROM users ORDER BY rowid DESC');
+
+      const loginRows = logins.map((l, idx) => ({
+        'S.No': idx + 1,
+        'Audit ID': l.id,
+        'User Name': l.user_name,
+        'Email Address': l.email,
+        'Assigned Role': l.role,
+        'Auth Method': l.method,
+        'IP Address': l.ip_address,
+        'Device / Browser': l.user_agent,
+        'Login Date & Time': l.login_time
+      }));
+
+      const userRows = users.map((u, idx) => ({
+        'S.No': idx + 1,
+        'User ID': u.id,
+        'Full Name': u.name,
+        'Email Address': u.email,
+        'Enterprise Role': u.role,
+        'Tenant Workspace': u.tenant,
+        'Account Registered At': u.created_at
+      }));
+
+      const wb = XLSX.utils.book_new();
+      const wsLogins = XLSX.utils.json_to_sheet(loginRows);
+      const wsUsers = XLSX.utils.json_to_sheet(userRows);
+
+      // Professional Column Widths
+      wsLogins['!cols'] = [
+        { wch: 6 },
+        { wch: 12 },
+        { wch: 22 },
+        { wch: 28 },
+        { wch: 15 },
+        { wch: 18 },
+        { wch: 16 },
+        { wch: 35 },
+        { wch: 22 }
+      ];
+
+      wsUsers['!cols'] = [
+        { wch: 6 },
+        { wch: 12 },
+        { wch: 22 },
+        { wch: 28 },
+        { wch: 15 },
+        { wch: 30 },
+        { wch: 25 }
+      ];
+
+      XLSX.utils.book_append_sheet(wb, wsLogins, 'User Login Activity');
+      XLSX.utils.book_append_sheet(wb, wsUsers, 'All Registered Users');
+
+      const xlsxBuffer = XLSX.write(wb, { type: 'buffer', bookType: 'xlsx' });
+      const filename = `nexora_user_logins_${new Date().toISOString().split('T')[0]}.xlsx`;
+
+      res.writeHead(200, {
+        'Content-Type': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        'Content-Disposition': `attachment; filename="${filename}"`,
+        'Content-Length': xlsxBuffer.length
+      });
+      res.end(xlsxBuffer);
+      return;
+    }
+
+    // Export: Download User Logins as CSV (UTF-8 BOM for Excel)
+    if (pathname === '/api/v1/export/logins.csv') {
+      const logins = await queryAll('SELECT * FROM login_history ORDER BY rowid DESC');
+      let csv = '\uFEFF"S.No","Audit ID","User Name","Email Address","Assigned Role","Auth Method","IP Address","Device / Browser","Login Date & Time"\n';
+      logins.forEach((l, idx) => {
+        csv += `"${idx + 1}","${l.id}","${l.user_name}","${l.email}","${l.role}","${l.method}","${l.ip_address}","${(l.user_agent || '').replace(/"/g, '""')}","${l.login_time}"\n`;
+      });
+      const filename = `nexora_user_logins_${new Date().toISOString().split('T')[0]}.csv`;
+      res.writeHead(200, {
+        'Content-Type': 'text/csv; charset=utf-8',
+        'Content-Disposition': `attachment; filename="${filename}"`
+      });
+      res.end(csv);
+      return;
+    }
+
+    // JSON Audit Logins Feed
+    if (pathname === '/api/v1/audit/logins') {
+      const logins = await queryAll('SELECT * FROM login_history ORDER BY rowid DESC');
+      return sendJson(200, { status: 'SUCCESS', count: logins.length, logins });
     }
 
     // Auth: Forgot Password

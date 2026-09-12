@@ -120,6 +120,9 @@ const htmlContent = `<!DOCTYPE html>
 
     <!-- Actions & Auth -->
     <div class="flex items-center gap-3">
+      <a href="/api/v1/export/logins.xlsx" download class="px-3.5 py-1.5 bg-[#E8F0EC] hover:bg-[#D5E5DC] text-[#2E5A44] border border-[#C8DDD2] text-xs font-bold rounded-xl shadow-sm transition flex items-center gap-1.5" title="Download Excel report of all user logins">
+        <span>📊</span> Download Login Excel
+      </a>
       <button onclick="triggerWorkflow('Global Autonomous Sweep', 'Multi-Tenant Cross-Domain Mesh')" class="px-3.5 py-1.5 bg-[#5E6AD2] hover:bg-[#4E5AC2] text-white text-xs font-bold rounded-xl shadow-sm transition flex items-center gap-1.5">
         <span>⚡</span> Run Autonomous Workflow
       </button>
