@@ -967,14 +967,14 @@ const htmlContent = `<!DOCTYPE html>
     <div class="flex items-center gap-3">
       <div id="backend-status-pill" class="flex items-center gap-2 px-3 py-1 rounded-full border border-[#E2DFD8] bg-[#F7F6F3] text-xs font-semibold text-[#1E2022]">
         <span class="w-2.5 h-2.5 rounded-full bg-[#6B8E7B] pulse-live"></span>
-        <span id="backend-status-text">Connecting to Backend (Port 4000)...</span>
+        <span id="backend-status-text">Connecting to Backend (Port 4000 | SQLite: Connected)...</span>
       </div>
       <span class="text-[11px] font-mono text-[#1E2022]/50 hidden sm:inline">HTTP/1.1 • WebSocket Mesh Connected</span>
     </div>
     <div class="flex items-center gap-3 text-[11px] font-semibold text-[#1E2022]/60">
       <span>NEXORA v2.4.0 PROD</span>
       <span>•</span>
-      <span class="text-[#5E6AD2]">Port 4000 (Backend API)</span>
+      <span class="text-[#5E6AD2]">Port 4000 (SQLite Persistent DB)</span>
     </div>
   </footer>
 
@@ -1192,8 +1192,9 @@ const htmlContent = `<!DOCTYPE html>
         const latency = Date.now() - start;
         if (data.status === 'HEALTHY') {
           const pill = document.getElementById('backend-status-pill');
+          const dbLabel = data.database === 'SQLITE_CONNECTED' ? 'SQLite: Connected' : 'DB: Active';
           pill.innerHTML = '<span class=\"w-2.5 h-2.5 rounded-full bg-[#6B8E7B] pulse-live\"></span>' +
-            '<span class=\"text-[#2E5A44] font-bold\">🟢 Backend Live Connected (Port ' + ${BACKEND_PORT} + ' | ' + latency + 'ms)</span>';
+            '<span class=\"text-[#2E5A44] font-bold\">🟢 Backend Live Connected (Port ' + ${BACKEND_PORT} + ' | ' + dbLabel + ' | ' + latency + 'ms)</span>';
           return true;
         }
       } catch (err) {

@@ -1,4 +1,4 @@
-﻿# Dependencies
+# Dependencies
 node_modules/
 .pnp
 .pnp.js
@@ -48,3 +48,5 @@ Thumbs.db
 docker-data/
 scratch/
 tmp/
+*.sqlite*
+

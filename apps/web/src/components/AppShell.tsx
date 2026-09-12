@@ -167,7 +167,7 @@ function HeaderAndSidebar({ children }: { children: React.ReactNode }) {
           </div>
           <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-[#EFECE6] border border-[#E2DFD8]">
             <span className="w-2 h-2 rounded-full bg-[#6B8E7B] animate-pulse" />
-            <span className="text-[11px] font-semibold text-[#1E2022]">Backend Live Connected (Port 4000 | 6ms)</span>
+            <span className="text-[11px] font-semibold text-[#1E2022]">Backend Live Connected (Port 4000 | SQLite: Connected | 6ms)</span>
           </div>
         </footer>
       </div>
